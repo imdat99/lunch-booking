@@ -1,13 +1,14 @@
 import Layout from '@app/components/Layout'
 import LayoutWithFooter from '@app/components/LayoutWithFooter'
-import AppSuspense, { LoadingScreen } from '@app/components/Suspense'
-import { useAppSelector } from '@app/stores/hook'
-import { userStatus, userStore } from '@app/stores/user'
+import AppSuspense from '@app/components/Suspense'
+import { useAppDispatch, useAppSelector } from '@app/stores/hook'
+import { userStore, userStatus } from '@app/stores/user'
 import { lazy, useEffect } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { createBrowserRouter, Navigate, Outlet, useNavigate } from 'react-router-dom'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '../server/firebase'
-
+import { LoadingScreen } from '@app/components/Suspense'
+import { initializeUser } from '@app/stores/user'
 
 interface PrivateRouteProps {
   Comp: () => JSX.Element
@@ -43,7 +44,7 @@ const PrivateRoute = ({ Comp }: PrivateRouteProps) => {
 export default createBrowserRouter([
   {
     path: '/',
-    element: <PrivateRoute Comp={() => <Outlet />} />,
+    element: <PrivateRoute Comp={Layout} />,
     children: [
       {
         path: '',
@@ -59,11 +60,17 @@ export default createBrowserRouter([
       },
       {
         path: 'profile',
-        element: (
-          <LayoutWithFooter>
-            <AppSuspense comp={lazy(() => import('@app/page/Profile'))} />
-          </LayoutWithFooter>
-        ),
+        element: <Outlet />,
+        children: [
+          {
+            path: ':userUid',
+            element: (
+              <LayoutWithFooter>
+                <AppSuspense comp={lazy(() => import('@app/page/Profile'))} />
+              </LayoutWithFooter>
+            ),
+          },
+        ],
       },
       {
         path: 'events',
@@ -79,11 +86,7 @@ export default createBrowserRouter([
           },
           {
             path: 'add',
-            element: (
-              <Layout>
-                <AppSuspense comp={lazy(() => import('@app/page/Events/Add'))} />
-              </Layout>
-            ),
+            element: <AppSuspense comp={lazy(() => import('@app/page/Events/Add'))} />,
           },
           {
             path: 'edit/:id',
