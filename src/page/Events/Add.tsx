@@ -55,7 +55,7 @@ const style = {
 
 const initEventValue = {
   address: '',
-  date: dayjs(new Date()).format('MM/DD/YYYY'),
+  date: dayjs(new Date()).format('DD/MM/YYYY'),
   eventName: '',
   totalAmount: 0,
   userId: '',
@@ -182,7 +182,7 @@ function Add() {
         const promises: Promise<any>[] = []
         selectedListMember.map((member) => {
           const eventDetail = { ...member, eventId }
-          if (member.id) setEventDetail(eventDetail)
+          setEventDetail(eventDetail)
         })
         await Promise.all(promises)
         setOpenModalSuccess(true)
@@ -276,7 +276,7 @@ function Add() {
               label="Thời gian"
               value={dayjs(eventState?.date)}
               onChange={(newValue) => {
-                handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
+                handleChangeTextField('date', dayjs(newValue).format('DD/MM/YYYY'))
               }}
               renderInput={(params) => (
                 <TextFieldStyled
