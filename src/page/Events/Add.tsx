@@ -84,6 +84,16 @@ function Add() {
   const navigate = useNavigate()
   // const dispatch = useAppDispatch()
 
+  useEffect(() => {
+    setListBillOwner(sortListByPaidCount([...selectedListMember]))
+  }, [selectedListMember])
+
+  useEffect(() => {
+    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0)
+    const total = (eventState.billAmount || 0) + bonus
+    setEventState({ ...eventState, totalAmount: total })
+  }, [eventState.billAmount])
+
   const handleToggle = (memberId: string) => {
     const tempMembers = _.cloneDeep(selectedListMember)
     const index = tempMembers.findIndex((u) => u.uid === memberId)
@@ -209,25 +219,21 @@ function Add() {
     setSelectedListMember(selectedListMembersWithMoney)
   }
 
-  const handleGenerate = () => {
-    const sortListBillOwner = listBillOwner.sort((a, b) => (a.count || 0) - (b.count || 0))
-    const memberToPayNew = sortListBillOwner.pop()
-    // const memberPayIdNew = memberToPayNew?.uid
-    // const memberPayIdOld = memberToPayState?.uid
-    // const tempMembers = _.cloneDeep(selectedListMember)
-    // const indexNew = tempMembers.findIndex((u) => u.uid === memberPayIdNew)
-    // const indexOld = tempMembers.findIndex((u) => u.uid === memberPayIdOld)
-    // if (indexNew > -1) {
-    //   tempMembers[indexNew].isPaid = true
-    // }
-    // if (indexOld > -1) {
-    //   tempMembers[indexOld].isPaid = false
-    // }
-    // setSelectedListMember(tempMembers)
-    setListBillOwner(sortListBillOwner)
-    if (memberToPayNew && memberToPayNew.uid && memberToPayNew.email) {
-      setMemberToPayState(memberToPayNew)
-      setEventState({ ...eventState, userPayId: memberToPayNew.uid, userPayName: memberToPayNew.name ? memberToPayNew.name : memberToPayNew.email })
+  const sortListByPaidCount = (members: User[]) => {
+    return members.sort((a, b) => (a.count || 0) - (b.count || 0))
+  }
+
+  const handleAutoPickBillOwner = () => {
+    const billOwner = listBillOwner.pop()
+
+    if (!listBillOwner.length) {
+      const resetListBillOwner = sortListByPaidCount([...selectedListMember])
+      setListBillOwner(resetListBillOwner)
+    }
+
+    if (billOwner && billOwner.uid && billOwner.email) {
+      setMemberToPayState(billOwner)
+      setEventState({ ...eventState, userPayId: billOwner.uid, userPayName: billOwner.name ? billOwner.name : billOwner.email })
     }
   }
 
@@ -305,19 +311,19 @@ function Add() {
             <>
               <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                 <ListItem disablePadding>
-                  <Typography className="min-w-fit" variant="subtitle2">
+                  <Typography className="min-w-[20px]" variant="subtitle2">
                     Đã trả
                   </Typography>
-                  <Box className="min-w-[100px] ml-5">
+                  <Box className="min-w-[150px] ml-5">
                     <Typography variant="subtitle2">Tên</Typography>
                   </Box>
                   <Box className="ml-5">
-                    <Typography className="min-w-[100px]" variant="subtitle2">
+                    <Typography className="min-w-[50px]" variant="subtitle2">
                       Bill
                     </Typography>
                   </Box>
                   <Box className="ml-5">
-                    <Typography className="min-w-[100px]" variant="subtitle2">
+                    <Typography className="min-w-[50px]" variant="subtitle2">
                       Thành Tiền
                     </Typography>
                   </Box>
@@ -327,8 +333,9 @@ function Add() {
 
                   return (
                     <ListItem key={member.uid} disablePadding>
-                      <ListItemIcon onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}>
+                      <ListItemIcon onClick={() => (member.uid ? handleToggle(member.uid) : undefined)} sx={{ minWidth: '20px' }}>
                         <Checkbox
+                          className="w-[20px]"
                           edge="start"
                           // checked={checked.includes(member.uid) !== -1}
                           tabIndex={-1}
@@ -336,14 +343,14 @@ function Add() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </ListItemIcon>
-                      <Box className="ml-5 min-w-[100px]">
+                      <Box className="ml-5 min-w-[150px]">
                         <Typography noWrap>
                           <Tooltip title={member.name || member.email}>
                             <span> {member.name || member.email} </span>
                           </Tooltip>
                         </Typography>
                       </Box>
-                      <Box className="ml-5 min-w-[100px]">
+                      <Box className="ml-5 min-w-[50px]">
                         <TextNumberInput
                           fullWidth
                           id="filled-required"
@@ -356,7 +363,7 @@ function Add() {
                           defaultValue={0}
                         />
                       </Box>
-                      <Box className="ml-5 min-w-[100px]">
+                      <Box className="ml-5 min-w-[50px]">
                         <TextNumberInput
                           fullWidth
                           id="filled-required"
@@ -387,7 +394,7 @@ function Add() {
           <Box sx={{ flexGrow: 1 }} className="mt-2">
             <Grid container spacing={2}>
               <Grid item md={4} xs={5} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <ButtonStyled variant="contained" onClick={handleGenerate} disabled={!listBillOwner.length}>
+                <ButtonStyled variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
                   <Typography>Auto Pick</Typography>
                 </ButtonStyled>
                 <Tooltip title="Chọn thành viên trước khi pick người chủ chi" placement="top-start">
