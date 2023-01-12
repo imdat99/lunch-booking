@@ -54,7 +54,7 @@ const List = () => {
               const isPaid = isHost ? item.isAllPaid : !(listEventDetail || []).find((member) => member?.uid === userData.uid && member.isPaid)
               const paidMoney = isHost
                 ? listEventDetail
-                    .filter((eventDetail) => eventDetail.eventId === item.id)
+                    .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
                     .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
                 : 0
 
