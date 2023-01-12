@@ -270,7 +270,7 @@ function Add() {
           />
         </div>
       </button>
-      <div className="text-center font-[Bellota] text-[24px]">Tạo mới hoá đơn</div>
+      <div className="text-center font-[Bellota] text-[24px]">{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</div>
 
       <CardStyled variant="outlined" className="mx-5 md:px-3 md:max-w-xl" sx={{ marginTop: '30px', marginBottom: '15px', overflow: 'scroll' }}>
         <CardContent>
