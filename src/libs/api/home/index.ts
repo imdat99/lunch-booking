@@ -1,6 +1,7 @@
 import { EventColection, EventDetailColection } from '@app/server/useDB'
 import { store } from '@app/stores'
 import { CollectionReference, getDocs, query, where } from 'firebase/firestore'
+import { intersectionWith } from 'lodash'
 
 const getBy = async <T = any>(cloection: CollectionReference<T>, params?: string) => {
   return (await getDocs(params ? query(cloection, where(params, '==', store.getState().USER.data?.uid)) : cloection)).docs.map((item) => ({
@@ -10,7 +11,6 @@ const getBy = async <T = any>(cloection: CollectionReference<T>, params?: string
 }
 export const getHomeData = async () => {
   const uid = store.getState().USER.data?.uid
-  console.log('uid', uid)
 
   //list bữa ăn user chủ chi
   const allEvent = await getBy(EventColection)
@@ -22,9 +22,8 @@ export const getHomeData = async () => {
 
   // list bữa ăn user chưa trả
   const unPaidList = isMember
-    .filter((item) => !item.isPaid)
+    .filter((item) => !(item.isPaid || false))
     .map((item) => ({ ...item, eventName: allEvent.find((event) => event.id === item.eventId)?.eventName }))
-  console.log('unPaidList', unPaidList)
   // list bữa ăn user chưa đòi
   const requirePaymentList = isHost
     .filter((item) => !item.isAllPaid)
@@ -35,12 +34,12 @@ export const getHomeData = async () => {
         totalAmount: item.totalAmount! - paid,
       }
     })
-  console.log('requirePaymentList', requirePaymentList)
 
-  const isMemberCount = isMember.length - isHost.length
+  const isMemberCount = isMember.length - intersectionWith(isMember, isHost, (members, hosts) => members.eventId === hosts.id).length
 
   return {
     isHostCount: isHost.length,
+    // isMemberCount: isMember.length,
     isMemberCount: isMemberCount > 0 ? isMemberCount : 0,
     unPaidList,
     requirePaymentList,

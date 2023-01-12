@@ -24,6 +24,8 @@ export default function HomePage() {
   }, [dispatch])
 
   const [listEvent, setListEvent] = useState<any>()
+  console.log('listEvent', listEvent)
+
   // console.log('listEvent', listEvent)
   const css = `
     html {
