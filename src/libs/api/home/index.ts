@@ -44,3 +44,19 @@ export const getHomeData = async () => {
     requirePaymentList,
   }
 }
+
+export const getHomeDataByUid = async (userUid: string) => {
+  const allEvent = await getBy(EventColection)
+  const isHost = allEvent.filter((item) => item.userPayId === userUid)
+
+  // số bữa ăn user tham gia
+  const allEventDetail = await getBy(EventDetailColection)
+  const isMember = allEventDetail.filter((item) => item.uid === userUid)
+
+  const isMemberCount = isMember.length - intersectionWith(isMember, isHost, (members, hosts) => members.eventId === hosts.id).length
+
+  return {
+    isHostCount: isHost.length,
+    isMemberCount: isMemberCount > 0 ? isMemberCount : 0,
+  }
+}

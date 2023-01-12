@@ -3,5 +3,5 @@ export const formatMoney = (v?: string | number) => {
   if (replateStr) {
     return replateStr + 'K'
   }
-  return ''
+  return '0K'
 }

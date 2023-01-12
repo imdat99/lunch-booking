@@ -125,7 +125,7 @@ export default function HomePage() {
           <p id="username">{user?.name}</p>
         </Grid>
         <Grid item xs={2}>
-          <Link to="/profile">
+          <Link to={'/profile/' + user.uid}>
             <img id="userImg" src={user?.photoURL || ''} alt="user_photo" referrerPolicy="no-referrer" />
           </Link>
         </Grid>
