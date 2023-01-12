@@ -27,7 +27,7 @@ const List = () => {
         <div className="text-center my-6">
           <h2 className="text-2xl">Lịch sử đi ăn</h2>
         </div>
-        <div className="inline-flex w-full" role="group">
+        {/* <div className="inline-flex w-full" role="group">
           <button
             disabled
             className="min-w-[50%] py-4 px-4 text-gray-900 border-r-2 border-gray-200 bg-white rounded-l-lg hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-green-700 cursor-not-allowed"
@@ -40,7 +40,7 @@ const List = () => {
           >
             Thanh toán
           </button>
-        </div>
+        </div> */}
         <ul className="mt-10">
           {listEventUser.map((item, index) => {
             const isHost = userData.uid === item.userPayId

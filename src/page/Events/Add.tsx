@@ -133,6 +133,10 @@ function Add() {
       newSelectedMember.splice(index, 1)
     }
     setSelectedListMember(newSelectedMember)
+
+    if (member.uid === eventState.userPayId) {
+      setEventState({ ...eventState, userPayId: '', userPayName: '' })
+    }
   }
 
   const handleChangeTextField = (field: string, value: string | number) => {
