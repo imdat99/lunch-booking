@@ -27,13 +27,12 @@ export const getHomeData = async () => {
   // list bữa ăn user chưa đòi
   const requirePaymentList = isHost
     .filter((item) => !item.isAllPaid)
-    .map((item) => {
-      const paid = allEventDefail.filter((event) => event.eventId === item.id && event.isPaid).reduce((sum, event) => sum + Number(event.amount!), 0)
-      return {
-        ...item,
-        totalAmount: item.totalAmount! - paid,
-      }
-    })
+    .map((item) => ({
+      ...item,
+      totalAmount:
+        item.totalAmount! -
+        allEventDefail.filter((event) => event.eventId === item.id && event.isPaid).reduce((sum, event) => sum + Number(event.amountToPay!), 0),
+    }))
 
   const isMemberCount = isMember.length - intersectionWith(isMember, isHost, (members, hosts) => members.eventId === hosts.id).length
 
