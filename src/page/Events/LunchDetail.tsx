@@ -1,8 +1,6 @@
 import { LoadingScreen } from '@app/components/Suspense'
-import { createNoti } from '@app/libs/api/noti'
+import { createNoti , IsEventNoticed} from '@app/libs/api/noti'
 import {
-  DATE_NOW,
-  FORMAT__DATE,
   TEXT__HOST,
   TEXT__MEMBER,
   TEXT__PAYMENT_PAID,
@@ -15,7 +13,6 @@ import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { listUserStore } from '@app/stores/listUser'
-import { listNotiStore } from '@app/stores/noti'
 import { userStore } from '@app/stores/user'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import ReplyIcon from '@mui/icons-material/Reply'
@@ -37,12 +34,11 @@ const LunchDetail = () => {
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
   const listUser = useAppSelector(listUserStore)
-  const listNoti = useAppSelector(listNotiStore)
 
   // state
   const [openAlert, setOpenAlert] = useState('')
   const [loading, setLoading] = useState(true)
-  const [disableNoti, setDisableNoti] = useState(false)
+  const [disableNoti, setDisableNoti] = useState<boolean>(false)
 
   // calc - memo
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
@@ -79,19 +75,24 @@ const LunchDetail = () => {
     }
   }, [eventInfo])
   useEffect(() => {
-    if (listNoti.find((noti) => noti.fromUid === uid || Boolean(noti.toUids?.includes(uid!)))) {
-      setDisableNoti(true)
+    async function checkEventNoticed(eventId:string) {
+      const isNoticed = await IsEventNoticed(eventId)
+      console.log(isNoticed)
+      setDisableNoti(isNoticed!)
     }
-  }, [listNoti, uid])
+    if(eventInfo)
+      checkEventNoticed(eventInfo.id!)
+  }, [eventInfo])
 
   const handleNoti = useCallback(() => {
     setDisableNoti(true)
     createNoti({
-      date: dayjs(DATE_NOW).format(FORMAT__DATE),
+      date: dayjs(Date.now()).unix(),
       content: (isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG) + ' ' + formatMoney(userInEvent.find((user) => user.uid === uid)?.amount),
       fromUid: uid!,
       toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
       eventId: eventInfo?.id || '',
+      userSeen:[],
     }).then((res) => {
       if (res.isSuccess) {
         setOpenAlert('Đã Thông báo')
