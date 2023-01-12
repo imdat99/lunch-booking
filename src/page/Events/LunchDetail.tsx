@@ -98,7 +98,6 @@ const LunchDetail = () => {
       }
     })
   }, [eventInfo, isHost, uid, userInEvent])
-  console.log('eventInfo?.date', dayjs(eventInfo?.date, FORMAT__DATE).format(FORMAT__DATE))
   return loading ? (
     <LoadingScreen />
   ) : (
