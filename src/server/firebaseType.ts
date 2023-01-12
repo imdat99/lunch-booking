@@ -47,11 +47,10 @@ export interface IEventDetail {
 }
 export interface INoti {
   id?: string
-  date: string
+  date: number
   content: string
   fromUid: string
   toUids: string[]
   userSeen: string[]
   eventId: string
-  isSeen?: boolean
 }
