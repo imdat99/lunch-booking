@@ -1,9 +1,6 @@
-import { PAGES } from '@app/contants'
 import { getHomeData } from '@app/libs/api/home'
 import { IEvent, IEventDetail } from '@app/server/firebaseType'
-import { setCurrentPage } from '@app/stores/footer'
-import { useAppSelector } from '@app/stores/hook'
-import { useAppDispatch } from '@app/stores/hook'
+import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { userStore } from '@app/stores/user'
 import { Grid } from '@mui/material'
 import { Container } from '@mui/system'
@@ -15,8 +12,6 @@ export default function HomePage() {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    dispatch(setCurrentPage(PAGES.HOME))
-
     getHomeData().then((e) => {
       setListEvent(e)
       // console.log("aaa", e);
