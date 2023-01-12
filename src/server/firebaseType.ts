@@ -1,3 +1,5 @@
+import { bonusTypeEnum } from '@app/page/Events/Add'
+
 export type User = {
   bankName?: string
   ldapAcc?: string
@@ -30,6 +32,7 @@ export interface IEvent {
   tip?: number
   totalAmount?: number
   isAllPaid?: boolean
+  bonusType?: bonusTypeEnum
 }
 export interface IEventDetail {
   id?: string | null
