@@ -54,15 +54,15 @@ const Profile = () => {
 
   const dispatch = useAppDispatch()
 
-  const [listEvent, setListEvent] = useState({})
+  const [listEvent, setListEvent] = useState<any>({})
 
   useEffect(() => {
     dispatch(setCurrentPage(PAGES.HOME))
 
-    getHomeDataByUid(paramUser.uid).then((e) => {
+    getHomeDataByUid(paramUser?.uid || '').then((e) => {
       setListEvent(e)
     })
-  }, [dispatch, paramUser.uid])
+  }, [dispatch, paramUser?.uid])
 
   console.log(listEvent)
 
