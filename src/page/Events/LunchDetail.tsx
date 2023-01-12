@@ -96,11 +96,10 @@ const LunchDetail = () => {
       }
     })
   }, [eventInfo, isHost, uid, userInEvent])
-
   return loading ? (
     <LoadingScreen />
   ) : (
-    <div className="bg-white h-screen">
+    <div className="bg-white">
       <Snackbar open={!!openAlert} autoHideDuration={1500} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
           <span className="font-bold">{openAlert}</span>
@@ -218,10 +217,10 @@ const LunchDetail = () => {
                 Chủ tài khoản: {hostInfo?.bankAccountName} <br />
                 Ngân hàng: {hostInfo?.bankName} <br />
                 Số Tài khoản: <b>{hostInfo?.bankAccount}</b>{' '}
-                <button className="px-2 rounded bg-gray-300" onClick={handleClick}>
+                <button className="px-2 rounded bg-gray-300 mb-3" onClick={handleClick}>
                   Copy
                 </button>
-                <img className="w-96 h-auto mx-auto" src="https://kalite.vn/wp-content/uploads/2021/09/maqrkalite.jpg" alt="aaa" />
+                <img className="w-96 h-auto mx-auto" src={hostInfo?.qrCodeURL || ''} referrerPolicy="no-referrer" alt="aaa" />
               </p>
             </div>
             <div className="my-3">
