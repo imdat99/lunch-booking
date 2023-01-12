@@ -163,7 +163,7 @@ export default function HomePage() {
               </div>
             ))
           ) : (
-            <img src="/src/assets/paid_logo.webp" alt="paid" />
+            <img src="/paid.png" alt="paid" />
           )}
           <hr className="divider" />
           <div>
@@ -187,7 +187,7 @@ export default function HomePage() {
               </div>
             ))
           ) : (
-            <img src="/src/assets/paid_logo.webp" alt="paid" />
+            <img src="/paid.png" alt="paid" />
           )}
           <hr className="divider" />
           <div>
