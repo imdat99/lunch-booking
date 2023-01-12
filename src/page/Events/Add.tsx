@@ -12,6 +12,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, FormLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
+import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Checkbox from '@mui/material/Checkbox'
@@ -70,6 +71,12 @@ export const enum bonusTypeEnum {
   PERCENT = 'PERCENT',
   MONEY = 'MONEY',
 }
+
+export interface IDropdownMembers {
+  label: string | null | undefined | ''
+  value: string | null | undefined | ''
+}
+
 function Add() {
   const params = useParams()
   const listEventDetail = useAppSelector(listEventDetailStore)
@@ -82,12 +89,14 @@ function Add() {
   const [selectedListMember, setSelectedListMember] = useState<IEventDetail[]>([...userInEvent])
   const [memberToPayState, setMemberToPayState] = useState<IEventDetail>()
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(bonusTypeEnum.PERCENT)
+  const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>([])
   const navigate = useNavigate()
   // const dispatch = useAppDispatch()
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
 
   useEffect(() => {
     setListBillOwner(sortListByPaidCount([...selectedListMember]))
+    setDropdownMembers(selectedListMember.map((item) => ({ label: item.name || item.email, value: item.uid })))
   }, [selectedListMember])
 
   useEffect(() => {
@@ -258,6 +267,15 @@ function Add() {
     setEventState({ ...eventState, totalAmount: total })
   }, [eventState.billAmount])
 
+  const onChangeBillOwner = (_event: any, selectedUser: any) => {
+    if (!selectedUser) {
+      setEventState({ ...eventState, userPayName: '', userPayId: '' })
+      return
+    }
+
+    setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
+  }
+
   return (
     <div>
       <button className="px-4">
@@ -414,15 +432,12 @@ function Add() {
                 </Tooltip>
               </Grid>
               <Grid item md={8} xs={7}>
-                <TextFieldStyled
-                  fullWidth
-                  disabled
-                  value={eventState.userPayName || eventState.userPayId}
-                  id="filled-required"
-                  variant="standard"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                <Autocomplete
+                  disabled={!selectedListMember.length}
+                  value={eventState.userPayName}
+                  options={dropdownMembers}
+                  onChange={onChangeBillOwner}
+                  renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
                 />
               </Grid>
             </Grid>
@@ -490,7 +505,7 @@ function Add() {
           </Box>
           <Box className="flex justify-center my-7">
             <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
-              <Typography>{params.id ? 'cập nhật hóa đơn' : 'Tạo hóa đơn'}</Typography>
+              <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>
         </CardContent>
@@ -499,7 +514,7 @@ function Add() {
 
       <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-          <span className="font-bold"> Thành công </span>
+          <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>
         </Alert>
       </Snackbar>
     </div>
