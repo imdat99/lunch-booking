@@ -24,6 +24,8 @@ import Snackbar from '@mui/material/Snackbar'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+
+import { bonusTypeEnum } from './Add'
 const LunchDetail = () => {
   // navigate
   const navigate = useNavigate()
@@ -96,6 +98,7 @@ const LunchDetail = () => {
       }
     })
   }, [eventInfo, isHost, uid, userInEvent])
+  console.log('eventInfo?.date', dayjs(eventInfo?.date, FORMAT__DATE).format(FORMAT__DATE))
   return loading ? (
     <LoadingScreen />
   ) : (
@@ -161,7 +164,7 @@ const LunchDetail = () => {
         <div className="flex justify-between">
           <span className="text-gray-400 font-bold block mb-3">Hoa hồng</span>
           <p className="text-end">
-            <span className="text-black">{formatMoney(eventInfo?.tip)}</span>
+            <span className="text-black">{eventInfo?.bonusType === bonusTypeEnum.MONEY ? formatMoney(eventInfo?.tip) : eventInfo?.tip + '%'}</span>
           </p>
         </div>
         <div className="flex justify-between">
@@ -220,7 +223,12 @@ const LunchDetail = () => {
                 <button className="px-2 rounded bg-gray-300 mb-3" onClick={handleClick}>
                   Copy
                 </button>
-                <img className="w-96 h-auto mx-auto" src={hostInfo?.qrCodeURL || ''} referrerPolicy="no-referrer" alt="aaa" />
+                <img
+                  className="w-96 h-auto mx-auto"
+                  src={hostInfo?.qrCodeURL || ''}
+                  referrerPolicy="no-referrer"
+                  alt={hostInfo?.bankName || '' + ' - ' + hostInfo?.bankAccount || ''}
+                />
               </p>
             </div>
             <div className="my-3">
