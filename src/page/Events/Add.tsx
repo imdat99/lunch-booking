@@ -10,7 +10,8 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
-import { Box, CardContent, FormControl, FormControlLabel, FormLabel, InputAdornment, Modal, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, CardContent, FormControl, FormControlLabel, FormLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Checkbox from '@mui/material/Checkbox'
@@ -18,13 +19,14 @@ import Grid from '@mui/material/Grid'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
+import Snackbar from '@mui/material/Snackbar'
 import { styled } from '@mui/material/styles'
 import Tooltip from '@mui/material/Tooltip'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import * as dayjs from 'dayjs'
 import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
@@ -239,7 +241,7 @@ function Add() {
 
   const handleCloseModalSuccess = () => {
     setOpenModalSuccess(false)
-    navigate('/')
+    navigate('/events')
   }
 
   useEffect(() => {
@@ -254,9 +256,14 @@ function Add() {
   return (
     <div>
       <button className="px-4">
-        <Link to="/">
-          <ReplyIcon fontSize={'large'} />
-        </Link>
+        <div>
+          <ReplyIcon
+            onClick={() => {
+              history.back()
+            }}
+            fontSize={'large'}
+          />
+        </div>
       </button>
       <div className="text-center font-[Bellota] text-[24px]">Tạo mới hoá đơn</div>
 
@@ -484,11 +491,12 @@ function Add() {
         </CardContent>
       </CardStyled>
       <PeopleModal open={open} setOpen={setOpen} handleSelectedMember={handleSelectedMember} selectedListMember={selectedListMember} />
-      <Modal open={openModalSuccess} onClose={handleCloseModalSuccess} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-        <Box sx={style}>
-          <Typography variant="h5">thành công</Typography>
-        </Box>
-      </Modal>
+
+      <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+          <span className="font-bold"> Thành công </span>
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
