@@ -349,7 +349,7 @@ function Add() {
                         <Checkbox
                           className="w-[20px]"
                           edge="start"
-                          // checked={checked.includes(member.uid) !== -1}
+                          checked={member.isPaid}
                           tabIndex={-1}
                           disableRipple
                           inputProps={{ 'aria-labelledby': labelId }}
@@ -490,7 +490,7 @@ function Add() {
           </Box>
           <Box className="flex justify-center my-7">
             <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
-              <Typography>{isEdit ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
+              <Typography>{params.id ? 'cập nhật hóa đơn' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>
         </CardContent>
