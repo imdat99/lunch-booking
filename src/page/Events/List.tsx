@@ -52,6 +52,12 @@ const List = () => {
             .map((item, index) => {
               const isHost = userData.uid === item.userPayId
               const isPaid = isHost ? item.isAllPaid : !(listEventDetail || []).find((member) => member?.uid === userData.uid && member.isPaid)
+              const paidMoney = isHost
+                ? listEventDetail
+                    .filter((eventDetail) => eventDetail.eventId === item.id)
+                    .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
+                : 0
+
               return (
                 <li className="my-4" key={index}>
                   <Link to={item.id!} className="flex bg-white rounded-3xl p-3">
@@ -78,16 +84,12 @@ const List = () => {
                         </span>
                         <br />
                         <span>
-                          Số tiền chưa đòi:
+                          Số tiền chưa đòi:&nbsp;
                           <b>
-                            {
+                            {formatMoney(
                               // eslint-disable-next-line prettier/prettier
-                              formatMoney(
-                                isHost
-                                  ? item.totalAmount! - listEventDetail.reduce((sum, item) => sum + item.amountToPay!, 0)
-                                  : listEventDetail?.find((member) => member.uid === userData.uid)?.amountToPay
-                              )
-                            }
+                              isHost ? Number(item.totalAmount)! - paidMoney : listEventDetail?.find((member) => member.uid === userData.uid)?.amountToPay
+                            )}
                           </b>
                         </span>
                       </div>

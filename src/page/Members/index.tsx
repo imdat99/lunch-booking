@@ -1,10 +1,12 @@
 import ProfilePicture from '@app/assets/profile-picture.png'
 import { getListUser } from '@app/libs/api/EventApi'
+import MemberCard from '@app/page/Members/MemberCard'
 import { User } from '@app/server/firebaseType'
 import SearchIcon from '@mui/icons-material/Search'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const Members = () => {
   const [users, setUsers] = useState<User[]>([])
@@ -16,18 +18,6 @@ const Members = () => {
       setUsers(data)
     })
   }, [])
-
-  const membersList = users.map((user) => (
-    <div className="bg-white px-1 py-3 rounded-xl flex items-center gap-2" key={user.uid}>
-      <img src={ProfilePicture} alt="User profile" className="w-14 h-14 rounded-full shadow-lg" />
-      <div className="flex flex-col pr-1">
-        <p>{user.name}</p>
-        <p>
-          <span>Chủ chi</span>: 4 lần |<span> Tham gia</span>: 4 lần
-        </p>
-      </div>
-    </div>
-  ))
 
   const onChangeSearch = (event: any) => {
     const searchText = event.target.value
@@ -56,8 +46,15 @@ const Members = () => {
         />
       </div>
       <div className="pt-6 flex flex-col gap-4">
-        {users.length === 0 && <div>Team Front-end không có ai cả!</div>}
-        {membersList}
+        {users.length === 0 ? (
+          <div>Team Front-end không có ai cả!</div>
+        ) : (
+          users.map((user) => (
+            <Link to={'/profile/' + user.uid} key={user.uid}>
+              <MemberCard user={user} />
+            </Link>
+          ))
+        )}
       </div>
     </div>
   )
