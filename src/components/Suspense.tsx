@@ -1,6 +1,8 @@
 import { CircularProgress } from '@mui/material'
 import React, { Suspense } from 'react'
 
+import { ErrorBoundary } from './ErrorBoundary'
+
 interface AppSuspenseProps {
   children?: React.ReactElement
   comp?: React.LazyExoticComponent<() => JSX.Element>
@@ -15,7 +17,11 @@ export const LoadingScreen = () => {
 }
 
 const AppSuspense: React.FC<AppSuspenseProps> = ({ children, comp: Comp }) => {
-  return <Suspense fallback={<LoadingScreen />}>{Comp ? <Comp /> : children}</Suspense>
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingScreen />}>{Comp ? <Comp /> : children}</Suspense>
+    </ErrorBoundary>
+  )
 }
 
 export default AppSuspense

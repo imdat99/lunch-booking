@@ -6,8 +6,8 @@ import { userStatus, userStore } from '@app/stores/user'
 import { lazy, useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { createBrowserRouter, Navigate, Outlet, useNavigate } from 'react-router-dom'
-import { auth } from '../server/firebase'
 
+import { auth } from '../server/firebase'
 
 interface PrivateRouteProps {
   Comp: () => JSX.Element
