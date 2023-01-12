@@ -79,7 +79,16 @@ const List = () => {
                         <br />
                         <span>
                           Số tiền chưa đòi:
-                          <b>{formatMoney(isHost ? item.billAmount : listEventDetail?.find((member) => member.uid === userData.uid)?.amount)}</b>
+                          <b>
+                            {
+                              // eslint-disable-next-line prettier/prettier
+                              formatMoney(
+                                isHost
+                                  ? item.totalAmount! - listEventDetail.reduce((sum, item) => sum + item.amountToPay!, 0)
+                                  : listEventDetail?.find((member) => member.uid === userData.uid)?.amountToPay
+                              )
+                            }
+                          </b>
                         </span>
                       </div>
                       <span
