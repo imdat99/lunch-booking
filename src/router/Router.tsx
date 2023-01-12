@@ -59,11 +59,17 @@ export default createBrowserRouter([
       },
       {
         path: 'profile',
-        element: (
-          <LayoutWithFooter>
-            <AppSuspense comp={lazy(() => import('@app/page/Profile'))} />
-          </LayoutWithFooter>
-        ),
+        element: <Outlet />,
+        children: [
+          {
+            path: ':userUid',
+            element: (
+              <LayoutWithFooter>
+                <AppSuspense comp={lazy(() => import('@app/page/Profile'))} />
+              </LayoutWithFooter>
+            ),
+          },
+        ],
       },
       {
         path: 'events',
