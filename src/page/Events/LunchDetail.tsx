@@ -8,7 +8,7 @@ import {
   TEXT__PAYMENT_PAID,
   TEXT__PAYMENT_PAID_MSG,
   TEXT__PAYMENT_REMIND,
-  TEXT__PAYMENT_REMIND_MSG,
+  TEXT__PAYMENT_REMIND_MSG
 } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { useAppSelector } from '@app/stores/hook'
@@ -74,10 +74,10 @@ const LunchDetail = () => {
   }
 
   useEffect(() => {
-    if (eventInfo && hostInfo) {
+    if (eventInfo) {
       setLoading(false)
     }
-  }, [eventInfo, hostInfo])
+  }, [eventInfo])
   useEffect(() => {
     if (listNoti.find((noti) => noti.fromUid === uid || Boolean(noti.toUids?.includes(uid!)))) {
       setDisableNoti(true)
@@ -134,7 +134,7 @@ const LunchDetail = () => {
             <p className="my-4">
               <span>
                 {TEXT__HOST}
-                <b>&nbsp;{eventInfo?.userPayName}</b>
+                <b>&nbsp;{eventInfo?.userPayName || 'Chưa chọn chủ trì'}</b>
               </span>
               &emsp;{'-'}&emsp;
               <span>
@@ -143,7 +143,7 @@ const LunchDetail = () => {
             </p>
           </div>
           <div>
-            {isHost ? (
+            {isHost || !hostInfo ? (
               <button className="h-[36px]" onClick={() => navigate(`/events/edit/${params.id}`)}>
                 <BorderColorIcon fontSize={'large'} />
               </button>
