@@ -1,25 +1,19 @@
-import { getListUser } from '@app/libs/api/EventApi'
-import React, { useEffect, useState } from 'react'
-import { User } from '@app/server/firebaseType'
 import ProfilePicture from '@app/assets/profile-picture.png'
-import Search from '@app/page/Members/Search'
+import { getListUser } from '@app/libs/api/EventApi'
+import { User } from '@app/server/firebaseType'
+import SearchIcon from '@mui/icons-material/Search'
+import React, { useEffect, useState } from 'react'
 
 const Members = () => {
   const [users, setUsers] = useState<User[]>([])
+  const [allUsers, setAllUsers] = useState<User[]>([])
 
   useEffect(() => {
-    getListUser().then((r) => {
-      setUsers(r)
+    getListUser().then((data) => {
+      setAllUsers(data)
+      setUsers(data)
     })
   }, [])
-
-  const handleSubmit = (query: string) => {
-    console.log(query)
-    const filteredUserList = users.filter((user) => {
-      return user.name?.toLowerCase().includes(query)
-    })
-    setUsers(filteredUserList)
-  }
 
   const membersList = users.map((user) => (
     <div className="bg-white px-1 py-3 rounded-xl flex items-center gap-2" key={user.uid}>
@@ -33,10 +27,25 @@ const Members = () => {
     </div>
   ))
 
+  const onChangeSearch = (event: any) => {
+    const searchText = event.target.value
+    if (!searchText) {
+      setUsers(allUsers)
+    }
+    const lowerSearchText = searchText.toLowerCase()
+    const searchResult = allUsers.filter((item) => item.name?.toLowerCase()?.includes(lowerSearchText))
+    setUsers(searchResult)
+  }
+
   return (
     <div className="flex flex-col items-center pt-6 pb-12">
       <h1 className="font-bellota text-center text-3xl pb-4">Thành viên</h1>
-      <Search onSubmit={handleSubmit} />
+      <div>
+        <input type="text" onChange={onChangeSearch} className="rounded-full max-w-xs px-6 py-2.5 min-w-[270px] md:min-w-[400px]" placeholder="Search" />
+        <button className="ml-2">
+          <SearchIcon fontSize={'large'} />
+        </button>
+      </div>
       <div className="pt-6 flex flex-col gap-4">
         {users.length === 0 && <div>Team Front-end không có ai cả!</div>}
         {membersList}
