@@ -76,7 +76,6 @@ function Add() {
   const listEvent = useAppSelector(listEventStore)
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
-  // const { billDetail, isEditBill } = useAppSelector(billStore)
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
   const [openModalSuccess, setOpenModalSuccess] = useState<boolean>(false)
   const [listBillOwner, setListBillOwner] = useState<User[]>([])
@@ -85,6 +84,7 @@ function Add() {
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(bonusTypeEnum.PERCENT)
   const navigate = useNavigate()
   // const dispatch = useAppDispatch()
+  const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
 
   useEffect(() => {
     setListBillOwner(sortListByPaidCount([...selectedListMember]))
@@ -251,6 +251,7 @@ function Add() {
   useEffect(() => {
     setListBillOwner([...selectedListMember])
   }, [selectedListMember])
+
   useEffect(() => {
     const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0)
     const total = (eventState.billAmount || 0) + bonus
@@ -489,7 +490,7 @@ function Add() {
           </Box>
           <Box className="flex justify-center my-7">
             <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
-              <Typography>Tạo hóa đơn</Typography>
+              <Typography>{isEdit ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>
         </CardContent>
