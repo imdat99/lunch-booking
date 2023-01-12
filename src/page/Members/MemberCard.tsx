@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react'
 const MemberCard = ({ user }) => {
   const dispatch = useAppDispatch()
 
-  const [listEvent, setListEvent] = useState({})
+  const [listEvent, setListEvent] = useState<any>({})
 
   useEffect(() => {
     dispatch(setCurrentPage(PAGES.HOME))
