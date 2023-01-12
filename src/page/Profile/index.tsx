@@ -119,6 +119,16 @@ const Profile = () => {
                 label="Ngân hàng"
                 variant="standard"
                 fullWidth={true}
+                id="bankName"
+                name="bankName"
+                value={values.bankName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+              <TextField
+                label="Chủ tài khoản"
+                variant="standard"
+                fullWidth={true}
                 id="bankAccountName"
                 name="bankAccountName"
                 value={values.bankAccountName}
