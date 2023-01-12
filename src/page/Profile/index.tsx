@@ -1,10 +1,8 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import ProfilePicture from '@app/assets/profile-picture.png'
-import { PAGES } from '@app/contants'
 import { getHomeDataByUid } from '@app/libs/api/home'
 import { auth } from '@app/server/firebase'
 import { store } from '@app/stores'
-import { setCurrentPage } from '@app/stores/footer'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { listUserStore } from '@app/stores/listUser'
 import { clearUser, updateUserInfo, userStatus, userStore } from '@app/stores/user'
@@ -29,7 +27,6 @@ const Profile = () => {
 
   const paramUser = users.find((user) => user.uid === userUid)
 
-  console.log(paramUser?.uid)
   const isEditable = paramUser?.uid === loginUser.uid
 
   const handlePreviewChange = (event: any) => {
@@ -57,8 +54,6 @@ const Profile = () => {
   const [listEvent, setListEvent] = useState<any>({})
 
   useEffect(() => {
-    dispatch(setCurrentPage(PAGES.HOME))
-
     getHomeDataByUid(paramUser?.uid || '').then((e) => {
       setListEvent(e)
     })

@@ -1,7 +1,5 @@
 import ProfilePicture from '@app/assets/profile-picture.png'
-import { PAGES } from '@app/contants'
 import { getHomeDataByUid } from '@app/libs/api/home'
-import { setCurrentPage } from '@app/stores/footer'
 import { useAppDispatch } from '@app/stores/hook'
 import React, { useEffect, useState } from 'react'
 
@@ -13,8 +11,6 @@ const MemberCard = ({ user }) => {
   const [listEvent, setListEvent] = useState<any>({})
 
   useEffect(() => {
-    dispatch(setCurrentPage(PAGES.HOME))
-
     getHomeDataByUid(user.uid).then((e) => {
       setListEvent(e)
     })
