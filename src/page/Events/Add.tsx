@@ -76,7 +76,9 @@ export interface IDropdownMembers {
   label: string | null | undefined | ''
   value: string | null | undefined | ''
 }
-
+const sortListByPaidCount = (members: User[]) => {
+  return members.sort((a, b) => (a.count || 0) - (b.count || 0))
+}
 function Add() {
   const params = useParams()
   const listEventDetail = useAppSelector(listEventDetailStore)
@@ -85,26 +87,17 @@ function Add() {
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
   const [openModalSuccess, setOpenModalSuccess] = useState<boolean>(false)
-  const [listBillOwner, setListBillOwner] = useState<User[]>([])
+  const [listBillOwner, setListBillOwner] = useState<User[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
   const [selectedListMember, setSelectedListMember] = useState<IEventDetail[]>([...userInEvent])
   const [memberToPayState, setMemberToPayState] = useState<IEventDetail>()
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(eventInfo?.bonusType || bonusTypeEnum.PERCENT)
-  const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>([])
+  const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
+    userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
+  )
   const navigate = useNavigate()
   const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
-
-  useEffect(() => {
-    setListBillOwner(sortListByPaidCount([...selectedListMember]))
-    setDropdownMembers(selectedListMember.map((item) => ({ label: item.name || item.email, value: item.uid })))
-  }, [selectedListMember])
-
-  useEffect(() => {
-    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
-    const total = (eventState.billAmount || 0) + bonus
-    setEventState({ ...eventState, totalAmount: total })
-  }, [eventState.billAmount])
 
   const handleToggle = (memberId: string) => {
     const tempMembers = _.cloneDeep(selectedListMember)
@@ -134,6 +127,7 @@ function Add() {
   const handleSelectedMember = (listSelectingMembers: IEventDetail[]) => {
     setListBillOwner(sortListByPaidCount([...listSelectingMembers]))
     setSelectedListMember(listSelectingMembers)
+    setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid })))
   }
   const [open, setOpen] = useState(false)
 
@@ -236,11 +230,9 @@ function Add() {
     setSelectedListMember(selectedListMembersWithMoney)
   }
 
-  const sortListByPaidCount = (members: User[]) => {
-    return members.sort((a, b) => (a.count || 0) - (b.count || 0))
-  }
-
   const handleAutoPickBillOwner = () => {
+    console.log('listBillOwner', listBillOwner)
+
     const billOwner = listBillOwner.pop()
     const selectedListMemberTemp = _.cloneDeep(selectedListMember)
     selectedListMemberTemp.forEach((item, index, arr) => {
@@ -284,7 +276,6 @@ function Add() {
       setEventState({ ...eventState, userPayName: '', userPayId: '' })
       return
     }
-
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
 
@@ -446,7 +437,7 @@ function Add() {
               <Grid item md={8} xs={7}>
                 <Autocomplete
                   disabled={!selectedListMember.length}
-                  value={eventState.userPayName}
+                  value={{ value: eventState?.userPayName, label: eventState.userPayName }}
                   options={dropdownMembers}
                   onChange={onChangeBillOwner}
                   renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
