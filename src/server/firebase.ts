@@ -14,21 +14,13 @@ const {
 } = import.meta.env
 
 const firebaseConfig = {
-  // apiKey,
-  // authDomain,
-  // projectId,
-  // storageBucket,
-  // messagingSenderId,
-  // appId,
-  // measurementId,
-  apiKey: 'AIzaSyDcsGPXU5iaQXyr5fxxft0q9Bvf8wcNu9Q',
-  authDomain: 'an-lunch.firebaseapp.com',
-  databaseURL: 'https://an-lunch-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'an-lunch',
-  storageBucket: 'an-lunch.appspot.com',
-  messagingSenderId: '593640378675',
-  appId: '1:593640378675:web:aef77080d743c6ccfb2e46',
-  measurementId: 'G-FD0279B6RW',
+  apiKey,
+  authDomain,
+  projectId,
+  storageBucket,
+  messagingSenderId,
+  appId,
+  measurementId,
 }
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig)

@@ -1,4 +1,5 @@
 import { LoadingScreen } from '@app/components/Suspense'
+import { deleteEvent } from '@app/libs/api/event'
 import { createNoti, IsEventNoticed } from '@app/libs/api/noti'
 import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
@@ -8,8 +9,16 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { listUserStore } from '@app/stores/listUser'
 import { userStore } from '@app/stores/user'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
+import DeleteIcon from '@mui/icons-material/Delete'
 import ReplyIcon from '@mui/icons-material/Reply'
+import { Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
 import Snackbar from '@mui/material/Snackbar'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -32,6 +41,7 @@ const LunchDetail = () => {
   const [openAlert, setOpenAlert] = useState('')
   const [loading, setLoading] = useState(true)
   const [disableNoti, setDisableNoti] = useState<boolean>(false)
+  const [confirmDialog, setConfirmDialog] = useState<boolean>(false)
 
   // calc - memo
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
@@ -91,10 +101,45 @@ const LunchDetail = () => {
       }
     })
   }, [eventInfo, isHost, uid, userInEvent])
+
+  const handleCloseDialog = () => {
+    setConfirmDialog(false)
+  }
+
+  const handleDeleteEvent = useCallback(async () => {
+    setLoading(true)
+    await deleteEvent(params.id!).then((isSuccess) => {
+      if (isSuccess) {
+        navigate('..')
+        setConfirmDialog(false)
+      }
+    })
+  }, [params, navigate])
+
   return loading ? (
     <LoadingScreen />
   ) : (
     <div className="bg-white">
+      <Dialog open={confirmDialog} onClose={handleCloseDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">Bạn có chắc chắn muốn xoá?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <Typography>
+              Thao tác này không thể hoàn tác.
+              <br /> Mọi thành viên có trong bill cũng sẽ không nhìn thấy bill này nữa.
+            </Typography>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleCloseDialog}>
+            <Typography>Để tôi suy nghĩ lại</Typography>
+          </Button>
+          <Button onClick={handleDeleteEvent} variant="outlined" color="error" startIcon={<DeleteIcon />}>
+            <Typography>Xoá!</Typography>
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar open={!!openAlert} autoHideDuration={1500} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
           <span className="font-bold">{openAlert}</span>
@@ -112,11 +157,16 @@ const LunchDetail = () => {
           </button>
           <div className="flex flex-col text-center">
             <div className={'mx-auto relative mb-5 rounded-full border-4 p-1 ' + (isHost ? 'border-red-500' : 'border-green-500')}>
-              <img src="https://picsum.photos/200/300?grayscale" className="w-24 h-24 rounded-full" alt="" />
+              <img
+                src={hostInfo?.photoURL || 'https://picsum.photos/200/300?grayscale'}
+                referrerPolicy="no-referrer"
+                className="w-24 h-24 rounded-full"
+                alt=""
+              />
               <span
                 className={
                   'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-5 inset-x-2/4 -translate-x-2/4 ' +
-                  (isHost ? 'bg-red-600 w-[65px]' : 'bg-green-600 w-[80px]')
+                  (isHost ? 'bg-red-600 w-[70px]' : 'bg-green-600 w-[80px]')
                 }
               >
                 {isHost ? TEXT__HOST : TEXT__MEMBER}
@@ -185,7 +235,7 @@ const LunchDetail = () => {
               <thead>
                 <tr className="text-gray-400 font-bold">
                   <th scope="col" className="py-3">
-                    Member
+                    Thành viên
                   </th>
                   <th scope="col" className="py-3 text-center">
                     Bill
@@ -210,11 +260,20 @@ const LunchDetail = () => {
                         <span className="ml-3">{user.name || user.email}</span>
                       </label>
                     </td>
-                    <td className="text-center">{formatMoney(user.amount)}</td>
-                    <td className="text-right">{formatMoney(user.amountToPay)}</td>
+                    <td className="text-center">{formatMoney(user.amount, false)}</td>
+                    <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="text-right text-gray-500">
+                  <td colSpan={3}>
+                    <em className="text-sm">
+                      * Đơn vị tính <b>K VNĐ</b>
+                    </em>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -254,6 +313,22 @@ const LunchDetail = () => {
                 </button>
               </div>
             </div>
+            {(isHost || !hostInfo) && (
+              <div className="my-3">
+                <span className="text-gray-400 font-bold block mb-3">Danger Zone</span>
+                <div className="flex w-full">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfirmDialog(true)
+                    }}
+                    className={'focus:outline-none text-white font-medium rounded-lg px-5 py-2.5 mx-auto bg-red-600 hover:bg-red-700 focus:ring-red-400'}
+                  >
+                    Xoá Bill
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="my-3">
