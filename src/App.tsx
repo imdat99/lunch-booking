@@ -25,19 +25,21 @@ function App() {
     getListUser().then((e) => {
       dispatch(setListUser(e))
     })
-    getAllowedEmail(loggedInUser?.email || '').then((isAllowed) => {
-      if (isAllowed) {
-        const { uid } = loggedInUser!
-        dispatch(initializeUser(loggedInUser!))
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _unscribe = listenCommingNoti(uid, (noti) => {
-          dispatch(addNewNotiCome(noti))
-        })
-        getListEventDetail()
-      } else {
-        hadleLogout()
-      }
-    })
+    if (loggedInUser) {
+      getAllowedEmail(loggedInUser?.email || '').then((isAllowed) => {
+        if (isAllowed) {
+          const { uid } = loggedInUser!
+          dispatch(initializeUser(loggedInUser!))
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _unscribe = listenCommingNoti(uid, (noti) => {
+            dispatch(addNewNotiCome(noti))
+          })
+          getListEventDetail()
+        } else {
+          hadleLogout()
+        }
+      })
+    }
   }, [dispatch, loggedInUser])
 
   return (
