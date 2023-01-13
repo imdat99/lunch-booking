@@ -17,14 +17,14 @@ const MemberCard = ({ user }) => {
   }, [dispatch, user.uid])
 
   return (
-    <div className="bg-white px-1 py-3 rounded-xl flex items-center gap-2" key={user.uid}>
+    <div className="bg-white pl-2 py-1.5 rounded-xl flex gap-2.5 font-bellota text-sm" key={user.uid}>
       {user.photoURL ? (
-        <img src={user.photoURL} alt="User profile" className="w-14 h-14 rounded-full shadow-lg" />
+        <img src={user.photoURL} alt="User profile" className="w-12 h-12 rounded-full shadow-lg" />
       ) : (
-        <img src={ProfilePicture} alt="User profile" className="w-14 h-14 rounded-full shadow-lg" />
+        <img src={ProfilePicture} alt="User profile" className="w-12 h-12 rounded-full shadow-lg" />
       )}
-      <div className="flex flex-col pr-1">
-        <p>{user.name}</p>
+      <div className="flex flex-col justify-between pr-8">
+        <p className="font-bold">{user.name}</p>
         <p>
           <span>Chủ chi</span>: {listEvent.isHostCount} lần |<span> Tham gia</span>: {listEvent.isMemberCount} lần
         </p>

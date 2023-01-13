@@ -1,4 +1,3 @@
-import ProfilePicture from '@app/assets/profile-picture.png'
 import { getListUser } from '@app/libs/api/EventApi'
 import MemberCard from '@app/page/Members/MemberCard'
 import { User } from '@app/server/firebaseType'
@@ -31,12 +30,13 @@ const Members = () => {
 
   return (
     <div className="flex flex-col items-center pt-6 pb-12">
-      <h1 className="font-bellota text-center text-3xl pb-4">Thành viên</h1>
+      <h1 className="font-bellota text-center text-2xl pb-4">Thành viên</h1>
       <div>
         <OutlinedInput
-          sx={{ width: '290px', height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
+          sx={{ width: '300px', height: '46px', borderRadius: '30px', backgroundColor: 'white', fontFamily: 'Bellota' }}
           id="outlined-adornment-password"
           type={'text'}
+          placeholder={'Tìm kiếm'}
           endAdornment={
             <InputAdornment position="end">
               <SearchIcon fontSize={'large'} />

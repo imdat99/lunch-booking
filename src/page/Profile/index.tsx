@@ -72,7 +72,7 @@ const Profile = () => {
     <div className="min-h-screen bg-white">
       {/*Header section*/}
       <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
-        <div className="flex justify-between pb-2 self-stretch">
+        <div className="flex justify-between self-stretch">
           <button className="px-4">
             <ReplyIcon
               onClick={() => {
@@ -90,7 +90,7 @@ const Profile = () => {
         {normalUser?.photoURL ? (
           <img src={normalUser.photoURL} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
         ) : (
-          <img src={ProfilePicture} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
+          <img src={ProfilePicture} alt="" referrerPolicy="no-referrer" className="rounded-full w-28 mb-3 shadow-xl" />
         )}
         <span className="py-2 text-xl">{normalUser?.name || ''}</span>
         <span className="text-md">{normalUser?.email || ''}</span>
@@ -107,7 +107,7 @@ const Profile = () => {
             dispatch(updateUserInfo(values.uid as string, values, imgObj))
           }}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+          {({ values, handleChange, handleBlur, handleSubmit }) => (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <TextField
                 label="LDAP"
