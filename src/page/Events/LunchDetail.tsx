@@ -1,13 +1,6 @@
 import { LoadingScreen } from '@app/components/Suspense'
-import { createNoti , IsEventNoticed} from '@app/libs/api/noti'
-import {
-  TEXT__HOST,
-  TEXT__MEMBER,
-  TEXT__PAYMENT_PAID,
-  TEXT__PAYMENT_PAID_MSG,
-  TEXT__PAYMENT_REMIND,
-  TEXT__PAYMENT_REMIND_MSG
-} from '@app/libs/constant'
+import { createNoti, IsEventNoticed } from '@app/libs/api/noti'
+import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
@@ -75,13 +68,12 @@ const LunchDetail = () => {
     }
   }, [eventInfo])
   useEffect(() => {
-    async function checkEventNoticed(eventId:string) {
+    async function checkEventNoticed(eventId: string) {
       const isNoticed = await IsEventNoticed(eventId)
       console.log(isNoticed)
       setDisableNoti(isNoticed!)
     }
-    if(eventInfo)
-      checkEventNoticed(eventInfo.id!)
+    if (eventInfo) checkEventNoticed(eventInfo.id!)
   }, [eventInfo])
 
   const handleNoti = useCallback(() => {
@@ -92,7 +84,7 @@ const LunchDetail = () => {
       fromUid: uid!,
       toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
       eventId: eventInfo?.id || '',
-      userSeen:[],
+      userSeen: [],
     }).then((res) => {
       if (res.isSuccess) {
         setOpenAlert('Đã Thông báo')
@@ -132,16 +124,30 @@ const LunchDetail = () => {
             </div>
             <h2 className="text-2xl text-center mb-2">{eventInfo?.eventName}</h2>
             <time className="mb-2">{eventInfo?.date}</time>
-            <p className="my-4">
-              <span>
-                {TEXT__HOST}
-                <b>&nbsp;{eventInfo?.userPayName || 'Chưa chọn chủ trì'}</b>
-              </span>
-              &emsp;{'-'}&emsp;
-              <span>
-                Tham gia&nbsp;<b>{userInEvent?.length} người</b>
-              </span>
-            </p>
+            <div className="my-4 flex-wrap">
+              <div className="relative overflow-x-auto">
+                <table className="w-full text-left">
+                  <tbody>
+                    <tr>
+                      <th scope="row" className="font-normal pr-4">
+                        {TEXT__HOST}
+                      </th>
+                      <td>
+                        <b>{eventInfo?.userPayName || 'Chưa chọn chủ trì'}</b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th scope="row" className="font-normal pr-4">
+                        Tham gia
+                      </th>
+                      <td>
+                        <b>{userInEvent?.length} người</b>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
           <div>
             {isHost || !hostInfo ? (
@@ -179,13 +185,13 @@ const LunchDetail = () => {
               <thead>
                 <tr className="text-gray-400 font-bold">
                   <th scope="col" className="py-3">
-                    Thành viên
+                    Member
                   </th>
                   <th scope="col" className="py-3 text-center">
-                    Tiền bill
+                    Bill
                   </th>
                   <th scope="col" className="py-3 text-right">
-                    Thành tiền
+                    Pay
                   </th>
                 </tr>
               </thead>
