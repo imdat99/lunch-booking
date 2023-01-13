@@ -315,7 +315,7 @@ function Add() {
                 shrink: true,
               }}
               error={!eventState.eventName}
-              helperText="Vui lòng nhập tên"
+              helperText={eventState.eventName ? null : 'Vui lòng nhập tên'}
             />
           </Box>
           <Box className="mt-6">
