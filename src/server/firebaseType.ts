@@ -54,3 +54,7 @@ export interface INoti {
   userSeen: string[]
   eventId: string
 }
+
+export interface IAllowedEmail {
+  email: string[]
+}
