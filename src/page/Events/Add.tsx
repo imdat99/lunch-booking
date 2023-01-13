@@ -58,7 +58,7 @@ const style = {
 
 const initEventValue = {
   address: '',
-  date: dayjs(new Date()).format('DD/MM/YYYY'),
+  date: dayjs(new Date()).format('MM/DD/YYYY'),
   eventName: '',
   totalAmount: 0,
   userId: '',
@@ -76,7 +76,9 @@ export interface IDropdownMembers {
   label: string | null | undefined | ''
   value: string | null | undefined | ''
 }
-
+const sortListByPaidCount = (members: User[]) => {
+  return members.sort((a, b) => (a.count || 0) - (b.count || 0))
+}
 function Add() {
   const params = useParams()
   const listEventDetail = useAppSelector(listEventDetailStore)
@@ -85,26 +87,18 @@ function Add() {
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
   const [openModalSuccess, setOpenModalSuccess] = useState<boolean>(false)
-  const [listBillOwner, setListBillOwner] = useState<User[]>([])
+  const [listBillOwner, setListBillOwner] = useState<User[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
   const [selectedListMember, setSelectedListMember] = useState<IEventDetail[]>([...userInEvent])
   const [memberToPayState, setMemberToPayState] = useState<IEventDetail>()
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(eventInfo?.bonusType || bonusTypeEnum.PERCENT)
-  const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>([])
+  const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
+    userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
+  )
+
   const navigate = useNavigate()
   const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
-
-  useEffect(() => {
-    setListBillOwner(sortListByPaidCount([...selectedListMember]))
-    setDropdownMembers(selectedListMember.map((item) => ({ label: item.name || item.email, value: item.uid })))
-  }, [selectedListMember])
-
-  useEffect(() => {
-    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
-    const total = (eventState.billAmount || 0) + bonus
-    setEventState({ ...eventState, totalAmount: total })
-  }, [eventState.billAmount])
 
   const handleToggle = (memberId: string) => {
     const tempMembers = _.cloneDeep(selectedListMember)
@@ -134,6 +128,7 @@ function Add() {
   const handleSelectedMember = (listSelectingMembers: IEventDetail[]) => {
     setListBillOwner(sortListByPaidCount([...listSelectingMembers]))
     setSelectedListMember(listSelectingMembers)
+    setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid })))
   }
   const [open, setOpen] = useState(false)
 
@@ -175,7 +170,7 @@ function Add() {
   }
   const recalculateMoneyToPay = (arrListMember: IEventDetail[], bonus: number) => {
     arrListMember.forEach((item, index, arr) => {
-      arr[index].amountToPay = Math.round((item.amount || 0) + bonus / arrListMember.length)
+      if (arr[index].amount) arr[index].amountToPay = Math.round((item.amount || 0) + bonus / arrListMember.length)
     })
     return arrListMember
   }
@@ -236,10 +231,6 @@ function Add() {
     setSelectedListMember(selectedListMembersWithMoney)
   }
 
-  const sortListByPaidCount = (members: User[]) => {
-    return members.sort((a, b) => (a.count || 0) - (b.count || 0))
-  }
-
   const handleAutoPickBillOwner = () => {
     const billOwner = listBillOwner.pop()
 
@@ -275,7 +266,6 @@ function Add() {
       setEventState({ ...eventState, userPayName: '', userPayId: '' })
       return
     }
-
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
 
@@ -313,9 +303,10 @@ function Add() {
             <DatePicker
               className="w-full "
               label="Thời gian"
-              value={dayjs(eventState?.date)}
+              value={dayjs(eventState.date).format('MM/DD/YYYY')}
+              inputFormat="DD/MM/YYYY"
               onChange={(newValue) => {
-                handleChangeTextField('date', dayjs(newValue).format('DD/MM/YYYY'))
+                handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
               }}
               renderInput={(params) => (
                 <TextFieldStyled
@@ -437,7 +428,7 @@ function Add() {
               <Grid item md={8} xs={7}>
                 <Autocomplete
                   disabled={!selectedListMember.length}
-                  value={eventState.userPayName}
+                  value={{ value: eventState?.userPayName, label: eventState.userPayName }}
                   options={dropdownMembers}
                   onChange={onChangeBillOwner}
                   renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
