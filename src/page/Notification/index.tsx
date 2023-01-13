@@ -26,7 +26,34 @@ export default function Notification() {
       const listUser = await Promise.all(listNoti.map((noti) => getUserByUid(noti.fromUid!)))
 
       const listCard = listNoti.map((noti, index) => {
-        return (
+        return (<>        <div className="mb-[0.625rem]" key={noti.id}>
+        <NotificationCard
+          link={`/events/${noti.eventId}`}
+          time={`${dayjs(noti.date * 1000).format(FORMAT__DATE)}`}
+          content={
+            <p>
+              Từ <b>{listUser[index]?.name}</b> : {noti.content}
+            </p>
+          }
+          isRead={noti.userSeen.includes(userInfo?.uid!)}
+          avatarSrc={listUser[index]?.photoURL!}
+          onClick={()=>{dispatch(setUserReadNoti(userInfo?.uid!,noti))}}
+        />
+      </div>
+      <div className="mb-[0.625rem]" key={noti.id}>
+            <NotificationCard
+              link={`/events/${noti.eventId}`}
+              time={`${dayjs(noti.date * 1000).format(FORMAT__DATE)}`}
+              content={
+                <p>
+                  Từ <b>{listUser[index]?.name}</b> : {noti.content}
+                </p>
+              }
+              isRead={noti.userSeen.includes(userInfo?.uid!)}
+              avatarSrc={listUser[index]?.photoURL!}
+              onClick={()=>{dispatch(setUserReadNoti(userInfo?.uid!,noti))}}
+            />
+          </div>
           <div className="mb-[0.625rem]" key={noti.id}>
             <NotificationCard
               link={`/events/${noti.eventId}`}
@@ -41,6 +68,9 @@ export default function Notification() {
               onClick={()=>{dispatch(setUserReadNoti(userInfo?.uid!,noti))}}
             />
           </div>
+        </>
+
+
         )
       })
       setListCard(listCard)
@@ -55,10 +85,10 @@ export default function Notification() {
   return (
     <>
       <div className="flex flex-col justify-start">
-        <div className="mt-[1.875rem] mb-[1.875rem]">
+        <div className="mt-[1.875rem] mb-[1.875rem] h-[5.625rem]">
           <p className="leading-[1.875rem] text-[1.5rem] text-center">Thông báo</p>
         </div>
-        <div className="flex flex-col content-center overflow-y-auto">
+        <div className="flex flex-col content-center overflow-y-auto ">
           <InfinitScroll
             hasMore={!isLastPage}
             next = {updateNotiList}

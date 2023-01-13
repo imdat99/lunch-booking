@@ -8,15 +8,16 @@ import { RouterProvider } from 'react-router-dom'
 
 import { getListEventDetail } from './libs/api/event'
 import { getListUser } from './libs/api/events'
+import { listenCommingNoti } from './libs/api/noti'
+import { getAllowedEmail, hadleLogout } from './libs/api/userAPI'
 import Router from './router/Router'
 import { auth } from './server/firebase'
 import { useAppDispatch } from './stores/hook'
 import { setListUser } from './stores/listUser'
-import { initializeUser } from './stores/user'
-import { listenCommingNoti } from './libs/api/noti'
 import { addNewNotiCome } from './stores/noti'
-
+import { initializeUser } from './stores/user'
 function App() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loggedInUser, loading] = useAuthState(auth)
   const dispatch = useAppDispatch()
 
@@ -24,17 +25,22 @@ function App() {
     getListUser().then((e) => {
       dispatch(setListUser(e))
     })
-
     if (loggedInUser) {
-      const {uid} = loggedInUser
-      dispatch(initializeUser(loggedInUser))
-      var unscribe = listenCommingNoti(uid,(noti)=>{
-          dispatch(addNewNotiCome(noti))
+      getAllowedEmail(loggedInUser?.email || '').then((isAllowed) => {
+        if (isAllowed) {
+          const { uid } = loggedInUser!
+          dispatch(initializeUser(loggedInUser!))
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _unscribe = listenCommingNoti(uid, (noti) => {
+            dispatch(addNewNotiCome(noti))
+          })
+          getListEventDetail()
+        } else {
+          hadleLogout()
+        }
       })
-      getListEventDetail()
     }
   }, [dispatch, loggedInUser])
-
 
   return (
     <ThemeProvider theme={theme}>
