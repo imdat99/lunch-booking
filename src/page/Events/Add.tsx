@@ -234,14 +234,6 @@ function Add() {
     console.log('listBillOwner', listBillOwner)
 
     const billOwner = listBillOwner.pop()
-    const selectedListMemberTemp = _.cloneDeep(selectedListMember)
-    selectedListMemberTemp.forEach((item, index, arr) => {
-      if (item.uid === billOwner?.uid) {
-        arr[index].isPaid = true
-      } else {
-        arr[index].isPaid = false
-      }
-    })
 
     if (!listBillOwner.length) {
       const resetListBillOwner = sortListByPaidCount([...selectedListMember])
@@ -252,7 +244,6 @@ function Add() {
       setMemberToPayState(billOwner)
       setEventState({ ...eventState, userPayId: billOwner.uid, userPayName: billOwner.name ? billOwner.name : billOwner.email })
     }
-    setSelectedListMember(selectedListMemberTemp)
     setForceRerender(Date.now())
   }
 
