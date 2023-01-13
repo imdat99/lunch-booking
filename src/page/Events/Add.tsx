@@ -170,7 +170,7 @@ function Add() {
   }
   const recalculateMoneyToPay = (arrListMember: IEventDetail[], bonus: number) => {
     arrListMember.forEach((item, index, arr) => {
-      arr[index].amountToPay = Math.round((item.amount || 0) + bonus / arrListMember.length)
+      if (arr[index].amount) arr[index].amountToPay = Math.round((item.amount || 0) + bonus / arrListMember.length)
     })
     return arrListMember
   }
