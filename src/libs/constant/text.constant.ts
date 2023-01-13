@@ -1,4 +1,4 @@
-export const TEXT__HOST = 'Chủ trì' as const
+export const TEXT__HOST = 'Chủ chi' as const
 export const TEXT__MEMBER = 'Member' as const
 export const TEXT__PAYMENT_REMIND = 'Nhắc nhở trả tiền' as const
 export const TEXT__PAYMENT_REMIND_MSG = 'Trả tiền cho tui đi!' as const
