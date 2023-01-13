@@ -8,7 +8,6 @@ import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, FormLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
@@ -291,7 +290,6 @@ function Add() {
                   shrink: true,
                 }}
                 error={!eventState.eventName}
-                helperText={eventState.eventName ? null : 'Vui lòng nhập tên'}
               />
             </Box>
             <Box className="mt-6">
@@ -315,8 +313,10 @@ function Add() {
               />
             </Box>
             <Box className="flex items-center mt-3">
-              <Typography variant="subtitle2">Thành viên</Typography>
-              &nbsp; {selectedListMember?.length || 0}
+              <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
+                Thành viên
+              </Typography>
+              <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
               <ButtonStyled>
                 <AddIcon
                   color="success"
@@ -326,80 +326,85 @@ function Add() {
                 />
               </ButtonStyled>
             </Box>
-            <TableContainer>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow sx={{ border: 'none' }}>
-                    <TableCell style={{ minWidth: '75px' }}>Đã trả</TableCell>
-                    <TableCell>Tên</TableCell>
-                    <TableCell style={{ minWidth: '110px' }}>Bill</TableCell>
-                    <TableCell style={{ minWidth: '110px' }}>Thành Tiền</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {selectedListMember.map((member) => {
-                    const labelId = `checkbox-list-label-${member.uid}`
-                    return (
-                      <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
-                        <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
-                          <Checkbox
-                            onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
-                            key={forceRerender}
-                            className="w-[20px]"
-                            edge="start"
-                            checked={member.isPaid}
-                            tabIndex={-1}
-                            disableRipple
-                            inputProps={{ 'aria-labelledby': labelId }}
-                          />
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <Typography noWrap>
-                            <Tooltip title={member.name || member.email}>
-                              <span> {member.name || member.email} </span>
-                            </Tooltip>
-                          </Typography>
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <TextNumberInput
-                            thousandSeparator=","
-                            fullWidth
-                            id="filled-required"
-                            variant="standard"
-                            value={member.amount}
-                            onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
-                            defaultValue={0}
-                          />
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <TextNumberInput
-                            thousandSeparator=","
-                            fullWidth
-                            id="filled-required"
-                            variant="standard"
-                            value={member.amountToPay}
-                            disabled
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
-                            defaultValue={0}
-                          />
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <ButtonStyled onClick={() => handleDelete(member)}>
-                            <DeleteIcon />
-                          </ButtonStyled>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+
+            {/* Members table */}
+            {!isEmptyMembers && (
+              <TableContainer>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow sx={{ border: 'none' }}>
+                      <TableCell style={{ minWidth: '75px' }}>Đã trả</TableCell>
+                      <TableCell>Tên</TableCell>
+                      <TableCell style={{ minWidth: '110px' }}>Bill</TableCell>
+                      <TableCell style={{ minWidth: '110px' }}>Thành Tiền</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedListMember.map((member) => {
+                      const labelId = `checkbox-list-label-${member.uid}`
+                      return (
+                        <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
+                          <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
+                            <Checkbox
+                              onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
+                              key={forceRerender}
+                              className="w-[20px]"
+                              edge="start"
+                              checked={member.isPaid}
+                              tabIndex={-1}
+                              disableRipple
+                              inputProps={{ 'aria-labelledby': labelId }}
+                            />
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <Typography noWrap>
+                              <Tooltip title={member.name || member.email}>
+                                <span> {member.name || member.email} </span>
+                              </Tooltip>
+                            </Typography>
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <TextNumberInput
+                              thousandSeparator=","
+                              fullWidth
+                              id="filled-required"
+                              variant="standard"
+                              value={member.amount}
+                              onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              defaultValue={0}
+                            />
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <TextNumberInput
+                              thousandSeparator=","
+                              fullWidth
+                              id="filled-required"
+                              variant="standard"
+                              value={member.amountToPay}
+                              disabled
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              defaultValue={0}
+                            />
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <ButtonStyled onClick={() => handleDelete(member)}>
+                              <DeleteIcon />
+                            </ButtonStyled>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+
             <Typography variant="subtitle2" sx={{ marginTop: '20px' }}>
               Người trả bill
             </Typography>
@@ -409,11 +414,6 @@ function Add() {
                   <ButtonStyled sx={{ padding: '10px' }} variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
                     <Typography>Auto Pick</Typography>
                   </ButtonStyled>
-                  <Box className="relative pt-3 pl-1">
-                    <Tooltip title="Chọn thành viên trước khi pick người chủ chi" placement="top-start">
-                      <ErrorOutlineIcon sx={{ marginTop: '-16px', fontSize: '20px', marginLeft: '3px', color: '#9c9c9c' }} />
-                    </Tooltip>
-                  </Box>
                 </Grid>
                 <Grid item md={8} xs={7}>
                   <Autocomplete
@@ -450,6 +450,7 @@ function Add() {
                   shrink: true,
                 }}
                 defaultValue={0}
+                error={!eventState.billAmount}
               />
             </Box>
             <Box className="mt-5 flex items-center justify-between">
@@ -475,7 +476,12 @@ function Add() {
                   handleChangeTip(_.toNumber(e.target.value), bonusType)
                 }}
                 InputProps={{
-                  endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">%</InputAdornment> : null,
+                  endAdornment:
+                    bonusType === bonusTypeEnum.PERCENT ? (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ) : (
+                      <InputAdornment position="end">K VND</InputAdornment>
+                    ),
                   sx: {
                     '& input': {
                       textAlign: 'right',
@@ -512,8 +518,10 @@ function Add() {
                 defaultValue={0}
               />
             </Box>
+
+            {/* Submit button */}
             <Box className="flex justify-center my-7">
-              <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
+              <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers}>
                 <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
               </ButtonStyled>
             </Box>
