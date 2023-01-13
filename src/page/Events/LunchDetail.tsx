@@ -116,7 +116,7 @@ const LunchDetail = () => {
               <span
                 className={
                   'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-5 inset-x-2/4 -translate-x-2/4 ' +
-                  (isHost ? 'bg-red-600 w-[65px]' : 'bg-green-600 w-[80px]')
+                  (isHost ? 'bg-red-600 w-[70px]' : 'bg-green-600 w-[80px]')
                 }
               >
                 {isHost ? TEXT__HOST : TEXT__MEMBER}
