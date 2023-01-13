@@ -185,7 +185,7 @@ const LunchDetail = () => {
               <thead>
                 <tr className="text-gray-400 font-bold">
                   <th scope="col" className="py-3">
-                    Member
+                    Thành viên
                   </th>
                   <th scope="col" className="py-3 text-center">
                     Bill

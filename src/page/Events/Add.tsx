@@ -52,7 +52,7 @@ const initEventValue = {
   totalAmount: 0,
   userId: '',
   tip: 0,
-  billAmount: 0,
+  billAmount: '',
   userPayId: '',
   userPayName: '',
 }
@@ -286,7 +286,6 @@ function Add() {
                 shrink: true,
               }}
               error={!eventState.eventName}
-              helperText={eventState.eventName ? null : 'Vui lòng nhập tên'}
             />
           </Box>
           <Box className="mt-6">
@@ -433,7 +432,7 @@ function Add() {
               allowLeadingZeros={false}
               fullWidth
               variant="standard"
-              label="Bill"
+              label="Tổng hoá đơn"
               value={eventState?.billAmount}
               onValueChange={(values) => {
                 handleChangeBill(round(_.toNumber(values.value), 3))
@@ -441,7 +440,11 @@ function Add() {
               InputLabelProps={{
                 shrink: true,
               }}
-              defaultValue={0}
+              placeholder={'1K = 1000 VND'}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">K VND</InputAdornment>,
+              }}
+              error={!eventState.billAmount}
             />
           </Box>
           <Box className="mt-5 flex items-center">
@@ -466,7 +469,12 @@ function Add() {
                 handleChangeTip(_.toNumber(e.target.value), bonusType)
               }}
               InputProps={{
-                endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">%</InputAdornment> : null,
+                endAdornment:
+                  bonusType === bonusTypeEnum.PERCENT ? (
+                    <InputAdornment position="end">%</InputAdornment>
+                  ) : (
+                    <InputAdornment position="end">K VND</InputAdornment>
+                  ),
               }}
               variant="standard"
               InputLabelProps={{
@@ -486,11 +494,13 @@ function Add() {
               InputLabelProps={{
                 shrink: true,
               }}
-              defaultValue={0}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">K VND</InputAdornment>,
+              }}
             />
           </Box>
           <Box className="flex justify-center my-7">
-            <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers}>
+            <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers || !eventState.billAmount}>
               <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>
