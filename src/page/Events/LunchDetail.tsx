@@ -1,25 +1,24 @@
 import { LoadingScreen } from '@app/components/Suspense'
-import { createNoti } from '@app/libs/api/noti'
-import {
-  DATE_NOW,
-  FORMAT__DATE,
-  TEXT__HOST,
-  TEXT__MEMBER,
-  TEXT__PAYMENT_PAID,
-  TEXT__PAYMENT_PAID_MSG,
-  TEXT__PAYMENT_REMIND,
-  TEXT__PAYMENT_REMIND_MSG,
-} from '@app/libs/constant'
+import { deleteEvent } from '@app/libs/api/event'
+import { createNoti, IsEventNoticed } from '@app/libs/api/noti'
+import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { listUserStore } from '@app/stores/listUser'
-import { listNotiStore } from '@app/stores/noti'
 import { userStore } from '@app/stores/user'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
+import DeleteIcon from '@mui/icons-material/Delete'
 import ReplyIcon from '@mui/icons-material/Reply'
+import { Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
 import Snackbar from '@mui/material/Snackbar'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -37,12 +36,12 @@ const LunchDetail = () => {
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
   const listUser = useAppSelector(listUserStore)
-  const listNoti = useAppSelector(listNotiStore)
 
   // state
   const [openAlert, setOpenAlert] = useState('')
   const [loading, setLoading] = useState(true)
-  const [disableNoti, setDisableNoti] = useState(false)
+  const [disableNoti, setDisableNoti] = useState<boolean>(false)
+  const [confirmDialog, setConfirmDialog] = useState<boolean>(false)
 
   // calc - memo
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
@@ -74,34 +73,73 @@ const LunchDetail = () => {
   }
 
   useEffect(() => {
-    if (eventInfo && hostInfo) {
+    if (eventInfo) {
       setLoading(false)
     }
-  }, [eventInfo, hostInfo])
+  }, [eventInfo])
   useEffect(() => {
-    if (listNoti.find((noti) => noti.fromUid === uid || Boolean(noti.toUids?.includes(uid!)))) {
-      setDisableNoti(true)
+    async function checkEventNoticed(eventId: string) {
+      const isNoticed = await IsEventNoticed(eventId)
+      console.log(isNoticed)
+      setDisableNoti(isNoticed!)
     }
-  }, [listNoti, uid])
+    if (eventInfo) checkEventNoticed(eventInfo.id!)
+  }, [eventInfo])
 
   const handleNoti = useCallback(() => {
     setDisableNoti(true)
     createNoti({
-      date: dayjs(DATE_NOW).format(FORMAT__DATE),
+      date: dayjs(Date.now()).unix(),
       content: (isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG) + ' ' + formatMoney(userInEvent.find((user) => user.uid === uid)?.amount),
       fromUid: uid!,
       toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
       eventId: eventInfo?.id || '',
+      userSeen: [],
     }).then((res) => {
       if (res.isSuccess) {
         setOpenAlert('Đã Thông báo')
       }
     })
   }, [eventInfo, isHost, uid, userInEvent])
+
+  const handleCloseDialog = () => {
+    setConfirmDialog(false)
+  }
+
+  const handleDeleteEvent = useCallback(async () => {
+    setLoading(true)
+    await deleteEvent(params.id!).then((isSuccess) => {
+      if (isSuccess) {
+        navigate('..')
+        setConfirmDialog(false)
+      }
+    })
+  }, [params, navigate])
+
   return loading ? (
     <LoadingScreen />
   ) : (
     <div className="bg-white">
+      <Dialog open={confirmDialog} onClose={handleCloseDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">Bạn có chắc chắn muốn xoá?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <Typography>
+              Thao tác này không thể hoàn tác.
+              <br /> Mọi thành viên có trong bill cũng sẽ không nhìn thấy bill này nữa.
+            </Typography>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleCloseDialog}>
+            <Typography>Để tôi suy nghĩ lại</Typography>
+          </Button>
+          <Button onClick={handleDeleteEvent} variant="outlined" color="error" startIcon={<DeleteIcon />}>
+            <Typography>Xoá!</Typography>
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar open={!!openAlert} autoHideDuration={1500} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
           <span className="font-bold">{openAlert}</span>
@@ -119,11 +157,16 @@ const LunchDetail = () => {
           </button>
           <div className="flex flex-col text-center">
             <div className={'mx-auto relative mb-5 rounded-full border-4 p-1 ' + (isHost ? 'border-red-500' : 'border-green-500')}>
-              <img src="https://picsum.photos/200/300?grayscale" className="w-24 h-24 rounded-full" alt="" />
+              <img
+                src={hostInfo?.photoURL || 'https://picsum.photos/200/300?grayscale'}
+                referrerPolicy="no-referrer"
+                className="w-24 h-24 rounded-full"
+                alt=""
+              />
               <span
                 className={
                   'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-5 inset-x-2/4 -translate-x-2/4 ' +
-                  (isHost ? 'bg-red-600 w-[65px]' : 'bg-green-600 w-[80px]')
+                  (isHost ? 'bg-red-600 w-[70px]' : 'bg-green-600 w-[80px]')
                 }
               >
                 {isHost ? TEXT__HOST : TEXT__MEMBER}
@@ -131,19 +174,33 @@ const LunchDetail = () => {
             </div>
             <h2 className="text-2xl text-center mb-2">{eventInfo?.eventName}</h2>
             <time className="mb-2">{eventInfo?.date}</time>
-            <p className="my-4">
-              <span>
-                {TEXT__HOST}
-                <b>&nbsp;{eventInfo?.userPayName}</b>
-              </span>
-              &emsp;{'-'}&emsp;
-              <span>
-                Tham gia&nbsp;<b>{userInEvent?.length} người</b>
-              </span>
-            </p>
+            <div className="my-4 flex-wrap">
+              <div className="relative overflow-x-auto">
+                <table className="w-full text-left">
+                  <tbody>
+                    <tr>
+                      <th scope="row" className="font-normal pr-4">
+                        {TEXT__HOST}
+                      </th>
+                      <td>
+                        <b>{eventInfo?.userPayName || 'Chưa chọn chủ trì'}</b>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th scope="row" className="font-normal pr-4">
+                        Tham gia
+                      </th>
+                      <td>
+                        <b>{userInEvent?.length} người</b>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
           <div>
-            {isHost ? (
+            {isHost || !hostInfo ? (
               <button className="h-[36px]" onClick={() => navigate(`/events/edit/${params.id}`)}>
                 <BorderColorIcon fontSize={'large'} />
               </button>
@@ -181,10 +238,10 @@ const LunchDetail = () => {
                     Thành viên
                   </th>
                   <th scope="col" className="py-3 text-center">
-                    Tiền bill
+                    Bill
                   </th>
                   <th scope="col" className="py-3 text-right">
-                    Thành tiền
+                    Pay
                   </th>
                 </tr>
               </thead>
@@ -203,11 +260,20 @@ const LunchDetail = () => {
                         <span className="ml-3">{user.name || user.email}</span>
                       </label>
                     </td>
-                    <td className="text-center">{formatMoney(user.amount)}</td>
-                    <td className="text-right">{formatMoney(user.amountToPay)}</td>
+                    <td className="text-center">{formatMoney(user.amount, false)}</td>
+                    <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="text-right text-gray-500">
+                  <td colSpan={3}>
+                    <em className="text-sm">
+                      * Đơn vị tính <b>K VNĐ</b>
+                    </em>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -247,6 +313,22 @@ const LunchDetail = () => {
                 </button>
               </div>
             </div>
+            {(isHost || !hostInfo) && (
+              <div className="my-3">
+                <span className="text-gray-400 font-bold block mb-3">Danger Zone</span>
+                <div className="flex w-full">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfirmDialog(true)
+                    }}
+                    className={'focus:outline-none text-white font-medium rounded-lg px-5 py-2.5 mx-auto bg-red-600 hover:bg-red-700 focus:ring-red-400'}
+                  >
+                    Xoá Bill
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="my-3">

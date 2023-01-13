@@ -1,7 +1,7 @@
-export const formatMoney = (v?: string | number) => {
+export const formatMoney = (v?: string | number, isShowUnit = true) => {
   const replateStr = String(v || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   if (replateStr) {
-    return replateStr + 'K'
+    return isShowUnit ? replateStr + ' K VND' : replateStr
   }
-  return ''
+  return isShowUnit ? '0K' : '0'
 }
