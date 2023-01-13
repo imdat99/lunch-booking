@@ -1,9 +1,9 @@
 import { User } from '@app/server/firebaseType'
-import { EventColection, EventDetailColection, UserDetail } from '@app/server/useDB'
+import { EventColection, EventDetailColection, EventRef, UserDetail } from '@app/server/useDB'
 import { store } from '@app/stores'
 import { setListEvent } from '@app/stores/listEvent'
 import { setListEventDetail } from '@app/stores/listEventDetail'
-import { onSnapshot, query, updateDoc } from 'firebase/firestore'
+import { deleteDoc, documentId, getDocs, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
 
 // export const getListEvent = (fn: (d: IEvent[]) => void) => {
 //   onSnapshot(query(EventColection), (res) => {
@@ -37,4 +37,19 @@ export const getListEventDetail = () => {
     getListEvent()
     store.dispatch(setListEventDetail(ListEventDetail))
   })
+}
+
+export const deleteEvent = async (id: string) => {
+  const q = query(EventDetailColection, where('eventId', '==', id))
+  return getDocs(q)
+    .then((doc) => {
+      doc.forEach(async (event) => {
+        await deleteDoc(event.ref)
+      })
+    })
+    .then(async () => {
+      await deleteDoc(EventRef(id))
+    })
+    .then(() => true)
+    .catch(() => false)
 }
