@@ -90,7 +90,7 @@ const LunchDetail = () => {
     setDisableNoti(true)
     createNoti({
       date: dayjs(Date.now()).unix(),
-      content: (isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG) + ' ' + formatMoney(userInEvent.find((user) => user.uid === uid)?.amount),
+      content: isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG,
       fromUid: uid!,
       toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
       eventId: eventInfo?.id || '',
