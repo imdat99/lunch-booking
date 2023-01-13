@@ -19,7 +19,6 @@ export default function HomePage() {
   }, [dispatch])
 
   const [listEvent, setListEvent] = useState<any>()
-  console.log('listEvent', listEvent)
 
   // console.log('listEvent', listEvent)
   const css = `
@@ -101,7 +100,7 @@ export default function HomePage() {
 
   const getTotalUnPaidAmount = () => {
     // let result = 0;
-    const result = listEvent.unPaidList.reduce((total: number, data: IEventDetail) => (total += data.amount || 0), 0)
+    const result = listEvent.unPaidList.reduce((total: number, data: IEventDetail) => (total += data.amountToPay || 0), 0)
     return Math.round(result)
   }
 
@@ -156,7 +155,7 @@ export default function HomePage() {
                 <Link to={'/events/' + data.eventId} className="text-link">
                   {data.eventName}
                 </Link>
-                <span className="text-right">{data.amount}K VND</span>
+                <span className="text-right">{data.amountToPay}K VND</span>
               </div>
             ))
           ) : (
