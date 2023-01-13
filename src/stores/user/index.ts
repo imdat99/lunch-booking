@@ -1,4 +1,4 @@
-import { createUser, getUserByUid, updateUser, uploadQRImg } from '@app/libs/api/userAPI'
+import { createUser, getUserByUid, updateUser, uploadQRImg , uploadAvatarImg} from '@app/libs/api/userAPI'
 import { User as UserType } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
@@ -9,7 +9,7 @@ import { ThunkAction } from 'redux-thunk'
 export const namespace = 'USER'
 interface userState {
   data: UserType
-  status: 'idle' | 'loading' | 'succeeded' | 'failed'
+  status: 'idle' | 'loading' | 'succeeded' | 'failed' | 'updating'
 }
 const initialState: userState = {
   data: { uid: '' },
@@ -34,7 +34,7 @@ const slice = createSlice({
       state.status = 'idle'
     },
     update(state) {
-      state.status = 'loading'
+      state.status = 'updating'
     },
     updateSucceeded(state, action: PayloadAction<UserType>) {
       state.data = { ...action.payload }
@@ -90,7 +90,7 @@ export function initializeUser(authUser: User): ThunkAction<void, RootState, unk
   }
 }
 
-export function updateUserInfo(uid: string, userInfo: UserType, imgObj: any): ThunkAction<void, RootState, unknown, AnyAction> {
+export function updateUserInfo(uid: string, userInfo: UserType, imgObj: any , imgAvatarObj : any): ThunkAction<void, RootState, unknown, AnyAction> {
   return async (dispatch) => {
     dispatch(update())
     try {
@@ -98,11 +98,14 @@ export function updateUserInfo(uid: string, userInfo: UserType, imgObj: any): Th
         const qrURL = await uploadQRImg(imgObj)
         userInfo.qrCodeURL = qrURL
       }
+      if (imgAvatarObj) {
+        const avatarURL = await uploadAvatarImg(imgAvatarObj)
+        userInfo.photoURL = avatarURL
+      }
       await updateUser(uid, userInfo)
       dispatch(updateSucceeded(userInfo))
     } catch (error) {
       dispatch(updateFailed())
-      dispatch(idle())
     }
   }
 }
