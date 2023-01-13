@@ -44,17 +44,6 @@ const CardStyled = styled(Card)(() => ({
     borderRadius: '15px',
   },
 }))
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-}
 
 const initEventValue = {
   address: '',
@@ -99,6 +88,7 @@ function Add() {
   const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
+  const isEmptyMembers = useMemo(() => !selectedListMember.length, [selectedListMember])
 
   const handleToggle = (memberId: string) => {
     const tempMembers = _.cloneDeep(selectedListMember)
@@ -320,8 +310,10 @@ function Add() {
             />
           </Box>
           <Box className="flex items-center mt-3">
-            <Typography variant="subtitle2">Thành viên</Typography>
-            &nbsp; {selectedListMember?.length || 0}
+            <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
+              Thành viên
+            </Typography>
+            <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
             <ButtonStyled>
               <AddIcon
                 color="success"
@@ -331,7 +323,7 @@ function Add() {
               />
             </ButtonStyled>
           </Box>
-          {selectedListMember.length > 0 ? (
+          {!isEmptyMembers ? (
             <>
               <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                 <ListItem disablePadding>
@@ -418,7 +410,7 @@ function Add() {
           <Box sx={{ flexGrow: 1 }} className="mt-2">
             <Grid container spacing={2}>
               <Grid item md={4} xs={5} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <ButtonStyled variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
+                <ButtonStyled variant="contained" onClick={handleAutoPickBillOwner} disabled={isEmptyMembers}>
                   <Typography>Auto Pick</Typography>
                 </ButtonStyled>
                 <Tooltip title="Chọn thành viên trước khi pick người chủ chi" placement="top-start">
@@ -427,7 +419,7 @@ function Add() {
               </Grid>
               <Grid item md={8} xs={7}>
                 <Autocomplete
-                  disabled={!selectedListMember.length}
+                  disabled={isEmptyMembers}
                   value={{ value: eventState?.userPayName, label: eventState.userPayName }}
                   options={dropdownMembers}
                   onChange={onChangeBillOwner}
@@ -498,7 +490,7 @@ function Add() {
             />
           </Box>
           <Box className="flex justify-center my-7">
-            <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
+            <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers}>
               <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>

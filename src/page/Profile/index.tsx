@@ -58,8 +58,6 @@ const Profile = () => {
     })
   }, [dispatch, normalUser?.uid])
 
-  console.log(listEvent)
-
   const logout = async () => {
     try {
       await signOut(auth).then(() => {
