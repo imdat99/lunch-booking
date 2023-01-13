@@ -4,6 +4,7 @@ import { IEvent } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
+import { listUserStore } from '@app/stores/listUser'
 import { userStore } from '@app/stores/user'
 import SearchIcon from '@mui/icons-material/Search'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -14,8 +15,8 @@ import { Link } from 'react-router-dom'
 
 const List = () => {
   const userData = useAppSelector(userStore)!
+  const listUser = useAppSelector(listUserStore)!
   const listEvent = useAppSelector(listEventStore)
-
   const [filterEvents, setFilterEvents] = useState<IEvent[]>([])
   const listEventDetail = useAppSelector(listEventDetailStore)
   const eventOfUser = useMemo(
@@ -86,7 +87,10 @@ const List = () => {
             })
             .map((item, index) => {
               const isHost = userData.uid === item.userPayId
-              const isPaid = isHost ? item.isAllPaid : !(listEventDetail || []).find((member) => member?.uid === userData.uid && member.isPaid)
+              const hostInfo = listUser.find((user) => user.uid === item.userPayId)
+              const isPaid = isHost
+                ? item.isAllPaid
+                : listEventDetail.find((eventDetail) => eventDetail?.uid === userData.uid && eventDetail.isPaid && eventDetail.eventId === item.id)
               const paidMoney = isHost
                 ? listEventDetail
                     .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
@@ -97,7 +101,7 @@ const List = () => {
                   <Link to={item.id!} className="flex bg-white rounded-3xl p-3">
                     <div className="mx-auto mb-5 p-1 w-1/3">
                       <div className="relative">
-                        <img src="https://picsum.photos/200/300?grayscale" className="w-20 h-20 rounded-full mx-auto" alt="" />
+                        <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-20 h-20 rounded-full mx-auto" alt="" />
                         <span
                           className={
                             'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 ' +
