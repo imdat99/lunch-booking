@@ -1,5 +1,6 @@
 import { FORMAT__DATE, TEXT__HOST, TEXT__MEMBER, TEXT__PAID, TEXT__UNPAID } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
+import { IEvent } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
@@ -15,7 +16,7 @@ const List = () => {
   const userData = useAppSelector(userStore)!
   const listEvent = useAppSelector(listEventStore)
 
-  const [filterEvents, setFilterEvents] = useState<any>([])
+  const [filterEvents, setFilterEvents] = useState<IEvent[]>([])
   const listEventDetail = useAppSelector(listEventDetailStore)
   const eventOfUser = useMemo(
     () =>
@@ -91,7 +92,6 @@ const List = () => {
                     .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
                     .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
                 : 0
-
               return (
                 <li className="my-4" key={index}>
                   <Link to={item.id!} className="flex bg-white rounded-3xl p-3">
@@ -101,7 +101,7 @@ const List = () => {
                         <span
                           className={
                             'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 ' +
-                            (isHost ? 'bg-red-700 w-[65px]' : 'bg-green-600 w-[80px]')
+                            (isHost ? 'bg-red-700 w-[70px]' : 'bg-green-600 w-[80px]')
                           }
                         >
                           {isHost ? TEXT__HOST : TEXT__MEMBER}
@@ -118,11 +118,12 @@ const List = () => {
                         </span>
                         <br />
                         <span>
-                          Số tiền chưa đòi:&nbsp;
+                          Số tiền:&nbsp;
                           <b>
                             {formatMoney(
-                              // eslint-disable-next-line prettier/prettier
-                              isHost ? Number(item.totalAmount)! - paidMoney : listEventDetail?.find((member) => member.uid === userData.uid)?.amountToPay
+                              isHost
+                                ? Number(item.totalAmount)! - paidMoney
+                                : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
                             )}
                           </b>
                         </span>
