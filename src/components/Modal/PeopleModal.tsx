@@ -80,15 +80,17 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        {allMembers?.map((item: User) => (
-          <Box
-            key={item.uid}
-            className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
-            onClick={() => handleClickRow(item)}
-          >
-            <Typography>{item.name || item.email || 'no name'}</Typography>
-          </Box>
-        ))}
+        <div className="overflow-auto h-50">
+          {allMembers?.map((item: User) => (
+            <Box
+              key={item.uid}
+              className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
+              onClick={() => handleClickRow(item)}
+            >
+              <Typography>{item.name || item.email || 'no name'}</Typography>
+            </Box>
+          ))}
+        </div>
         <Button onClick={handleAdd} variant="contained">
           OK
         </Button>
