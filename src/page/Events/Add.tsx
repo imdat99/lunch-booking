@@ -333,10 +333,18 @@ function Add() {
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ border: 'none' }}>
-                      <TableCell style={{ minWidth: '75px' }}>Đã trả</TableCell>
-                      <TableCell>Tên</TableCell>
-                      <TableCell style={{ minWidth: '110px' }}>Bill</TableCell>
-                      <TableCell style={{ minWidth: '110px' }}>Thành Tiền</TableCell>
+                      <TableCell style={{ minWidth: '85px' }}>
+                        <Typography variant="subtitle1">Đã trả</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="subtitle1">Tên</Typography>
+                      </TableCell>
+                      <TableCell style={{ minWidth: '130px' }}>
+                        <Typography variant="subtitle1">Bill</Typography>
+                      </TableCell>
+                      <TableCell style={{ minWidth: '130px' }}>
+                        <Typography variant="subtitle1">Thành Tiền</Typography>
+                      </TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                   </TableHead>
@@ -455,7 +463,7 @@ function Add() {
             </Box>
             <Box className="mt-5 flex items-center justify-between">
               <FormControl>
-                <FormLabel>Hoa hồng</FormLabel>
+                <Typography variant="subtitle2">Hoa hồng</Typography>
                 <RadioGroup
                   row
                   aria-labelledby="demo-form-control-label-placement"

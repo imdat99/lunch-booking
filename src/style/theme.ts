@@ -21,9 +21,9 @@ declare module '@mui/material/Typography' {
   }
 }
 
-export type CustomThemeType = {
-  [Key in keyof typeof theme]: typeof theme[Key]
-}
+// export type CustomThemeType = {
+//   [Key in keyof typeof theme]: typeof theme[Key]
+// }
 const customPalette = {
   background: {
     default: '#F3F5F7',
