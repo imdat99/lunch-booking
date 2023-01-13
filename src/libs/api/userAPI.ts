@@ -1,9 +1,12 @@
-import { serverTimestamp, setDoc, getDoc, doc, updateDoc } from 'firebase/firestore'
-// import {User} from 'firebase/auth'
-import { usersColection, UserDetail } from '@app/server/useDB'
+import { auth, storage } from '@app/server/firebase'
 import { User } from '@app/server/firebaseType'
-import { storage } from '@app/server/firebase'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+// import {User} from 'firebase/auth'
+import { AllowedEmail, UserDetail, usersColection } from '@app/server/useDB'
+import { store } from '@app/stores'
+import { clearUser } from '@app/stores/user'
+import { signOut } from 'firebase/auth'
+import { doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { uniqueId } from 'lodash'
 import dayjs from 'dayjs'
 
@@ -57,4 +60,19 @@ export async function uploadAvatarImg(obj: any) {
   } catch (error) {
     console.log('ERROR UPLOAD QR FAILED', error)
   }
+}
+
+export const hadleLogout = async () => {
+  try {
+    await signOut(auth).then(() => {
+      store.dispatch(clearUser())
+    })
+  } catch (error) {
+    console.log('ERROR LOGGING OUT', error)
+  }
+}
+
+export const getAllowedEmail = async (email: string) => {
+  const allowedEmail = await getDoc(AllowedEmail)
+  return allowedEmail.data()?.email.includes(email)
 }
