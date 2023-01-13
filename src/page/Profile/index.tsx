@@ -5,58 +5,105 @@ import { auth } from '@app/server/firebase'
 import { store } from '@app/stores'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { listUserStore } from '@app/stores/listUser'
-import { clearUser, updateUserInfo, userStatus, userStore } from '@app/stores/user'
+import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
 import LogoutIcon from '@mui/icons-material/Logout'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
+import Badge from '@mui/material/Badge'
+import Avatar from '@mui/material/Avatar'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
-  const users = useAppSelector(listUserStore)
+  const listUser = useAppSelector(listUserStore)
   const status = useAppSelector(userStatus)
-  const [imgPreview, setImgPreview] = useState(loginUser?.qrCodeURL)
-  const [imgObj, setImgObj] = useState<any>(null)
-  const [listEvent, setListEvent] = useState<any>({})
+  const dispatch = useAppDispatch()
+  const [showMessage, setShowMessage] = useState<'success' | 'error' | null>(null)
 
   const { userUid } = useParams()
-  const dispatch = useAppDispatch()
 
-  const normalUser = users.find((user) => user.uid === userUid)
+  //state for images
+  const [imgQRPreview, setImgQRPreview] = useState(loginUser?.qrCodeURL)
+  const [imgObj, setImgObj] = useState<any>(null)
+
+  const [imgAvatarPreview, setImgAvatarPreview] = useState(loginUser?.photoURL)
+  const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
+  //
+
+  const [listEvent, setListEvent] = useState<any>({})
+  const normalUser = listUser.find((user) => user.uid === userUid)
   const isLoginUser = normalUser?.uid === loginUser.uid
   const userFormData = useMemo(() => (isLoginUser ? loginUser : normalUser), [loginUser, normalUser, isLoginUser])
 
-  const handlePreviewChange = (event: any) => {
+  //Handle QR Image
+  useEffect(() => {
+    return () => {
+      if (imgQRPreview) {
+        URL.revokeObjectURL(imgQRPreview)
+      }
+    }
+  }, [imgQRPreview])
+
+  const handlePreviewQRChange = (event: any) => {
     const fileUploaded = event.target ? event.target.files[0] : null
     if (fileUploaded) {
       setImgObj(fileUploaded)
-      setImgPreview(URL.createObjectURL(fileUploaded))
+      setImgQRPreview(URL.createObjectURL(fileUploaded))
     }
   }
 
   useEffect(() => {
+    setImgQRPreview(loginUser?.qrCodeURL)
+  }, [loginUser])
+
+  //Handle User Avatar Image
+  useEffect(() => {
     return () => {
-      if (imgPreview) {
-        URL.revokeObjectURL(imgPreview)
+      if (imgAvatarPreview) {
+        URL.revokeObjectURL(imgAvatarPreview)
       }
     }
-  }, [imgPreview])
+  }, [imgAvatarPreview])
+
+  const handlePreviewAvatarChange = (event: any) => {
+    const fileUploaded = event.target ? event.target.files[0] : null
+    if (fileUploaded) {
+      setImgAvatarObj(fileUploaded)
+      setImgAvatarPreview(URL.createObjectURL(fileUploaded))
+    }
+  }
 
   useEffect(() => {
-    setImgPreview(loginUser?.qrCodeURL)
+    setImgAvatarPreview(loginUser?.photoURL)
   }, [loginUser])
+
+  //--------------------------------------
 
   useEffect(() => {
     getHomeDataByUid(normalUser?.uid || '').then((e) => {
       setListEvent(e)
     })
   }, [dispatch, normalUser?.uid])
+
+  useEffect(() => {
+    if (status === 'succeeded') {
+      setShowMessage('success')
+    } else if (status === 'failed') {
+      setShowMessage('error')
+    } else {
+    }
+    console.log(status)
+    console.log(showMessage)
+  }, [status])
 
   const logout = async () => {
     try {
@@ -68,9 +115,13 @@ const Profile = () => {
     }
   }
 
+  const handleCloseMessage = () => {
+    dispatch(idle())
+    setShowMessage(null)
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {/*Header section*/}
       <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
         <div className="flex justify-between self-stretch">
           <button className="px-4">
@@ -87,28 +138,51 @@ const Profile = () => {
             </button>
           )}
         </div>
-        {normalUser?.photoURL ? (
-          <img src={normalUser.photoURL} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
+        {isLoginUser ? (
+          <Badge
+            overlap="circular"
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            badgeContent={
+              <IconButton color="primary" aria-label="upload picture" component="label" onChange={handlePreviewAvatarChange}>
+                <input hidden accept="image/*" type="file" />
+                <div className="bg-white w-[40px] h-[40px] rounded-full">
+                  <AccountCircleSharpIcon sx={{ width: 40, height: 40 }} />
+                </div>
+              </IconButton>
+            }
+          >
+            <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
+          </Badge>
         ) : (
-          <img src={ProfilePicture} alt="" referrerPolicy="no-referrer" className="rounded-full w-28 mb-3 shadow-xl" />
+          <Avatar alt="avatar" src={normalUser?.photoURL!} sx={{ width: 120, height: 120 }} />
         )}
-        <span className="py-2 text-xl">{normalUser?.name || ''}</span>
-        <span className="text-md">{normalUser?.email || ''}</span>
+        <span className="py-2 text-xl">{isLoginUser ? loginUser.name : normalUser?.name}</span>
+        <span className="text-md">{isLoginUser ? loginUser.email : normalUser?.email}</span>
         <span className="pt-2 text-md">
           <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
           <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
         </span>
       </div>
-      {/*Details section*/}
       <div className="px-6 py-4">
         <Formik
           initialValues={{ ...userFormData }}
           onSubmit={(values) => {
-            dispatch(updateUserInfo(values.uid as string, values, imgObj))
+            dispatch(updateUserInfo(values.uid as string, values, imgObj, imgAvatarObj))
           }}
         >
           {({ values, handleChange, handleBlur, handleSubmit }) => (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <TextField
+                label="Tên hiển thị"
+                variant="standard"
+                fullWidth={true}
+                id="name"
+                name="name"
+                value={values.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={!isLoginUser}
+              />
               <TextField
                 label="LDAP"
                 variant="standard"
@@ -120,6 +194,7 @@ const Profile = () => {
                 onBlur={handleBlur}
                 disabled={!isLoginUser}
               />
+
               <TextField
                 label="Điện thoại"
                 variant="standard"
@@ -178,12 +253,12 @@ const Profile = () => {
               <div className="flex flex-col pt-2 pb-8">
                 <span className="font-serif text-sm">Mã QR</span>
                 <div className="self-center pt-3">
-                  {isLoginUser && imgPreview && <img alt="qrcode" className="max-w-xs" src={imgPreview} />}
+                  {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
                   {!isLoginUser && normalUser?.qrCodeURL && <img src={normalUser?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
                 </div>
                 {isLoginUser && (
                   <>
-                    <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewChange}>
+                    <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
                       <input hidden accept="image/*" type="file" />
                       <PhotoCamera fontSize={'large'} />
                     </IconButton>
@@ -197,6 +272,22 @@ const Profile = () => {
           )}
         </Formik>
       </div>
+      {showMessage && (
+        <Snackbar
+          open={true}
+          onClose={handleCloseMessage}
+          autoHideDuration={1500}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+            {showMessage === 'success' ? (
+              <span className="font-bold"> {'Cập nhật user thành công!'} </span>
+            ) : (
+              <span className="font-bold"> {'Cập nhật thất bại!'} </span>
+            )}
+          </Alert>
+        </Snackbar>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { User } from '@app/server/firebaseType'
 import { storage } from '@app/server/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { uniqueId } from 'lodash'
+import dayjs from 'dayjs'
 
 export async function createUser(userInfo: User) {
   try {
@@ -39,7 +40,17 @@ export async function updateUser(uid: string, userInfo: User) {
 }
 
 export async function uploadQRImg(obj: any) {
-  const imgRef = ref(storage, `images/qr/${obj.name + uniqueId()}`)
+  const imgRef = ref(storage, `images/qr/${ dayjs(Date.now()).unix() + obj.name}`)
+  try {
+    await uploadBytes(imgRef, obj)
+    return getDownloadURL(imgRef)
+  } catch (error) {
+    console.log('ERROR UPLOAD QR FAILED', error)
+  }
+}
+
+export async function uploadAvatarImg(obj: any) {
+  const imgRef = ref(storage, `images/avatar/${dayjs(Date.now()).unix() + obj.name}`)
   try {
     await uploadBytes(imgRef, obj)
     return getDownloadURL(imgRef)
