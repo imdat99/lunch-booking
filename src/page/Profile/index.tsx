@@ -80,7 +80,7 @@ const Profile = () => {
     <div className="min-h-screen bg-white">
       {/*Header section*/}
       <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
-        <div className="flex justify-between pb-2 self-stretch">
+        <div className="flex justify-between self-stretch">
           <button className="px-4">
             <Link to="/">
               <ReplyIcon fontSize={'large'} />
@@ -93,13 +93,13 @@ const Profile = () => {
           )}
         </div>
         {paramUser?.photoURL ? (
-          <img src={paramUser.photoURL} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
+          <img src={paramUser.photoURL} alt="" referrerPolicy="no-referrer" className="rounded-full w-28 mb-3 shadow-xl" />
         ) : (
-          <img src={ProfilePicture} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
+          <img src={ProfilePicture} alt="" referrerPolicy="no-referrer" className="rounded-full w-28 mb-3 shadow-xl" />
         )}
-        <span className="py-2 text-xl">{paramUser?.name || ''}</span>
+        <span className="text-xl">{paramUser?.name || ''}</span>
         <span className="text-md">{paramUser?.email || ''}</span>
-        <span className="pt-2 text-md">
+        <span className="pt-4 text-md">
           <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
           <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
         </span>
@@ -112,7 +112,7 @@ const Profile = () => {
             dispatch(updateUserInfo(values.uid as string, values, imgObj))
           }}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+          {({ values, handleChange, handleBlur, handleSubmit }) => (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <TextField
                 label="LDAP"
