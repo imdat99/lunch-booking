@@ -58,7 +58,7 @@ const style = {
 
 const initEventValue = {
   address: '',
-  date: dayjs(new Date()).format('DD/MM/YYYY'),
+  date: dayjs(new Date()).format('MM/DD/YYYY'),
   eventName: '',
   totalAmount: 0,
   userId: '',
@@ -94,6 +94,7 @@ function Add() {
   const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
     userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
   )
+
   const navigate = useNavigate()
   const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
@@ -231,8 +232,6 @@ function Add() {
   }
 
   const handleAutoPickBillOwner = () => {
-    console.log('listBillOwner', listBillOwner)
-
     const billOwner = listBillOwner.pop()
 
     if (!listBillOwner.length) {
@@ -304,9 +303,10 @@ function Add() {
             <DatePicker
               className="w-full "
               label="Thời gian"
-              value={dayjs(eventState?.date)}
+              value={dayjs(eventState.date).format('MM/DD/YYYY')}
+              inputFormat="DD/MM/YYYY"
               onChange={(newValue) => {
-                handleChangeTextField('date', dayjs(newValue).format('DD/MM/YYYY'))
+                handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
               }}
               renderInput={(params) => (
                 <TextFieldStyled
