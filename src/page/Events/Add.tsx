@@ -12,6 +12,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, FormLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
+import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Checkbox from '@mui/material/Checkbox'
@@ -70,6 +71,12 @@ export const enum bonusTypeEnum {
   PERCENT = 'PERCENT',
   MONEY = 'MONEY',
 }
+
+export interface IDropdownMembers {
+  label: string | null | undefined | ''
+  value: string | null | undefined | ''
+}
+
 function Add() {
   const params = useParams()
   const listEventDetail = useAppSelector(listEventDetailStore)
@@ -81,17 +88,20 @@ function Add() {
   const [listBillOwner, setListBillOwner] = useState<User[]>([])
   const [selectedListMember, setSelectedListMember] = useState<IEventDetail[]>([...userInEvent])
   const [memberToPayState, setMemberToPayState] = useState<IEventDetail>()
-  const [bonusType, setBonusType] = useState<bonusTypeEnum>(bonusTypeEnum.PERCENT)
+  const [bonusType, setBonusType] = useState<bonusTypeEnum>(eventInfo?.bonusType || bonusTypeEnum.PERCENT)
+  const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>([])
   const navigate = useNavigate()
+  const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
 
   useEffect(() => {
     setListBillOwner(sortListByPaidCount([...selectedListMember]))
+    setDropdownMembers(selectedListMember.map((item) => ({ label: item.name || item.email, value: item.uid })))
   }, [selectedListMember])
 
   useEffect(() => {
-    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0)
+    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
     const total = (eventState.billAmount || 0) + bonus
     setEventState({ ...eventState, totalAmount: total })
   }, [eventState.billAmount])
@@ -116,12 +126,13 @@ function Add() {
       // tempMembers[index].amountToPay = value + bonus / tempMembers.length
     }
     const newTotalAmount = tempMembers.reduce((acc: number, item: IEventDetail) => acc + (item.amount || 0), 0)
-    const bonus = calBonus(newTotalAmount, eventState.tip || 0)
+    const bonus = calBonus(newTotalAmount, eventState.tip || 0, bonusType)
     const tempMembersAfterCaculate = recalculateMoneyToPay(tempMembers, bonus)
     setSelectedListMember(tempMembersAfterCaculate)
     setEventState({ ...tempEvenState, billAmount: newTotalAmount })
   }
   const handleSelectedMember = (listSelectingMembers: IEventDetail[]) => {
+    setListBillOwner(sortListByPaidCount([...listSelectingMembers]))
     setSelectedListMember(listSelectingMembers)
   }
   const [open, setOpen] = useState(false)
@@ -153,7 +164,7 @@ function Add() {
     setSelectedListMember(tempMembers)
     setEventState({ ...eventState, billAmount: value, totalAmount: total })
   }
-  const calBonus = (billAmount: number, tipAmount: number) => {
+  const calBonus = (billAmount: number, tipAmount: number, bonusType: bonusTypeEnum) => {
     let bonus = 0
     if (bonusType === bonusTypeEnum.PERCENT) {
       bonus = billAmount && tipAmount > 0 ? (billAmount * tipAmount) / 100 : 0
@@ -168,8 +179,8 @@ function Add() {
     })
     return arrListMember
   }
-  const handleChangeTip = (value: number) => {
-    const bonus = calBonus(eventState.billAmount || 0, value)
+  const handleChangeTip = (value: number, bonusType1: bonusTypeEnum) => {
+    const bonus = calBonus(eventState.billAmount || 0, value, bonusType1)
 
     const tempMembers = _.cloneDeep(selectedListMember)
     const tempMembersAfterCaculate = recalculateMoneyToPay(tempMembers, bonus)
@@ -179,7 +190,7 @@ function Add() {
   }
   const handleCreateEvent = async () => {
     const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
-    const eventData = { ...eventState, isAllPaid }
+    const eventData = { ...eventState, isAllPaid, bonusType }
 
     if (params.id) {
       const { isSuccess, eventId } = await updateEvent(params.id, eventData)
@@ -231,6 +242,14 @@ function Add() {
 
   const handleAutoPickBillOwner = () => {
     const billOwner = listBillOwner.pop()
+    const selectedListMemberTemp = _.cloneDeep(selectedListMember)
+    selectedListMemberTemp.forEach((item, index, arr) => {
+      if (item.uid === billOwner?.uid) {
+        arr[index].isPaid = true
+      } else {
+        arr[index].isPaid = false
+      }
+    })
 
     if (!listBillOwner.length) {
       const resetListBillOwner = sortListByPaidCount([...selectedListMember])
@@ -241,22 +260,33 @@ function Add() {
       setMemberToPayState(billOwner)
       setEventState({ ...eventState, userPayId: billOwner.uid, userPayName: billOwner.name ? billOwner.name : billOwner.email })
     }
+    setSelectedListMember(selectedListMemberTemp)
+    setForceRerender(Date.now())
   }
 
   const handleCloseModalSuccess = () => {
     setOpenModalSuccess(false)
     navigate('/events')
   }
+  const handleChangeBonusType = (type: bonusTypeEnum) => {
+    setBonusType(type)
+    handleChangeTip(Number(eventState.tip), type)
+  }
 
   useEffect(() => {
-    setListBillOwner([...selectedListMember])
-  }, [selectedListMember])
-
-  useEffect(() => {
-    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0)
+    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
     const total = (eventState.billAmount || 0) + bonus
     setEventState({ ...eventState, totalAmount: total })
   }, [eventState.billAmount])
+
+  const onChangeBillOwner = (_event: any, selectedUser: any) => {
+    if (!selectedUser) {
+      setEventState({ ...eventState, userPayName: '', userPayId: '' })
+      return
+    }
+
+    setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
+  }
 
   return (
     <div>
@@ -285,7 +315,7 @@ function Add() {
                 shrink: true,
               }}
               error={!eventState.eventName}
-              helperText="Vui lòng nhập tên"
+              helperText={eventState.eventName ? null : 'Vui lòng nhập tên'}
             />
           </Box>
           <Box className="mt-6">
@@ -342,11 +372,11 @@ function Add() {
                 </ListItem>
                 {selectedListMember.map((member) => {
                   const labelId = `checkbox-list-label-${member.uid}`
-
                   return (
                     <ListItem key={member.uid} disablePadding>
                       <ListItemIcon onClick={() => (member.uid ? handleToggle(member.uid) : undefined)} sx={{ minWidth: '20px' }}>
                         <Checkbox
+                          key={forceRerender}
                           className="w-[20px]"
                           edge="start"
                           checked={member.isPaid}
@@ -414,15 +444,12 @@ function Add() {
                 </Tooltip>
               </Grid>
               <Grid item md={8} xs={7}>
-                <TextFieldStyled
-                  fullWidth
-                  disabled
-                  value={eventState.userPayName || eventState.userPayId}
-                  id="filled-required"
-                  variant="standard"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                <Autocomplete
+                  disabled={!selectedListMember.length}
+                  value={eventState.userPayName}
+                  options={dropdownMembers}
+                  onChange={onChangeBillOwner}
+                  renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
                 />
               </Grid>
             </Grid>
@@ -452,7 +479,7 @@ function Add() {
                 name="position"
                 defaultValue="top"
                 onChange={(e) => {
-                  setBonusType(e.target.value as bonusTypeEnum)
+                  handleChangeBonusType(e.target.value as bonusTypeEnum)
                 }}
               >
                 <FormControlLabel value={bonusTypeEnum.MONEY} checked={bonusType === bonusTypeEnum.MONEY} control={<Radio />} label="Nhập số" />
@@ -462,7 +489,7 @@ function Add() {
             <TextNumberInput
               value={eventState?.tip}
               onChange={(e) => {
-                handleChangeTip(_.toNumber(e.target.value))
+                handleChangeTip(_.toNumber(e.target.value), bonusType)
               }}
               InputProps={{
                 endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">%</InputAdornment> : null,
@@ -490,7 +517,7 @@ function Add() {
           </Box>
           <Box className="flex justify-center my-7">
             <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
-              <Typography>{params.id ? 'cập nhật hóa đơn' : 'Tạo hóa đơn'}</Typography>
+              <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>
         </CardContent>
@@ -499,7 +526,7 @@ function Add() {
 
       <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-          <span className="font-bold"> Thành công </span>
+          <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>
         </Alert>
       </Snackbar>
     </div>

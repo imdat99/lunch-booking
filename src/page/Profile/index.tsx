@@ -14,8 +14,8 @@ import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -23,11 +23,14 @@ const Profile = () => {
   const status = useAppSelector(userStatus)
   const [imgPreview, setImgPreview] = useState(loginUser?.qrCodeURL)
   const [imgObj, setImgObj] = useState<any>(null)
+  const [listEvent, setListEvent] = useState<any>({})
+
   const { userUid } = useParams()
+  const dispatch = useAppDispatch()
 
-  const paramUser = users.find((user) => user.uid === userUid)
-
-  const isEditable = paramUser?.uid === loginUser.uid
+  const normalUser = users.find((user) => user.uid === userUid)
+  const isLoginUser = normalUser?.uid === loginUser.uid
+  const userFormData = useMemo(() => (isLoginUser ? loginUser : normalUser), [loginUser, normalUser, isLoginUser])
 
   const handlePreviewChange = (event: any) => {
     const fileUploaded = event.target ? event.target.files[0] : null
@@ -49,15 +52,11 @@ const Profile = () => {
     setImgPreview(loginUser?.qrCodeURL)
   }, [loginUser])
 
-  const dispatch = useAppDispatch()
-
-  const [listEvent, setListEvent] = useState<any>({})
-
   useEffect(() => {
-    getHomeDataByUid(paramUser?.uid || '').then((e) => {
+    getHomeDataByUid(normalUser?.uid || '').then((e) => {
       setListEvent(e)
     })
-  }, [dispatch, paramUser?.uid])
+  }, [dispatch, normalUser?.uid])
 
   console.log(listEvent)
 
@@ -77,23 +76,26 @@ const Profile = () => {
       <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
         <div className="flex justify-between pb-2 self-stretch">
           <button className="px-4">
-            <Link to="/">
-              <ReplyIcon fontSize={'large'} />
-            </Link>
+            <ReplyIcon
+              onClick={() => {
+                history.back()
+              }}
+              fontSize={'large'}
+            />
           </button>
-          {isEditable && (
+          {isLoginUser && (
             <button className="px-4" onClick={logout}>
               <LogoutIcon fontSize={'large'} />
             </button>
           )}
         </div>
-        {paramUser?.photoURL ? (
-          <img src={paramUser.photoURL} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
+        {normalUser?.photoURL ? (
+          <img src={normalUser.photoURL} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
         ) : (
           <img src={ProfilePicture} alt="" referrerPolicy="no-referrer" className="rounded-full w-28" />
         )}
-        <span className="py-2 text-xl">{paramUser?.name || ''}</span>
-        <span className="text-md">{paramUser?.email || ''}</span>
+        <span className="py-2 text-xl">{normalUser?.name || ''}</span>
+        <span className="text-md">{normalUser?.email || ''}</span>
         <span className="pt-2 text-md">
           <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
           <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
@@ -102,7 +104,7 @@ const Profile = () => {
       {/*Details section*/}
       <div className="px-6 py-4">
         <Formik
-          initialValues={{ ...paramUser }}
+          initialValues={{ ...userFormData }}
           onSubmit={(values) => {
             dispatch(updateUserInfo(values.uid as string, values, imgObj))
           }}
@@ -118,7 +120,7 @@ const Profile = () => {
                 value={values.ldapAcc}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                disabled={!isEditable}
+                disabled={!isLoginUser}
               />
               <TextField
                 label="Điện thoại"
@@ -129,7 +131,7 @@ const Profile = () => {
                 value={values.phone}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                disabled={!isEditable}
+                disabled={!isLoginUser}
               />
               <TextField
                 label="Địa chỉ"
@@ -139,7 +141,7 @@ const Profile = () => {
                 name="address"
                 value={values.address}
                 onChange={handleChange}
-                disabled={!isEditable}
+                disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
               <TextField
@@ -150,7 +152,7 @@ const Profile = () => {
                 name="bankName"
                 value={values.bankName}
                 onChange={handleChange}
-                disabled={!isEditable}
+                disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
               <TextField
@@ -161,7 +163,7 @@ const Profile = () => {
                 name="bankAccountName"
                 value={values.bankAccountName}
                 onChange={handleChange}
-                disabled={!isEditable}
+                disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
               <TextField
@@ -172,16 +174,16 @@ const Profile = () => {
                 name="bankAccount"
                 value={values.bankAccount}
                 onChange={handleChange}
-                disabled={!isEditable}
+                disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
               <div className="flex flex-col pt-2 pb-8">
                 <span className="font-serif text-sm">Mã QR</span>
                 <div className="self-center pt-3">
-                  {imgPreview && isEditable && <img alt="qrcode" className="max-w-xs" src={imgPreview} />}
-                  {paramUser?.photoURL && !isEditable && <img src={paramUser?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
+                  {isLoginUser && imgPreview && <img alt="qrcode" className="max-w-xs" src={imgPreview} />}
+                  {!isLoginUser && normalUser?.qrCodeURL && <img src={normalUser?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
                 </div>
-                {isEditable && (
+                {isLoginUser && (
                   <>
                     <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewChange}>
                       <input hidden accept="image/*" type="file" />
