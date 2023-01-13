@@ -1,16 +1,22 @@
 import { FORMAT__DATE, TEXT__HOST, TEXT__MEMBER, TEXT__PAID, TEXT__UNPAID } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
+import { IEvent } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { userStore } from '@app/stores/user'
+import SearchIcon from '@mui/icons-material/Search'
+import InputAdornment from '@mui/material/InputAdornment'
+import OutlinedInput from '@mui/material/OutlinedInput'
 import dayjs from 'dayjs'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const List = () => {
   const userData = useAppSelector(userStore)!
   const listEvent = useAppSelector(listEventStore)
+
+  const [filterEvents, setFilterEvents] = useState<IEvent[]>([])
   const listEventDetail = useAppSelector(listEventDetailStore)
   const eventOfUser = useMemo(
     () =>
@@ -22,12 +28,41 @@ const List = () => {
     [listEventDetail, userData]
   )
   const listEventUser = useMemo(() => listEvent.filter((event) => eventOfUser.includes(event.id)), [eventOfUser, listEvent])
+
+  useEffect(() => {
+    setFilterEvents(listEventUser)
+  }, [listEventUser])
+
+  const onChangeSearch = (event: any) => {
+    const searchText = event.target.value
+    if (!searchText) {
+      setFilterEvents(listEventUser)
+    }
+    const lowerSearchText = searchText.toLowerCase()
+    const searchResult = listEventUser.filter((item) => item.eventName?.toLowerCase()?.includes(lowerSearchText))
+    setFilterEvents(searchResult)
+  }
+
   return (
     <main className="flex pb-6 bg-gradient-to-b from-light-green-2 to-light-green-3">
       <div className="mx-auto w-11/12 max-w-md">
         <div className="text-center my-6">
           <h2 className="text-2xl">Lịch sử đi ăn</h2>
         </div>
+        <div className="text-center">
+          <OutlinedInput
+            sx={{ width: '290px', height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
+            id="outlined-adornment-password"
+            type={'text'}
+            endAdornment={
+              <InputAdornment position="end">
+                <SearchIcon fontSize={'large'} />
+              </InputAdornment>
+            }
+            onChange={onChangeSearch}
+          />
+        </div>
+
         {/* <div className="inline-flex w-full" role="group">
           <button
             disabled
@@ -43,11 +78,11 @@ const List = () => {
           </button>
         </div> */}
         <ul className="mt-10">
-          {listEventUser
+          {filterEvents
             .sort((a, b) => {
               const date1 = dayjs(a.date, FORMAT__DATE)
               const date2 = dayjs(b.date, FORMAT__DATE)
-              return date1.diff(date2)
+              return date2.diff(date1)
             })
             .map((item, index) => {
               const isHost = userData.uid === item.userPayId
@@ -57,7 +92,6 @@ const List = () => {
                     .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
                     .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
                 : 0
-
               return (
                 <li className="my-4" key={index}>
                   <Link to={item.id!} className="flex bg-white rounded-3xl p-3">
@@ -67,7 +101,7 @@ const List = () => {
                         <span
                           className={
                             'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 ' +
-                            (isHost ? 'bg-red-700 w-[65px]' : 'bg-green-600 w-[80px]')
+                            (isHost ? 'bg-red-700 w-[70px]' : 'bg-green-600 w-[80px]')
                           }
                         >
                           {isHost ? TEXT__HOST : TEXT__MEMBER}
@@ -79,16 +113,17 @@ const List = () => {
                       <div className="mt-3">
                         <h3 className="font-medium">{item.eventName}</h3>
                         <span>
-                          Chủ trì:&nbsp;
+                          Chủ chi:&nbsp;
                           <b>{item.userPayName}</b>
                         </span>
                         <br />
                         <span>
-                          Số tiền chưa đòi:&nbsp;
+                          Số tiền:&nbsp;
                           <b>
                             {formatMoney(
-                              // eslint-disable-next-line prettier/prettier
-                              isHost ? Number(item.totalAmount)! - paidMoney : listEventDetail?.find((member) => member.uid === userData.uid)?.amountToPay
+                              isHost
+                                ? Number(item.totalAmount)! - paidMoney
+                                : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
                             )}
                           </b>
                         </span>
