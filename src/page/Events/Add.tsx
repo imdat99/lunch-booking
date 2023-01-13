@@ -26,6 +26,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
+import { Container } from '@mui/system'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
@@ -265,270 +266,272 @@ function Add() {
   }
 
   return (
-    <div>
-      <button className="px-4">
-        <div>
-          <ReplyIcon
-            onClick={() => {
-              history.back()
-            }}
-            fontSize={'large'}
-          />
-        </div>
-      </button>
-      <div className="text-center font-[Bellota] text-[24px]">{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</div>
-      <Box className="w-full flex justify-center">
-        <CardStyled variant="outlined" className="mx-5 md:px-3 md:max-w-xl">
-          <CardContent>
-            <Box className="mt-6">
-              <TextFieldStyled
-                fullWidth
-                label="Tên"
-                value={eventState?.eventName}
-                onChange={(e) => handleChangeTextField('eventName', e.target.value)}
-                variant="standard"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                error={!eventState.eventName}
-                helperText={eventState.eventName ? null : 'Vui lòng nhập tên'}
-              />
-            </Box>
-            <Box className="mt-6">
-              <DatePicker
-                className="w-full "
-                label="Thời gian"
-                value={dayjs(eventState.date).format('MM/DD/YYYY')}
-                inputFormat="DD/MM/YYYY"
-                onChange={(newValue) => {
-                  handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
-                }}
-                renderInput={(params) => (
-                  <TextFieldStyled
-                    variant="standard"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    {...params}
-                  />
-                )}
-              />
-            </Box>
-            <Box className="flex items-center mt-3">
-              <Typography variant="subtitle2">Thành viên</Typography>
-              &nbsp; {selectedListMember?.length || 0}
-              <ButtonStyled>
-                <AddIcon
-                  color="success"
-                  onClick={() => {
-                    setOpen(true)
+    <Container>
+      <div>
+        <button className="px-4">
+          <div>
+            <ReplyIcon
+              onClick={() => {
+                history.back()
+              }}
+              fontSize={'large'}
+            />
+          </div>
+        </button>
+        <div className="text-center font-[Bellota] text-[24px]">{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</div>
+        <Box className="w-full flex justify-center">
+          <CardStyled variant="outlined" className="mx-5 md:px-3 md:max-w-xl">
+            <CardContent>
+              <Box className="mt-6">
+                <TextFieldStyled
+                  fullWidth
+                  label="Tên"
+                  value={eventState?.eventName}
+                  onChange={(e) => handleChangeTextField('eventName', e.target.value)}
+                  variant="standard"
+                  InputLabelProps={{
+                    shrink: true,
                   }}
+                  error={!eventState.eventName}
+                  helperText={eventState.eventName ? null : 'Vui lòng nhập tên'}
                 />
-              </ButtonStyled>
-            </Box>
-            <TableContainer>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow sx={{ border: 'none' }}>
-                    <TableCell style={{ minWidth: '75px' }}>Đã trả</TableCell>
-                    <TableCell>Tên</TableCell>
-                    <TableCell style={{ minWidth: '110px' }}>Bill</TableCell>
-                    <TableCell style={{ minWidth: '110px' }}>Thành Tiền</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {selectedListMember.map((member) => {
-                    const labelId = `checkbox-list-label-${member.uid}`
-                    return (
-                      <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
-                        <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
-                          <Checkbox
-                            onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
-                            key={forceRerender}
-                            className="w-[20px]"
-                            edge="start"
-                            checked={member.isPaid}
-                            tabIndex={-1}
-                            disableRipple
-                            inputProps={{ 'aria-labelledby': labelId }}
-                          />
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <Typography noWrap>
-                            <Tooltip title={member.name || member.email}>
-                              <span> {member.name || member.email} </span>
-                            </Tooltip>
-                          </Typography>
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <TextNumberInput
-                            thousandSeparator=","
-                            fullWidth
-                            id="filled-required"
-                            variant="standard"
-                            value={member.amount}
-                            onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
-                            defaultValue={0}
-                          />
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <TextNumberInput
-                            thousandSeparator=","
-                            fullWidth
-                            id="filled-required"
-                            variant="standard"
-                            value={member.amountToPay}
-                            disabled
-                            InputLabelProps={{
-                              shrink: true,
-                            }}
-                            defaultValue={0}
-                          />
-                        </TableCell>
-                        <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                          <ButtonStyled onClick={() => handleDelete(member)}>
-                            <DeleteIcon />
-                          </ButtonStyled>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Typography variant="subtitle2" sx={{ marginTop: '20px' }}>
-              Người trả bill
-            </Typography>
-            <Box sx={{ flexGrow: 1 }} className="mt-2">
-              <Grid container spacing={2}>
-                <Grid item md={4} xs={5} style={{ display: 'flex', alignItems: 'center' }}>
-                  <ButtonStyled sx={{ padding: '10px' }} variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
-                    <Typography>Auto Pick</Typography>
-                  </ButtonStyled>
-                  <Box className="relative pt-3 pl-1">
-                    <Tooltip title="Chọn thành viên trước khi pick người chủ chi" placement="top-start">
-                      <ErrorOutlineIcon sx={{ marginTop: '-16px', fontSize: '20px', marginLeft: '3px', color: '#9c9c9c' }} />
-                    </Tooltip>
-                  </Box>
-                </Grid>
-                <Grid item md={8} xs={7}>
-                  <Autocomplete
-                    disabled={!selectedListMember.length}
-                    value={{ value: eventState?.userPayName, label: eventState.userPayName }}
-                    options={dropdownMembers}
-                    onChange={onChangeBillOwner}
-                    renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-            <Box className="mt-5">
-              <TextNumberInput
-                thousandSeparator=","
-                allowLeadingZeros={false}
-                fullWidth
-                variant="standard"
-                label="Tổng hóa đơn"
-                placeholder="1K = 1000 VND"
-                value={eventState?.billAmount}
-                onValueChange={(values) => {
-                  handleChangeBill(round(_.toNumber(values.value), 3))
-                }}
-                InputProps={{
-                  endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
-                  sx: {
-                    '& input': {
-                      textAlign: 'right',
-                    },
-                  },
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                defaultValue={0}
-              />
-            </Box>
-            <Box className="mt-5 flex items-center justify-between">
-              <FormControl>
-                <FormLabel>Hoa hồng</FormLabel>
-                <RadioGroup
-                  row
-                  aria-labelledby="demo-form-control-label-placement"
-                  name="position"
-                  defaultValue="top"
-                  onChange={(e) => {
-                    handleChangeBonusType(e.target.value as bonusTypeEnum)
+              </Box>
+              <Box className="mt-6">
+                <DatePicker
+                  className="w-full "
+                  label="Thời gian"
+                  value={dayjs(eventState.date).format('MM/DD/YYYY')}
+                  inputFormat="DD/MM/YYYY"
+                  onChange={(newValue) => {
+                    handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
                   }}
-                >
-                  <FormControlLabel value={bonusTypeEnum.MONEY} checked={bonusType === bonusTypeEnum.MONEY} control={<Radio />} label="Nhập số" />
-                  <FormControlLabel value={bonusTypeEnum.PERCENT} checked={bonusType === bonusTypeEnum.PERCENT} control={<Radio />} label="Phần trăm" />
-                </RadioGroup>
-              </FormControl>
-              <TextNumberInput
-                thousandSeparator=","
-                value={eventState?.tip}
-                onChange={(e) => {
-                  handleChangeTip(_.toNumber(e.target.value), bonusType)
-                }}
-                InputProps={{
-                  endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">%</InputAdornment> : null,
-                  sx: {
-                    '& input': {
-                      textAlign: 'right',
+                  renderInput={(params) => (
+                    <TextFieldStyled
+                      variant="standard"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      {...params}
+                    />
+                  )}
+                />
+              </Box>
+              <Box className="flex items-center mt-3">
+                <Typography variant="subtitle2">Thành viên</Typography>
+                &nbsp; {selectedListMember?.length || 0}
+                <ButtonStyled>
+                  <AddIcon
+                    color="success"
+                    onClick={() => {
+                      setOpen(true)
+                    }}
+                  />
+                </ButtonStyled>
+              </Box>
+              <TableContainer>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow sx={{ border: 'none' }}>
+                      <TableCell style={{ minWidth: '75px' }}>Đã trả</TableCell>
+                      <TableCell>Tên</TableCell>
+                      <TableCell style={{ minWidth: '110px' }}>Bill</TableCell>
+                      <TableCell style={{ minWidth: '110px' }}>Thành Tiền</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedListMember.map((member) => {
+                      const labelId = `checkbox-list-label-${member.uid}`
+                      return (
+                        <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
+                          <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
+                            <Checkbox
+                              onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
+                              key={forceRerender}
+                              className="w-[20px]"
+                              edge="start"
+                              checked={member.isPaid}
+                              tabIndex={-1}
+                              disableRipple
+                              inputProps={{ 'aria-labelledby': labelId }}
+                            />
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <Typography noWrap>
+                              <Tooltip title={member.name || member.email}>
+                                <span> {member.name || member.email} </span>
+                              </Tooltip>
+                            </Typography>
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <TextNumberInput
+                              thousandSeparator=","
+                              fullWidth
+                              id="filled-required"
+                              variant="standard"
+                              value={member.amount}
+                              onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              defaultValue={0}
+                            />
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <TextNumberInput
+                              thousandSeparator=","
+                              fullWidth
+                              id="filled-required"
+                              variant="standard"
+                              value={member.amountToPay}
+                              disabled
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              defaultValue={0}
+                            />
+                          </TableCell>
+                          <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                            <ButtonStyled onClick={() => handleDelete(member)}>
+                              <DeleteIcon />
+                            </ButtonStyled>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Typography variant="subtitle2" sx={{ marginTop: '20px' }}>
+                Người trả bill
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} className="mt-2">
+                <Grid container spacing={2}>
+                  <Grid item md={4} xs={5} style={{ display: 'flex', alignItems: 'center' }}>
+                    <ButtonStyled sx={{ padding: '10px' }} variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
+                      <Typography>Auto Pick</Typography>
+                    </ButtonStyled>
+                    <Box className="relative pt-3 pl-1">
+                      <Tooltip title="Chọn thành viên trước khi pick người chủ chi" placement="top-start">
+                        <ErrorOutlineIcon sx={{ marginTop: '-16px', fontSize: '20px', marginLeft: '3px', color: '#9c9c9c' }} />
+                      </Tooltip>
+                    </Box>
+                  </Grid>
+                  <Grid item md={8} xs={7}>
+                    <Autocomplete
+                      disabled={!selectedListMember.length}
+                      value={{ value: eventState?.userPayName, label: eventState.userPayName }}
+                      options={dropdownMembers}
+                      onChange={onChangeBillOwner}
+                      renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+              <Box className="mt-5">
+                <TextNumberInput
+                  thousandSeparator=","
+                  allowLeadingZeros={false}
+                  fullWidth
+                  variant="standard"
+                  label="Tổng hóa đơn"
+                  placeholder="1K = 1000 VND"
+                  value={eventState?.billAmount}
+                  onValueChange={(values) => {
+                    handleChangeBill(round(_.toNumber(values.value), 3))
+                  }}
+                  InputProps={{
+                    endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
+                    sx: {
+                      '& input': {
+                        textAlign: 'right',
+                      },
                     },
-                  },
-                }}
-                variant="standard"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                defaultValue={0}
-              />
-            </Box>
-            <Box className="mt-5">
-              <TextNumberInput
-                thousandSeparator=","
-                fullWidth
-                id="filled-required"
-                label="Tổng tiền"
-                value={eventState?.totalAmount}
-                variant="standard"
-                disabled
-                InputProps={{
-                  endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
-                  sx: {
-                    '& input': {
-                      textAlign: 'right',
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  defaultValue={0}
+                />
+              </Box>
+              <Box className="mt-5 flex items-center justify-between">
+                <FormControl>
+                  <FormLabel>Hoa hồng</FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-form-control-label-placement"
+                    name="position"
+                    defaultValue="top"
+                    onChange={(e) => {
+                      handleChangeBonusType(e.target.value as bonusTypeEnum)
+                    }}
+                  >
+                    <FormControlLabel value={bonusTypeEnum.MONEY} checked={bonusType === bonusTypeEnum.MONEY} control={<Radio />} label="Nhập số" />
+                    <FormControlLabel value={bonusTypeEnum.PERCENT} checked={bonusType === bonusTypeEnum.PERCENT} control={<Radio />} label="Phần trăm" />
+                  </RadioGroup>
+                </FormControl>
+                <TextNumberInput
+                  thousandSeparator=","
+                  value={eventState?.tip}
+                  onChange={(e) => {
+                    handleChangeTip(_.toNumber(e.target.value), bonusType)
+                  }}
+                  InputProps={{
+                    endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">%</InputAdornment> : null,
+                    sx: {
+                      '& input': {
+                        textAlign: 'right',
+                      },
                     },
-                  },
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                defaultValue={0}
-              />
-            </Box>
-            <Box className="flex justify-center my-7">
-              <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
-                <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
-              </ButtonStyled>
-            </Box>
-          </CardContent>
-        </CardStyled>
-      </Box>
+                  }}
+                  variant="standard"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  defaultValue={0}
+                />
+              </Box>
+              <Box className="mt-5">
+                <TextNumberInput
+                  thousandSeparator=","
+                  fullWidth
+                  id="filled-required"
+                  label="Tổng tiền"
+                  value={eventState?.totalAmount}
+                  variant="standard"
+                  disabled
+                  InputProps={{
+                    endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
+                    sx: {
+                      '& input': {
+                        textAlign: 'right',
+                      },
+                    },
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  defaultValue={0}
+                />
+              </Box>
+              <Box className="flex justify-center my-7">
+                <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName}>
+                  <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
+                </ButtonStyled>
+              </Box>
+            </CardContent>
+          </CardStyled>
+        </Box>
 
-      <PeopleModal open={open} setOpen={setOpen} handleSelectedMember={handleSelectedMember} selectedListMember={selectedListMember} />
+        <PeopleModal open={open} setOpen={setOpen} handleSelectedMember={handleSelectedMember} selectedListMember={selectedListMember} />
 
-      <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-          <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>
-        </Alert>
-      </Snackbar>
-    </div>
+        <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+          <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+            <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>
+          </Alert>
+        </Snackbar>
+      </div>
+    </Container>
   )
 }
 
