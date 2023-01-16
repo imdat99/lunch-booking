@@ -121,6 +121,8 @@ function Add() {
     setEventState({ ...tempEvenState, billAmount: newTotalAmount })
   }
   const handleSelectedMember = (listSelectingMembers: IEventDetail[]) => {
+    console.log('listSelectingMembers', listSelectingMembers)
+
     setListBillOwner(sortListByPaidCount([...listSelectingMembers]))
     setSelectedListMember(listSelectingMembers)
     setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid })))
