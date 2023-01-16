@@ -31,6 +31,25 @@ export async function IsEventNoticed(eventId:string){
     console.log('ERROR GETTING NOTI OF EVENT IN DB', error)
   }
 }
+export async function IsDemandPaymentNoticed(eventId:string){
+  try {
+    var queryState = query(NotiColection, where('eventId', '==', eventId),where('type','==',"DemandPayment"))
+    const res = await getDocs(queryState)
+    return res.docs.length > 0
+  } catch (error) {
+    console.log('ERROR GETTING NOTI OF EVENT IN DB', error)
+  }
+}
+
+export async function IsPaymentNoticed(eventId:string){
+  try {
+    var queryState = query(NotiColection, where('eventId', '==', eventId),where('type','==',"PaymentNotice"))
+    const res = await getDocs(queryState)
+    return res.docs.length > 0
+  } catch (error) {
+    console.log('ERROR GETTING NOTI OF EVENT IN DB', error)
+  }
+}
 
 
 
