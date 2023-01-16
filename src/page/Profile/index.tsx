@@ -119,13 +119,15 @@ const Profile = () => {
   }
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Must not be empty').min(6, 'At least 6 characters').max(30, 'At max 30 characters'),
-    ldapAcc: Yup.string().required('Must not be empty').min(4, 'At least 4 characters').max(12, 'At max 12 characters'),
-    phone: Yup.string().required('Must not be empty').max(12, 'At max 12 characters'),
-    address: Yup.string().required('Must not be empty').max(40, 'At max 40 characters'),
-    bankName: Yup.string().required('Must not be empty').max(15, 'At max 15 characters'),
-    bankAccountName: Yup.string().required('Must not be empty').min(6, 'At least 6 characters').max(30, 'At max 30 characters'),
-    bankAccount: Yup.string().required('Must not be empty').max(15, 'At max 15 characters'),
+    name: Yup.string().required('Must not be empty').max(50, 'At max 50 characters'),
+    ldapAcc: Yup.string().max(10, 'At max 10 characters'),
+    phone: Yup.string()
+      .max(20, 'At max 20 characters')
+      .matches(/^[0-9]*$/, 'Numbers only'),
+    address: Yup.string().max(50, 'At max 50 characters'),
+    bankName: Yup.string().required('Must not be empty').max(50, 'At max 50 characters'),
+    bankAccountName: Yup.string().required('Must not be empty').max(50, 'At max 50 characters'),
+    bankAccount: Yup.string().required('Must not be empty').max(20, 'At max 20 characters'),
   })
 
   return (
@@ -162,7 +164,7 @@ const Profile = () => {
             <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
           </Badge>
         ) : (
-          <Avatar alt="avatar" src={normalUser?.photoURL!} sx={{ width: 120, height: 120 }} />
+          <Avatar alt="avatar" src={normalUser?.photoURL || ProfilePicture} sx={{ width: 120, height: 120 }} />
         )}
         <span className="py-2 text-xl">{isLoginUser ? loginUser.name : normalUser?.name}</span>
         <span className="text-md">{isLoginUser ? loginUser.email : normalUser?.email}</span>
