@@ -80,7 +80,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        <div className="overflow-auto h-50">
+        <div className="overflow-auto h-64">
           {allMembers?.map((item: User) => (
             <Box
               key={item.uid}
