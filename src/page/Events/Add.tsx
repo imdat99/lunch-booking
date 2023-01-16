@@ -2,6 +2,7 @@
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
 import { setEvent, setEventDetail, updateEvent, updateEventDetail, updatePayCount } from '@app/libs/api/EventApi'
+import { auth } from '@app/server/firebase'
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
@@ -9,7 +10,7 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplyIcon from '@mui/icons-material/Reply'
-import { Box, CardContent, FormControl, FormControlLabel, FormLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
@@ -30,6 +31,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
@@ -75,6 +77,7 @@ const sortListByPaidCount = (members: User[]) => {
 }
 function Add() {
   const params = useParams()
+  const [loggedInUser] = useAuthState(auth)
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
@@ -88,7 +91,6 @@ function Add() {
   const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
     userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
   )
-
   const navigate = useNavigate()
   const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
@@ -120,13 +122,19 @@ function Add() {
     setSelectedListMember(tempMembersAfterCaculate)
     setEventState({ ...tempEvenState, billAmount: newTotalAmount })
   }
+
   const handleSelectedMember = (listSelectingMembers: IEventDetail[]) => {
-    setListBillOwner(sortListByPaidCount([...listSelectingMembers]))
+    const listSortedMember = sortListByPaidCount([...listSelectingMembers])
+    const tempMemberToPay = listSortedMember.find((item) => item.uid === loggedInUser?.uid)
+    setListBillOwner(listSortedMember)
     setSelectedListMember(listSelectingMembers)
     setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid })))
+    if (tempMemberToPay && tempMemberToPay.uid) {
+      setMemberToPayState(tempMemberToPay)
+      setEventState({ ...eventState, userPayId: tempMemberToPay.uid, userPayName: tempMemberToPay.name ? tempMemberToPay.name : 'chưa được đặt tên' })
+    }
   }
   const [open, setOpen] = useState(false)
-
   const handleDelete = (member: User) => {
     const newSelectedMember = [...selectedListMember]
     const index = newSelectedMember.findIndex((u) => u.uid === member.uid)
@@ -134,7 +142,6 @@ function Add() {
       newSelectedMember.splice(index, 1)
     }
     setSelectedListMember(newSelectedMember)
-
     if (member.uid === eventState.userPayId) {
       setEventState({ ...eventState, userPayId: '', userPayName: '' })
     }
@@ -154,6 +161,7 @@ function Add() {
     setSelectedListMember(tempMembers)
     setEventState({ ...eventState, billAmount: value, totalAmount: total })
   }
+
   const calBonus = (billAmount: number, tipAmount: number, bonusType: bonusTypeEnum) => {
     let bonus = 0
     if (bonusType === bonusTypeEnum.PERCENT) {
@@ -163,25 +171,26 @@ function Add() {
     }
     return Math.round(bonus)
   }
+
   const recalculateMoneyToPay = (arrListMember: IEventDetail[], bonus: number) => {
     arrListMember.forEach((item, index, arr) => {
       if (arr[index].amount) arr[index].amountToPay = Math.round((item.amount || 0) + bonus / arrListMember.length)
     })
     return arrListMember
   }
+
   const handleChangeTip = (value: number, bonusType1: bonusTypeEnum) => {
     const bonus = calBonus(eventState.billAmount || 0, value, bonusType1)
-
     const tempMembers = _.cloneDeep(selectedListMember)
     const tempMembersAfterCaculate = recalculateMoneyToPay(tempMembers, bonus)
     setSelectedListMember(tempMembersAfterCaculate)
     const total = eventState.billAmount ? Number(eventState.billAmount + bonus) : bonus
     setEventState({ ...eventState, tip: value, totalAmount: total })
   }
+
   const handleCreateEvent = async () => {
     const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
     const eventData = { ...eventState, isAllPaid, bonusType }
-
     if (params.id) {
       const { isSuccess, eventId } = await updateEvent(params.id, eventData)
       if (isSuccess) {
@@ -245,6 +254,7 @@ function Add() {
     setOpenModalSuccess(false)
     navigate('/events')
   }
+
   const handleChangeBonusType = (type: bonusTypeEnum) => {
     setBonusType(type)
     handleChangeTip(Number(eventState.tip), type)
