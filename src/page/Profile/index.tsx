@@ -96,19 +96,12 @@ const Profile = () => {
   }, [dispatch, normalUser?.uid])
 
   useEffect(() => {
-    switch (status) {
-      case 'succeeded':
-        setShowMessage('success')
-        break
-      case 'failed':
-        setShowMessage('error')
-        break
-      default:
-        break
+    if (status === 'succeeded') {
+      setShowMessage('success')
+    } else if (status === 'failed') {
+      setShowMessage('error')
     }
-    console.log(status)
-    console.log(showMessage)
-  }, [showMessage, status])
+  }, [status])
 
   const logout = async () => {
     try {

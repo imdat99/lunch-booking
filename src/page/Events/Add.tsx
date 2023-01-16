@@ -7,6 +7,7 @@ import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
+import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplyIcon from '@mui/icons-material/Reply'
@@ -26,7 +27,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
-import { Container } from '@mui/system'
+import { Container, useTheme } from '@mui/system'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
@@ -480,6 +481,31 @@ function Add() {
                   error={!eventState.billAmount}
                 />
               </Box>
+              <TextField
+                sx={(theme) => {
+                  return {
+                    marginTop: '15px',
+                    '& .MuiFormLabel-root': {
+                      ...theme.typography.h6,
+                    },
+                  }
+                }}
+                multiline
+                rows={2}
+                maxRows={4}
+                fullWidth
+                variant="standard"
+                label="Note hóa đơn (Optional)"
+                value={eventState.note}
+                onChange={(e) =>
+                  setEventState((prev) => {
+                    return { ...prev, note: e.target.value }
+                  })
+                }
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
               <Box className="mt-5 flex items-center justify-between">
                 <FormControl>
                   <Typography variant="subtitle2">Hoa hồng</Typography>
@@ -499,8 +525,8 @@ function Add() {
                 <TextNumberInput
                   thousandSeparator=","
                   value={eventState?.tip}
-                  onChange={(e) => {
-                    handleChangeTip(_.toNumber(e.target.value), bonusType)
+                  onValueChange={(values) => {
+                    handleChangeTip(_.toNumber(values.value), bonusType)
                   }}
                   InputProps={{
                     endAdornment:

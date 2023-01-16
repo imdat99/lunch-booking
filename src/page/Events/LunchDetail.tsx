@@ -23,8 +23,9 @@ import Snackbar from '@mui/material/Snackbar'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { bonusTypeEnum } from './Add'
+
+
 const LunchDetail = () => {
   // navigate
   const navigate = useNavigate()
@@ -80,7 +81,6 @@ const LunchDetail = () => {
   useEffect(() => {
     async function checkEventNoticed(eventId: string) {
       const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId)
-      console.log(isNoticed)
       setDisableNoti(isNoticed!)
     }
     if (eventInfo) checkEventNoticed(eventInfo.id!)
