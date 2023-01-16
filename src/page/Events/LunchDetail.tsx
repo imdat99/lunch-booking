@@ -1,6 +1,6 @@
 import { LoadingScreen } from '@app/components/Suspense'
 import { deleteEvent } from '@app/libs/api/event'
-import { createNoti, IsDemandPaymentNoticed,IsPaymentNoticed } from '@app/libs/api/noti'
+import { createNoti, IsDemandPaymentNoticed, IsPaymentNoticed } from '@app/libs/api/noti'
 import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { useAppSelector } from '@app/stores/hook'
@@ -79,7 +79,7 @@ const LunchDetail = () => {
   }, [eventInfo])
   useEffect(() => {
     async function checkEventNoticed(eventId: string) {
-      const isNoticed =isHost ?  await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId)
+      const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId)
       console.log(isNoticed)
       setDisableNoti(isNoticed!)
     }
@@ -95,7 +95,7 @@ const LunchDetail = () => {
       toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
       eventId: eventInfo?.id || '',
       userSeen: [],
-      type:isHost ? "DemandPayment" : "PaymentNotice"
+      type: isHost ? 'DemandPayment' : 'PaymentNotice',
     }).then((res) => {
       if (res.isSuccess) {
         setOpenAlert('Đã Thông báo')
@@ -120,7 +120,7 @@ const LunchDetail = () => {
   return loading ? (
     <LoadingScreen />
   ) : (
-    <div className="bg-white">
+    <div className="bg-white flex flex-col">
       <Dialog open={confirmDialog} onClose={handleCloseDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
         <DialogTitle id="alert-dialog-title">Bạn có chắc chắn muốn xoá?</DialogTitle>
         <DialogContent>
@@ -147,7 +147,7 @@ const LunchDetail = () => {
         </Alert>
       </Snackbar>
       <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
-        <div className="flex justify-between p-3">
+        <div className="flex justify-evenly p-3">
           <button
             className="h-[36px]"
             onClick={() => {
@@ -211,7 +211,7 @@ const LunchDetail = () => {
           </div>
         </div>
       </div>
-      <div className="py-3 px-5">
+      <div className="py-3 px-5 lg:w-[900px] md:w-[600px] self-center">
         <div className="flex justify-between">
           <span className="text-gray-400 font-bold block mb-3">Tổng bill</span>
           <p className="text-end">

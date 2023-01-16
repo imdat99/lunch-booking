@@ -1,21 +1,19 @@
+import { Avatar, Card, CardHeader } from '@mui/material'
+import { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, CardHeader, Avatar } from '@mui/material'
-import {ReactNode} from 'react'
 
 interface NotificationCardProps {
   link: string
   time: string
   content: ReactNode
   isRead: boolean
-  avatarSrc : string
-  onClick ?: ()=>void
+  avatarSrc: string
+  onClick?: () => void
 }
 
 export default function NotificationCard(props: NotificationCardProps) {
   return (
-    <Link to={props.link}          
-      onClick={props.onClick}
-    >
+    <Link to={props.link} onClick={props.onClick}>
       <Card
         sx={{
           margin: 'auto',
@@ -26,6 +24,7 @@ export default function NotificationCard(props: NotificationCardProps) {
           paddingBottom: '0.688rem',
           maxWidth: { xs: '21.87rem', sm: 'unset' },
           backgroundColor: props.isRead ? '#9C9C9C' : '#FFFFFF',
+          color: props.isRead ? '#FFFFFF' : '#000',
           // boxShadow:"0 0.25rem rgba(0, 0, 0, 0.3)"
         }}
       >

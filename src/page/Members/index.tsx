@@ -31,9 +31,11 @@ const Members = () => {
   return (
     <div className="flex flex-col items-center pt-6 pb-12">
       <h1 className="font-bellota text-center text-2xl pb-4">Thành viên</h1>
+      {/*Search bar*/}
       <div>
         <OutlinedInput
-          sx={{ width: '300px', height: '46px', borderRadius: '30px', backgroundColor: 'white', fontFamily: 'Bellota' }}
+          sx={{ borderRadius: '30px', backgroundColor: 'white', fontFamily: 'Bellota' }}
+          className="sm:w-[400px] md:w-[600px] h-12"
           id="outlined-adornment-password"
           type={'text'}
           placeholder={'Tìm kiếm'}
@@ -45,7 +47,7 @@ const Members = () => {
           onChange={onChangeSearch}
         />
       </div>
-      <div className="pt-6 flex flex-col gap-4">
+      <div className="pt-6 flex flex-col gap-4 sm:w-[400px] md:w-[600px]">
         {users.length === 0 ? (
           <div>Team Front-end không có ai cả!</div>
         ) : (

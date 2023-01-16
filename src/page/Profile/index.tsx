@@ -6,21 +6,22 @@ import { store } from '@app/stores'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { listUserStore } from '@app/stores/listUser'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
+import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
+import Alert from '@mui/material/Alert'
+import Avatar from '@mui/material/Avatar'
+import Badge from '@mui/material/Badge'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import Badge from '@mui/material/Badge'
-import Avatar from '@mui/material/Avatar'
 import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
+import TextField from '@mui/material/TextField'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
+import * as Yup from 'yup'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -95,15 +96,19 @@ const Profile = () => {
   }, [dispatch, normalUser?.uid])
 
   useEffect(() => {
-    if (status === 'succeeded') {
-      setShowMessage('success')
-    } else if (status === 'failed') {
-      setShowMessage('error')
-    } else {
+    switch (status) {
+      case 'succeeded':
+        setShowMessage('success')
+        break
+      case 'failed':
+        setShowMessage('error')
+        break
+      default:
+        break
     }
     console.log(status)
     console.log(showMessage)
-  }, [status])
+  }, [showMessage, status])
 
   const logout = async () => {
     try {
@@ -120,8 +125,18 @@ const Profile = () => {
     setShowMessage(null)
   }
 
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required('Must not be empty').min(6, 'At least 6 characters').max(30, 'At max 30 characters'),
+    ldapAcc: Yup.string().required('Must not be empty').min(4, 'At least 4 characters').max(12, 'At max 12 characters'),
+    phone: Yup.string().required('Must not be empty').max(12, 'At max 12 characters'),
+    address: Yup.string().required('Must not be empty').max(40, 'At max 40 characters'),
+    bankName: Yup.string().required('Must not be empty').max(15, 'At max 15 characters'),
+    bankAccountName: Yup.string().required('Must not be empty').min(6, 'At least 6 characters').max(30, 'At max 30 characters'),
+    bankAccount: Yup.string().required('Must not be empty').max(15, 'At max 15 characters'),
+  })
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
         <div className="flex justify-between self-stretch">
           <button className="px-4">
@@ -163,14 +178,16 @@ const Profile = () => {
           <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
         </span>
       </div>
-      <div className="px-6 py-4">
+      {/*Information section*/}
+      <div className="px-6 py-4 md:self-center md:w-[600px] lg:w-[900px] xl:w-[1200px]">
         <Formik
           initialValues={{ ...userFormData }}
           onSubmit={(values) => {
             dispatch(updateUserInfo(values.uid as string, values, imgObj, imgAvatarObj))
           }}
+          validationSchema={validationSchema}
         >
-          {({ values, handleChange, handleBlur, handleSubmit }) => (
+          {({ values, handleChange, handleBlur, handleSubmit, errors }) => (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <TextField
                 label="Tên hiển thị"
@@ -183,6 +200,7 @@ const Profile = () => {
                 onBlur={handleBlur}
                 disabled={!isLoginUser}
               />
+              {errors.name && <span className="text-sm font-bellota text-red-600">{errors.name}</span>}
               <TextField
                 label="LDAP"
                 variant="standard"
@@ -194,7 +212,7 @@ const Profile = () => {
                 onBlur={handleBlur}
                 disabled={!isLoginUser}
               />
-
+              {errors.ldapAcc && <span className="text-sm font-bellota text-red-600">{errors.ldapAcc}</span>}
               <TextField
                 label="Điện thoại"
                 variant="standard"
@@ -206,6 +224,7 @@ const Profile = () => {
                 onBlur={handleBlur}
                 disabled={!isLoginUser}
               />
+              {errors.phone && <span className="text-sm font-bellota text-red-600">{errors.phone}</span>}
               <TextField
                 label="Địa chỉ"
                 variant="standard"
@@ -217,6 +236,7 @@ const Profile = () => {
                 disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
+              {errors.address && <span className="text-sm font-bellota text-red-600">{errors.address}</span>}
               <TextField
                 label="Ngân hàng"
                 variant="standard"
@@ -228,6 +248,7 @@ const Profile = () => {
                 disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
+              {errors.bankName && <span className="text-sm font-bellota text-red-600">{errors.bankName}</span>}
               <TextField
                 label="Chủ tài khoản"
                 variant="standard"
@@ -239,6 +260,7 @@ const Profile = () => {
                 disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
+              {errors.bankAccountName && <span className="text-sm font-bellota text-red-600">{errors.bankAccountName}</span>}
               <TextField
                 label="Số tài khoản"
                 variant="standard"
@@ -250,8 +272,10 @@ const Profile = () => {
                 disabled={!isLoginUser}
                 onBlur={handleBlur}
               />
-              <div className="flex flex-col pt-2 pb-8">
-                <span className="font-serif text-sm">Mã QR</span>
+              {errors.bankAccount && <span className="text-sm font-bellota text-red-600">{errors.bankAccount}</span>}
+
+              <div className="flex flex-col pb-8">
+                <span className="font-bellota text-sm">Mã QR</span>
                 <div className="self-center pt-3">
                   {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
                   {!isLoginUser && normalUser?.qrCodeURL && <img src={normalUser?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
@@ -273,12 +297,7 @@ const Profile = () => {
         </Formik>
       </div>
       {showMessage && (
-        <Snackbar
-          open={true}
-          onClose={handleCloseMessage}
-          autoHideDuration={1500}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
+        <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
             {showMessage === 'success' ? (
               <span className="font-bold"> {'Cập nhật user thành công!'} </span>

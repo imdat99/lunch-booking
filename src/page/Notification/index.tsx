@@ -1,14 +1,15 @@
-import NotificationCard from './NotificationCard'
-import { useEffect, useState, ReactNode } from 'react'
-import { useAppSelector, useAppDispatch } from '@app/stores/hook'
-import { listNotiSelector, initializeNotiList, isLastPageSelector, updateNoti, setUserReadNoti } from '@app/stores/noti'
 import { setUserSeen } from '@app/libs/api/noti'
-import { userStore } from '@app/stores/user'
 import { getUserByUid } from '@app/libs/api/userAPI'
-import InfinitScroll from 'react-infinite-scroll-component'
-import dayjs from 'dayjs'
 import { FORMAT__DATE } from '@app/libs/constant'
 import { INoti } from '@app/server/firebaseType'
+import { useAppDispatch, useAppSelector } from '@app/stores/hook'
+import { initializeNotiList, isLastPageSelector, listNotiSelector, setUserReadNoti, updateNoti } from '@app/stores/noti'
+import { userStore } from '@app/stores/user'
+import dayjs from 'dayjs'
+import { ReactNode, useEffect, useState } from 'react'
+import InfinitScroll from 'react-infinite-scroll-component'
+
+import NotificationCard from './NotificationCard'
 
 export default function Notification() {
   const listNoti = useAppSelector(listNotiSelector)
@@ -60,9 +61,9 @@ export default function Notification() {
     <>
       <div className="flex flex-col justify-start">
         <div className="mt-[1.875rem] mb-[1.875rem] h-[5.625rem]">
-          <p className="leading-[1.875rem] text-[1.5rem] text-center">Thông báo</p>
+          <p className="leading-[1.875rem] text-[1.5rem] text-center font-bellota">Thông báo</p>
         </div>
-        <div className="flex flex-col content-center overflow-y-auto ">
+        <div className="flex flex-col mx-auto px-2">
           <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
             {listCard}
           </InfinitScroll>
