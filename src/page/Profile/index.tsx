@@ -21,6 +21,8 @@ import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
+import { clearNotiList } from '@app/stores/noti'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -105,7 +107,8 @@ const Profile = () => {
   const logout = async () => {
     try {
       await signOut(auth).then(() => {
-        store.dispatch(clearUser())
+        dispatch(clearUser())
+        dispatch(clearNotiList())
       })
     } catch (error) {
       console.log('ERROR LOGGING OUT', error)

@@ -2,7 +2,7 @@ import { INoti } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {  DocumentSnapshot} from 'firebase/firestore'
-import { getListNotiByPage ,setUserSeen } from '@app/libs/api/noti'
+import { getCountNewNotice, getListNotiByPage ,setUserSeen } from '@app/libs/api/noti'
 import { AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { updateFailed } from '../user'
@@ -12,6 +12,7 @@ interface NotiState {
   listNoti: INoti[] 
   lastSnapShot : DocumentSnapshot<INoti> | null
   isLastPage : boolean 
+  newNotiNumber : number
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
 }
 
@@ -19,6 +20,7 @@ const initialState: NotiState = {
   listNoti : [] ,
   lastSnapShot : null,
   isLastPage : true,
+  newNotiNumber: 0,
   status: 'idle',
 }
 
@@ -36,6 +38,7 @@ const slice = createSlice({
       state.listNoti = [...state.listNoti,...action.payload.listNoti]
       state.lastSnapShot = action.payload.lastSnapShot
       state.isLastPage = action.payload.isLastPage
+      state.newNotiNumber = action.payload.newNotiNumber
       state.status = 'idle'
     },
     initializeFailed(state) {
@@ -44,7 +47,7 @@ const slice = createSlice({
     update(state) {
       state.status = 'loading'
     },
-    updateSucceeded(state, action: PayloadAction<Omit<NotiState,"status">>) {
+    updateSucceeded(state, action: PayloadAction<Omit<NotiState,"status"|"newNotiNumber">>) {
       state.listNoti = [...state.listNoti,...action.payload.listNoti]
       state.lastSnapShot = action.payload.lastSnapShot
       state.isLastPage = action.payload.isLastPage
@@ -58,12 +61,18 @@ const slice = createSlice({
     },
     addNewNotiCome(state,action : PayloadAction<INoti>){
       state.listNoti = [action.payload,...state.listNoti]
+    },
+    updateNewNotiNumber(state,action : PayloadAction<number>){
+      state.newNotiNumber = action.payload
+    },
+    clearNotiList(state){
+      return initialState
     }
   },
 })
 
 //Actions
-export const { initialize , initializeSucceeded,initializeFailed,idle, update , updateSucceeded , setReadNoti , addNewNotiCome}= slice.actions
+export const { initialize , initializeSucceeded,initializeFailed,idle, update , updateSucceeded , setReadNoti , addNewNotiCome ,updateNewNotiNumber ,clearNotiList}= slice.actions
 
 //Thunk
 export function updateNoti(uid:string) : ThunkAction<void, RootState, unknown, AnyAction> {
@@ -77,7 +86,6 @@ export function updateNoti(uid:string) : ThunkAction<void, RootState, unknown, A
       dispatch(updateFailed())
     }
   }
-
 }
 
 export  function initializeNotiList(uid:string) : ThunkAction<void, RootState, unknown, AnyAction>{
@@ -85,7 +93,8 @@ export  function initializeNotiList(uid:string) : ThunkAction<void, RootState, u
     try {
       dispatch(initialize())
         const result =  await getListNotiByPage(uid,null)
-        dispatch(initializeSucceeded(result!))
+        const count = await getCountNewNotice(uid)
+        dispatch(initializeSucceeded({...result, newNotiNumber : count}))
     } catch (error) {
       dispatch(initializeFailed())
     }
@@ -111,9 +120,21 @@ export  function setUserReadNoti(uid:string , noti: INoti) : ThunkAction<void, R
   }
 }
 
+export function updateNewNotiCount(uid:string) : ThunkAction<void, RootState, unknown, AnyAction> {
+  return async(dispatch,getState)=>{
+    try {
+      const count = await getCountNewNotice(uid)
+      dispatch(updateNewNotiNumber(count!))
+    } catch (error) {
+
+    }
+  }
+}
+
 //selector
 export const listNotiSelector = (state: RootState) => state[namespace].listNoti
 export const notiStatusSelector = (state: RootState) => state[namespace].status
 export const isLastPageSelector = (state: RootState) => state[namespace].isLastPage
 
+export const newNotiNumberSelector = (state: RootState) => state[namespace].newNotiNumber
 export const reducer = slice.reducer

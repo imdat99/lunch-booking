@@ -57,6 +57,11 @@ export interface INoti {
   type: 'DemandPayment' | 'PaymentNotice'
 }
 
+export interface ILastTimeCheckNoti {
+  uid:string
+  checkTime:number
+}
+
 export interface IAllowedEmail {
   email: string[]
 }

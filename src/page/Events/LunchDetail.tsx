@@ -80,7 +80,8 @@ const LunchDetail = () => {
   }, [eventInfo])
   useEffect(() => {
     async function checkEventNoticed(eventId: string) {
-      const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId)
+      const isNoticed =isHost ?  await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId,uid!)
+      console.log(isNoticed)
       setDisableNoti(isNoticed!)
     }
     if (eventInfo) checkEventNoticed(eventInfo.id!)
