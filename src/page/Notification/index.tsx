@@ -1,13 +1,13 @@
 import NotificationCard from './NotificationCard'
 import { useEffect, useState, ReactNode } from 'react'
 import { useAppSelector, useAppDispatch } from '@app/stores/hook'
-import { listNotiSelector, initializeNotiList , isLastPageSelector , updateNoti , setUserReadNoti} from '@app/stores/noti'
+import { listNotiSelector, initializeNotiList, isLastPageSelector, updateNoti, setUserReadNoti } from '@app/stores/noti'
 import { setUserSeen } from '@app/libs/api/noti'
 import { userStore } from '@app/stores/user'
 import { getUserByUid } from '@app/libs/api/userAPI'
 import InfinitScroll from 'react-infinite-scroll-component'
 import dayjs from 'dayjs'
-import {FORMAT__DATE} from '@app/libs/constant'
+import { FORMAT__DATE } from '@app/libs/constant'
 import { INoti } from '@app/server/firebaseType'
 
 export default function Notification() {
@@ -26,51 +26,25 @@ export default function Notification() {
       const listUser = await Promise.all(listNoti.map((noti) => getUserByUid(noti.fromUid!)))
 
       const listCard = listNoti.map((noti, index) => {
-        return (<>        <div className="mb-[0.625rem]" key={noti.id}>
-        <NotificationCard
-          link={`/events/${noti.eventId}`}
-          time={`${dayjs(noti.date * 1000).format(FORMAT__DATE)}`}
-          content={
-            <p>
-              Từ <b>{listUser[index]?.name}</b> : {noti.content}
-            </p>
-          }
-          isRead={noti.userSeen.includes(userInfo?.uid!)}
-          avatarSrc={listUser[index]?.photoURL!}
-          onClick={()=>{dispatch(setUserReadNoti(userInfo?.uid!,noti))}}
-        />
-      </div>
-      <div className="mb-[0.625rem]" key={noti.id}>
-            <NotificationCard
-              link={`/events/${noti.eventId}`}
-              time={`${dayjs(noti.date * 1000).format(FORMAT__DATE)}`}
-              content={
-                <p>
-                  Từ <b>{listUser[index]?.name}</b> : {noti.content}
-                </p>
-              }
-              isRead={noti.userSeen.includes(userInfo?.uid!)}
-              avatarSrc={listUser[index]?.photoURL!}
-              onClick={()=>{dispatch(setUserReadNoti(userInfo?.uid!,noti))}}
-            />
-          </div>
-          <div className="mb-[0.625rem]" key={noti.id}>
-            <NotificationCard
-              link={`/events/${noti.eventId}`}
-              time={`${dayjs(noti.date * 1000).format(FORMAT__DATE)}`}
-              content={
-                <p>
-                  Từ <b>{listUser[index]?.name}</b> : {noti.content}
-                </p>
-              }
-              isRead={noti.userSeen.includes(userInfo?.uid!)}
-              avatarSrc={listUser[index]?.photoURL!}
-              onClick={()=>{dispatch(setUserReadNoti(userInfo?.uid!,noti))}}
-            />
-          </div>
-        </>
-
-
+        return (
+          <>
+            <div className="mb-[0.625rem]" key={noti.id}>
+              <NotificationCard
+                link={`/events/${noti.eventId}`}
+                time={`${dayjs(noti.date * 1000).format(FORMAT__DATE)}`}
+                content={
+                  <p>
+                    Từ <b>{listUser[index]?.name}</b> : {noti.content}
+                  </p>
+                }
+                isRead={noti.userSeen.includes(userInfo?.uid!)}
+                avatarSrc={listUser[index]?.photoURL!}
+                onClick={() => {
+                  dispatch(setUserReadNoti(userInfo?.uid!, noti))
+                }}
+              />
+            </div>
+          </>
         )
       })
       setListCard(listCard)
@@ -78,7 +52,7 @@ export default function Notification() {
     createCard()
   }, [listNoti])
 
-  function updateNotiList(){
+  function updateNotiList() {
     dispatch(updateNoti(userInfo?.uid!))
   }
 
@@ -89,12 +63,7 @@ export default function Notification() {
           <p className="leading-[1.875rem] text-[1.5rem] text-center">Thông báo</p>
         </div>
         <div className="flex flex-col content-center overflow-y-auto ">
-          <InfinitScroll
-            hasMore={!isLastPage}
-            next = {updateNotiList}
-            loader={<p>Loading...</p>}
-            dataLength={listCard.length}
-          >
+          <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
             {listCard}
           </InfinitScroll>
         </div>
