@@ -262,7 +262,7 @@ const Profile = () => {
                       <input hidden accept="image/*" type="file" />
                       <PhotoCamera fontSize={'large'} />
                     </IconButton>
-                    <Button variant="contained" type="submit" className="self-center" disabled={status === 'loading'}>
+                    <Button variant="contained" type="submit" className="self-center" disabled={status === 'updating'}>
                       Save
                     </Button>
                   </>

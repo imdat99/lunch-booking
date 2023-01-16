@@ -53,6 +53,7 @@ export interface INoti {
   toUids: string[]
   userSeen: string[]
   eventId: string
+  type:"DemandPayment"|"PaymentNotice"
 }
 
 export interface IAllowedEmail {
