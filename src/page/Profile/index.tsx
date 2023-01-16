@@ -6,21 +6,23 @@ import { store } from '@app/stores'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { listUserStore } from '@app/stores/listUser'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
+import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
+import Alert from '@mui/material/Alert'
+import Avatar from '@mui/material/Avatar'
+import Badge from '@mui/material/Badge'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import Badge from '@mui/material/Badge'
-import Avatar from '@mui/material/Avatar'
 import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
+import TextField from '@mui/material/TextField'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
+import { clearNotiList } from '@app/stores/noti'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -99,16 +101,14 @@ const Profile = () => {
       setShowMessage('success')
     } else if (status === 'failed') {
       setShowMessage('error')
-    } else {
     }
-    console.log(status)
-    console.log(showMessage)
   }, [status])
 
   const logout = async () => {
     try {
       await signOut(auth).then(() => {
-        store.dispatch(clearUser())
+        dispatch(clearUser())
+        dispatch(clearNotiList())
       })
     } catch (error) {
       console.log('ERROR LOGGING OUT', error)
@@ -273,12 +273,7 @@ const Profile = () => {
         </Formik>
       </div>
       {showMessage && (
-        <Snackbar
-          open={true}
-          onClose={handleCloseMessage}
-          autoHideDuration={1500}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
+        <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
             {showMessage === 'success' ? (
               <span className="font-bold"> {'Cập nhật user thành công!'} </span>

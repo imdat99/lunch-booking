@@ -1,8 +1,11 @@
 import { getListUser } from '@app/libs/api/EventApi'
 import { User } from '@app/server/firebaseType'
+import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Button, Modal, Typography } from '@mui/material'
+import { Box, Button, Modal, TextField, Typography } from '@mui/material'
+import _ from 'lodash'
 import { useEffect, useState } from 'react'
+
 type PropsType = {
   open: boolean
   setOpen: any
@@ -19,13 +22,16 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  overflowY: 'scroll',
+  maxHeight: '75%',
 }
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }: PropsType) {
   const [allMembers, setAllMembers] = useState<User[]>([])
+  const [newMemberName, setNewMemberName] = useState<string>()
+
   // const { selectedListMember } = useAppSelector(billStore)
   const [selectingMembers, setSelectingMembers] = useState<User[]>([...selectedListMember])
   // const dispatch = useAppDispatch()
-
   const handleClickRow = (user: User) => {
     const tempMembers = [...selectingMembers]
     const index = tempMembers.findIndex((u) => u.uid === user.uid)
@@ -66,13 +72,27 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
 
   useEffect(() => {
     setSelectingMembers([...selectedListMember])
+    setNewMemberName('')
   }, [open])
 
   const handleOnClose = () => {
     setOpen(false)
     setSelectingMembers([])
   }
-
+  const handleAddNewMember = () => {
+    const tempListSelectingMember = _.cloneDeep(selectingMembers)
+    const tempListAllMember = _.cloneDeep(allMembers)
+    const newMember = {
+      name: newMemberName,
+      uid: (Math.random() + 1).toString(36).substring(7),
+      email: 'người ngoài chưa được set tên',
+    }
+    tempListSelectingMember.push(newMember)
+    tempListAllMember.push(newMember)
+    setSelectingMembers(tempListSelectingMember)
+    setAllMembers(tempListAllMember)
+    setNewMemberName('')
+  }
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
@@ -80,18 +100,25 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        <div className="overflow-auto h-64">
-          {allMembers?.map((item: User) => (
-            <Box
-              key={item.uid}
-              className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
-              onClick={() => handleClickRow(item)}
-            >
-              <Typography>{item.name || item.email || 'no name'}</Typography>
-            </Box>
-          ))}
-        </div>
-        <Button onClick={handleAdd} variant="contained">
+        {allMembers?.map((item: User) => (
+          <Box
+            key={item.uid}
+            className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
+            onClick={() => handleClickRow(item)}
+          >
+            <Typography>{item.name || item.email || 'no name'}</Typography>
+          </Box>
+        ))}
+        <Typography variant="h5" sx={{ marginBottom: '10px' }}>
+          Thêm người ngoài
+        </Typography>
+        <Box className="flex">
+          <TextField value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className="w-full" />
+          <Button onClick={handleAddNewMember}>
+            <AddIcon />
+          </Button>
+        </Box>
+        <Button onClick={handleAdd} variant="contained" sx={{ marginTop: '20px' }}>
           OK
         </Button>
       </Box>

@@ -3,11 +3,15 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import HomeIcon from '@mui/icons-material/Home'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import Badge from '@mui/material/Badge';
 import PeopleIcon from '@mui/icons-material/People'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useAppSelector } from '@app/stores/hook'
+import { newNotiNumberSelector } from '@app/stores/noti'
 
 const Footer = () => {
+  const newNotiCount =  useAppSelector(newNotiNumberSelector)
   const navigateTo = useNavigate()
   const location = useLocation()
 
@@ -44,7 +48,9 @@ const Footer = () => {
 
       <button className="flex-1" onClick={() => onClickFooterIcon(PAGES.NOTIFICATIONS)}>
         <div>
-          <NotificationsIcon sx={{ color: currentRoute === PAGE_ROUTES[PAGES.NOTIFICATIONS] ? '#439D0D' : '#A0A0A0' }} />
+          <Badge color="secondary" badgeContent={newNotiCount}>
+            <NotificationsIcon sx={{ color: currentRoute === PAGE_ROUTES[PAGES.NOTIFICATIONS] ? '#439D0D' : '#A0A0A0' }} />
+          </Badge>
         </div>
         <div className={`text-[12px] ${currentRoute === PAGE_ROUTES[PAGES.NOTIFICATIONS] ? 'text-dark-green-1' : 'text-grey-1'}`}>Notifications</div>
       </button>

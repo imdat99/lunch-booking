@@ -14,13 +14,11 @@ export default function HomePage() {
   useEffect(() => {
     getHomeData().then((e) => {
       setListEvent(e)
-      // console.log("aaa", e);
     })
   }, [dispatch])
 
   const [listEvent, setListEvent] = useState<any>()
 
-  // console.log('listEvent', listEvent)
   const css = `
     html {
       width: 100vw;

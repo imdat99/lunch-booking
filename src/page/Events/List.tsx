@@ -1,4 +1,4 @@
-import { FORMAT__DATE, TEXT__HOST, TEXT__MEMBER, TEXT__PAID, TEXT__UNPAID } from '@app/libs/constant'
+import { FORMAT__DATE, TEXT__HOST, TEXT__MEMBER } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { IEvent } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
@@ -137,7 +137,11 @@ const List = () => {
                           'absolute py-1 px-3 block font-normal text-white rounded-xl text-xl top-0 right-0 ' + (isPaid ? 'bg-green-600' : 'bg-red-700')
                         }
                       >
-                        {isPaid ? TEXT__PAID : TEXT__UNPAID}
+                        {isHost && isPaid && 'Đã hoàn tất'}
+                        {isHost && !isPaid && 'Chưa hoàn tất'}
+                        {!isHost && isPaid && 'Đã trả'}
+                        {!isHost && !isPaid && 'Chưa trả'}
+                        {}
                       </span>
                     </div>
                   </Link>
