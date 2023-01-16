@@ -1,6 +1,6 @@
 import { LoadingScreen } from '@app/components/Suspense'
 import { deleteEvent } from '@app/libs/api/event'
-import { createNoti, IsDemandPaymentNoticed,IsPaymentNoticed } from '@app/libs/api/noti'
+import { createNoti, IsDemandPaymentNoticed, IsPaymentNoticed } from '@app/libs/api/noti'
 import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { useAppSelector } from '@app/stores/hook'
@@ -23,8 +23,9 @@ import Snackbar from '@mui/material/Snackbar'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { bonusTypeEnum } from './Add'
+
+
 const LunchDetail = () => {
   // navigate
   const navigate = useNavigate()
@@ -79,8 +80,7 @@ const LunchDetail = () => {
   }, [eventInfo])
   useEffect(() => {
     async function checkEventNoticed(eventId: string) {
-      const isNoticed =isHost ?  await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId)
-      console.log(isNoticed)
+      const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId)
       setDisableNoti(isNoticed!)
     }
     if (eventInfo) checkEventNoticed(eventInfo.id!)
@@ -95,7 +95,7 @@ const LunchDetail = () => {
       toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
       eventId: eventInfo?.id || '',
       userSeen: [],
-      type:isHost ? "DemandPayment" : "PaymentNotice"
+      type: isHost ? 'DemandPayment' : 'PaymentNotice',
     }).then((res) => {
       if (res.isSuccess) {
         setOpenAlert('Đã Thông báo')
