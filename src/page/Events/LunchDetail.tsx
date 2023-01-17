@@ -1,8 +1,11 @@
 import { LoadingScreen } from '@app/components/Suspense'
 import { deleteEvent } from '@app/libs/api/event'
+import { updateEventDetail } from '@app/libs/api/EventApi'
 import { createNoti, IsDemandPaymentNoticed, IsPaymentNoticed } from '@app/libs/api/noti'
 import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
+import { auth } from '@app/server/firebase'
+import { IEventDetail } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
@@ -11,7 +14,7 @@ import { userStore } from '@app/stores/user'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplyIcon from '@mui/icons-material/Reply'
-import { Container, Typography } from '@mui/material'
+import { TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -20,9 +23,12 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Snackbar from '@mui/material/Snackbar'
+import { Container } from '@mui/system'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
+
 import { bonusTypeEnum } from './Add'
 
 const LunchDetail = () => {
@@ -30,22 +36,23 @@ const LunchDetail = () => {
   const navigate = useNavigate()
   // params
   const params = useParams<{ id: string }>()
-
+  const [loggedInUser] = useAuthState(auth)
   //store
   const { uid } = useAppSelector(userStore)!
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
   const listUser = useAppSelector(listUserStore)
 
+  // calc - memo
+  const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
+  const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
+
   // state
+  const [memberNote, setMemberNote] = useState(userInEvent.find((item) => item.uid === (loggedInUser?.uid || ''))?.note || '')
   const [openAlert, setOpenAlert] = useState('')
   const [loading, setLoading] = useState(true)
   const [disableNoti, setDisableNoti] = useState<boolean>(false)
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false)
-
-  // calc - memo
-  const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
-  const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
 
   const isHost = useMemo(() => eventInfo?.userPayId === uid, [eventInfo?.userPayId, uid])
   const hostInfo = useMemo(() => listUser.find((user) => user.uid === eventInfo?.userPayId), [eventInfo?.userPayId, listUser])
@@ -117,6 +124,11 @@ const LunchDetail = () => {
     })
   }, [params, navigate])
 
+  const handleAddNote = (memberId: string) => {
+    const tempLoggedMember: IEventDetail = userInEvent.find((item: IEventDetail) => item.id === memberId)!
+    updateEventDetail(memberId, { ...tempLoggedMember, note: memberNote })
+  }
+
   return loading ? (
     <LoadingScreen />
   ) : (
@@ -146,8 +158,7 @@ const LunchDetail = () => {
           <span className="font-bold">{openAlert}</span>
         </Alert>
       </Snackbar>
-
-      <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl w-19">
+      <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
         <Container>
           <div className="flex justify-between p-3">
             <button
@@ -242,6 +253,7 @@ const LunchDetail = () => {
                     <th scope="col" className="py-3">
                       Thành viên
                     </th>
+                    <th>Note</th>
                     <th scope="col" className="py-3 text-center">
                       Bill
                     </th>
@@ -264,6 +276,16 @@ const LunchDetail = () => {
                           />
                           <span className="ml-3">{user.name || user.email}</span>
                         </label>
+                      </td>
+                      <td>
+                        {loggedInUser?.uid === user.uid ? (
+                          <>
+                            <TextField value={memberNote} onChange={(e) => setMemberNote(e.target.value)} />
+                            <Button onClick={() => handleAddNote(user.id || '')}>save</Button>
+                          </>
+                        ) : (
+                          user.note
+                        )}
                       </td>
                       <td className="text-center">{formatMoney(user.amount, false)}</td>
                       <td className="text-right">{formatMoney(user.amountToPay, false)}</td>

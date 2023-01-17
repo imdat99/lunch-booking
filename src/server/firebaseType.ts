@@ -45,6 +45,8 @@ export interface IEventDetail {
   amount?: number
   count?: number
   amountToPay?: number
+  isGuess?: boolean
+  note?: string
 }
 export interface INoti {
   id?: string
