@@ -2,9 +2,9 @@
 import ProfilePicture from '@app/assets/profile-picture.png'
 import { getHomeDataByUid } from '@app/libs/api/home'
 import { auth } from '@app/server/firebase'
-import { store } from '@app/stores'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { listUserStore } from '@app/stores/listUser'
+import { clearNotiList } from '@app/stores/noti'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -21,8 +21,6 @@ import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
-import { clearNotiList } from '@app/stores/noti'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
