@@ -1,7 +1,7 @@
 // import { ReactComponent as DishImg } from '@app/assets/react.svg'
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
-import { setEvent, setEventDetail, updateEvent, updateEventDetail, updatePayCount } from '@app/libs/api/EventApi'
+import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updateEventDetail, updatePayCount } from '@app/libs/api/EventApi'
 import { auth } from '@app/server/firebase'
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
@@ -136,7 +136,7 @@ function Add() {
     }
   }
   const [open, setOpen] = useState(false)
-  const handleDelete = (member: User) => {
+  const handleDelete = (member: IEventDetail) => {
     const newSelectedMember = [...selectedListMember]
     const index = newSelectedMember.findIndex((u) => u.uid === member.uid)
     if (index > -1) {
@@ -192,13 +192,23 @@ function Add() {
   const handleCreateEvent = async () => {
     const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
     const eventData = { ...eventState, isAllPaid, bonusType }
+    const listDeletedFromData = _.differenceWith(userInEvent, selectedListMember, _.isEqual)
+    for (const item of listDeletedFromData) {
+      if (item.id) {
+        deleteEventDetail(item.id)
+      }
+    }
     if (params.id) {
       const { isSuccess, eventId } = await updateEvent(params.id, eventData)
       if (isSuccess) {
         const promises: Promise<any>[] = []
         selectedListMember.map((member) => {
           const eventDetail = { ...member, eventId }
-          if (member.id) promises.push(updateEventDetail(member.id, eventDetail))
+          if (member.id) {
+            promises.push(updateEventDetail(member.id, eventDetail))
+          } else {
+            promises.push(setEventDetail(eventDetail))
+          }
         })
         await Promise.all(promises)
         setOpenModalSuccess(true)
@@ -265,6 +275,7 @@ function Add() {
     const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
     const total = (eventState.billAmount || 0) + bonus
     setEventState({ ...eventState, totalAmount: total })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventState.billAmount])
 
   const onChangeBillOwner = (_event: any, selectedUser: any) => {
@@ -290,7 +301,7 @@ function Add() {
         </button>
         <div className="text-center font-[Bellota] text-[24px]">{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</div>
         <Box className="w-full flex justify-center">
-          <CardStyled variant="outlined" className="mx-5 md:px-3 md:max-w-xl">
+          <CardStyled variant="outlined" className="mx-5 md:px-3 md:max-w-xxl">
             <CardContent>
               <Box className="mt-6">
                 <TextFieldStyled
