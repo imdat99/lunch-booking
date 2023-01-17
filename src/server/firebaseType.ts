@@ -33,6 +33,7 @@ export interface IEvent {
   totalAmount?: number
   isAllPaid?: boolean
   bonusType?: bonusTypeEnum
+  note?: string
 }
 export interface IEventDetail {
   id?: string | null
@@ -53,6 +54,12 @@ export interface INoti {
   toUids: string[]
   userSeen: string[]
   eventId: string
+  type: 'DemandPayment' | 'PaymentNotice'
+}
+
+export interface ILastTimeCheckNoti {
+  uid:string
+  checkTime:number
 }
 
 export interface IAllowedEmail {

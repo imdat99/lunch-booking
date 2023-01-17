@@ -24,7 +24,7 @@ export default function NotificationCard(props: NotificationCardProps) {
           width: '100%',
           padding: '0.93rem',
           paddingBottom: '0.688rem',
-          maxWidth: { xs: '21.87rem', sm: 'unset' },
+          maxWidth: '21.87rem',
           backgroundColor: props.isRead ? '#9C9C9C' : '#FFFFFF',
           // boxShadow:"0 0.25rem rgba(0, 0, 0, 0.3)"
         }}

@@ -14,7 +14,7 @@ import Router from './router/Router'
 import { auth } from './server/firebase'
 import { useAppDispatch } from './stores/hook'
 import { setListUser } from './stores/listUser'
-import { addNewNotiCome } from './stores/noti'
+import { addNewNotiCome , initializeNotiList , updateNewNotiCount} from './stores/noti'
 import { initializeUser } from './stores/user'
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -26,19 +26,27 @@ function App() {
       dispatch(setListUser(e))
     })
     if (loggedInUser) {
-      getAllowedEmail(loggedInUser?.email || '').then((isAllowed) => {
-        if (isAllowed) {
-          const { uid } = loggedInUser!
-          dispatch(initializeUser(loggedInUser!))
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _unscribe = listenCommingNoti(uid, (noti) => {
-            dispatch(addNewNotiCome(noti))
-          })
-          getListEventDetail()
-        } else {
-          hadleLogout()
-        }
+      // getAllowedEmail(loggedInUser?.email || '').then((isAllowed) => {
+      //   if (isAllowed) {
+      //     const { uid } = loggedInUser!
+      //     dispatch(initializeUser(loggedInUser!))
+      //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      //     const _unscribe = listenCommingNoti(uid, (noti) => {
+      //       dispatch(addNewNotiCome(noti))
+      //     })
+      //     getListEventDetail()
+      //   } else {
+      //     hadleLogout()
+      //   }
+      // })
+      const { uid } = loggedInUser
+      dispatch(initializeUser(loggedInUser))
+      dispatch(initializeNotiList(uid))
+      const _unscribe = listenCommingNoti(uid, (noti) => {
+        dispatch(addNewNotiCome(noti))
+        dispatch(updateNewNotiCount(uid))
       })
+      getListEventDetail()
     }
   }, [dispatch, loggedInUser])
 

@@ -1,7 +1,7 @@
 import { INoti } from '@app/server/firebaseType'
-import { NotiColection, NotiDetail } from '@app/server/useDB'
+import { NotiColection, NotiDetail , LastTimeCheckNotiColection , LastTimeCheckNotiDetail} from '@app/server/useDB'
 import { store } from '@app/stores'
-import { addDoc, onSnapshot, query, updateDoc, where , startAfter , orderBy , limit , Query , getDocs , DocumentSnapshot, serverTimestamp} from 'firebase/firestore'
+import { addDoc, onSnapshot, query, updateDoc, where , startAfter , orderBy , limit , Query , getDoc , getDocs , DocumentSnapshot, getCountFromServer ,setDoc ,doc} from 'firebase/firestore'
 import dayjs from 'dayjs'
 
 export const createNoti = async (data: Partial<INoti>) => {
@@ -25,6 +25,25 @@ export async function setUserSeen(uid:string,noti:INoti) {
 export async function IsEventNoticed(eventId:string){
   try {
     var queryState = query(NotiColection, where('eventId', '==', eventId))
+    const res = await getDocs(queryState)
+    return res.docs.length > 0
+  } catch (error) {
+    console.log('ERROR GETTING NOTI OF EVENT IN DB', error)
+  }
+}
+export async function IsDemandPaymentNoticed(eventId:string){
+  try {
+    var queryState = query(NotiColection, where('eventId', '==', eventId),where('type','==',"DemandPayment"))
+    const res = await getDocs(queryState)
+    return res.docs.length > 0
+  } catch (error) {
+    console.log('ERROR GETTING NOTI OF EVENT IN DB', error)
+  }
+}
+
+export async function IsPaymentNoticed(eventId:string,uid:string){
+  try {
+    var queryState = query(NotiColection, where('eventId', '==', eventId),where('type','==',"PaymentNotice"),where('fromUid','==',uid))
     const res = await getDocs(queryState)
     return res.docs.length > 0
   } catch (error) {
@@ -71,3 +90,41 @@ export async function getListNotiByPage(uid: string,afterSnapShot : DocumentSnap
     console.log('ERROR GETTING NOTIFICATIONS IN DB', error)
   }
 }
+
+
+export const updateLastTimeCheckNoti = async (uid: string) => {
+  try {
+    await setDoc(
+      doc(LastTimeCheckNotiColection, uid),
+      {
+        uid,
+        checkTime: dayjs(Date.now()).unix(),
+      },
+      { merge: true }
+    )
+  } catch (error) {
+    console.log('ERROR UPDATE NOTI TIME CHECKING IN DB',error)
+  }
+}
+
+async function getLastTimeCheckNoti(uid: string){
+  try {
+    const res = await getDoc(LastTimeCheckNotiDetail(uid))
+    return res.data()?.checkTime
+  } catch (error) {
+    console.log('ERROR GET LAST TIME CHECK NOTI IN DB',error)
+  }
+}
+
+
+export async function getCountNewNotice(uid: string){
+  try {
+    const lastTimeCheck = await getLastTimeCheckNoti(uid)
+    const queryState = query(NotiColection, where('toUids', 'array-contains', uid),where('date','>',lastTimeCheck))
+    const resCount = await getCountFromServer(queryState)
+    return resCount.data().count
+  } catch (error) {
+    console.log('ERROR GET LAST TIME CHECK NOTI IN DB',error)
+  }
+}
+
