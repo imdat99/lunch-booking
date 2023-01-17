@@ -1,7 +1,8 @@
 import { getListUser } from '@app/libs/api/EventApi'
-import { User } from '@app/server/firebaseType'
+import { IEventDetail, User } from '@app/server/firebaseType'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import { Box, Button, Modal, TextField, Typography } from '@mui/material'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
@@ -10,7 +11,7 @@ type PropsType = {
   open: boolean
   setOpen: any
   handleSelectedMember: any
-  selectedListMember: User[]
+  selectedListMember: IEventDetail[]
 }
 const style = {
   position: 'absolute',
@@ -26,13 +27,10 @@ const style = {
   maxHeight: '75%',
 }
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }: PropsType) {
-  const [allMembers, setAllMembers] = useState<User[]>([])
+  const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
-
-  // const { selectedListMember } = useAppSelector(billStore)
-  const [selectingMembers, setSelectingMembers] = useState<User[]>([...selectedListMember])
-  // const dispatch = useAppDispatch()
-  const handleClickRow = (user: User) => {
+  const [selectingMembers, setSelectingMembers] = useState<IEventDetail[]>([...selectedListMember])
+  const handleClickRow = (user: IEventDetail) => {
     const tempMembers = [...selectingMembers]
     const index = tempMembers.findIndex((u) => u.uid === user.uid)
     if (index > -1) {
@@ -43,18 +41,17 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
     setSelectingMembers(tempMembers)
   }
   const handleAdd = () => {
-    const formatSelectingMembers: User[] = []
+    const formatSelectingMembers: IEventDetail[] = []
 
-    selectingMembers.map((member: User) =>
+    selectingMembers.map((member: IEventDetail) =>
       formatSelectingMembers.push({
+        ...member,
         uid: member.uid,
         name: member.name,
         email: member.email,
       })
     )
     handleSelectedMember(formatSelectingMembers)
-    // dispatch(setSelectedListMember(formatSelectingMembers))
-    // setSelectingMembers([])
     setOpen(false)
   }
 
@@ -65,7 +62,8 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
 
   useEffect(() => {
     getListUser().then((allMembers) => {
-      const uniqueListMembers = removeDuplicateMembers(allMembers)
+      const allMemberAndOthers = [...allMembers, ...selectingMembers]
+      const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
       setAllMembers(uniqueListMembers)
     })
   }, [])
@@ -82,16 +80,24 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
   const handleAddNewMember = () => {
     const tempListSelectingMember = _.cloneDeep(selectingMembers)
     const tempListAllMember = _.cloneDeep(allMembers)
-    const newMember = {
+    const newMember: IEventDetail = {
       name: newMemberName,
       uid: (Math.random() + 1).toString(36).substring(7),
       email: 'người ngoài chưa được set tên',
+      isGuess: true,
     }
     tempListSelectingMember.push(newMember)
     tempListAllMember.push(newMember)
     setSelectingMembers(tempListSelectingMember)
     setAllMembers(tempListAllMember)
     setNewMemberName('')
+  }
+  const dellMember = (uid: string) => {
+    const tempMember = _.cloneDeep(allMembers)
+    const listMemberAfterDel = tempMember.filter((item) => item.uid !== uid)
+    const filterListSelectingMember = selectingMembers.filter((item) => item.uid !== uid)
+    setAllMembers(listMemberAfterDel)
+    setSelectingMembers(filterListSelectingMember)
   }
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
@@ -100,13 +106,19 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        {allMembers?.map((item: User) => (
-          <Box
-            key={item.uid}
-            className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
-            onClick={() => handleClickRow(item)}
-          >
-            <Typography>{item.name || item.email || 'no name'}</Typography>
+        {allMembers?.map((item: IEventDetail) => (
+          <Box className="flex w-full" key={item.uid}>
+            <Box
+              className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
+              onClick={() => handleClickRow(item)}
+            >
+              <Typography>{item.name || item.email || 'no name'}</Typography>
+            </Box>
+            {item.isGuess && item.uid && (
+              <Button onClick={() => dellMember(item.uid || '')}>
+                <DeleteForeverIcon />
+              </Button>
+            )}
           </Box>
         ))}
         <Typography variant="h5" sx={{ marginBottom: '10px' }}>
@@ -114,7 +126,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
         </Typography>
         <Box className="flex">
           <TextField value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className="w-full" />
-          <Button onClick={handleAddNewMember}>
+          <Button onClick={handleAddNewMember} disabled={!newMemberName}>
             <AddIcon />
           </Button>
         </Box>

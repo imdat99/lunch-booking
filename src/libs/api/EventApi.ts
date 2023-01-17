@@ -1,6 +1,6 @@
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { EventColection, EventDetail, EventDetailColection, EventRef, UserDetail, usersColection } from '@app/server/useDB'
-import { addDoc, getDocs, updateDoc } from 'firebase/firestore'
+import { addDoc, deleteDoc, getDocs, updateDoc } from 'firebase/firestore'
 
 export const getListUser = async () => {
   const userDocs = await getDocs(usersColection)
@@ -30,13 +30,22 @@ export const setEventDetail = async (data: IEventDetail) => {
   return { isSuccess, eventId }
 }
 
-export const updateEventDetail = async (eventId: string, data: IEvent) => {
+export const updateEventDetail = async (eventDetailId: string, data: IEventDetail) => {
   let isSuccess = false
-  await updateDoc(EventDetail(eventId), data).then(() => {
+  await updateDoc(EventDetail(eventDetailId), data).then(() => {
     isSuccess = true
   })
-  return { isSuccess, eventId }
+  return { isSuccess, eventDetailId }
 }
+
+export const deleteEventDetail = async (eventDetailId: string) => {
+  let isSuccess = false
+  await deleteDoc(EventDetail(eventDetailId)).then(() => {
+    isSuccess = true
+  })
+  return isSuccess
+}
+
 export const updateEvent = async (eventId: string, data: IEvent) => {
   let isSuccess = false
   await updateDoc(EventRef(eventId), data).then(() => {
