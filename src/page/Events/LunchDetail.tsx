@@ -56,7 +56,7 @@ const LunchDetail = () => {
   const [loading, setLoading] = useState(true)
   const [disableNoti, setDisableNoti] = useState<boolean>(false)
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false)
-  const [alertMessage, setAlertMessage] = useState<boolean>(false)
+  const [alertMessage, setAlertMessage] = useState<string>('')
 
   const isHost = useMemo(() => eventInfo?.userPayId === uid, [eventInfo?.userPayId, uid])
   const hostInfo = useMemo(() => listUser.find((user) => user.uid === eventInfo?.userPayId), [eventInfo?.userPayId, listUser])
