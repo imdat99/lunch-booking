@@ -1,21 +1,19 @@
 import { Link } from 'react-router-dom'
 import { Card, CardHeader, Avatar } from '@mui/material'
-import {ReactNode} from 'react'
+import { ReactNode } from 'react'
 
 interface NotificationCardProps {
   link: string
   time: string
   content: ReactNode
   isRead: boolean
-  avatarSrc : string
-  onClick ?: ()=>void
+  avatarSrc: string
+  onClick?: () => void
 }
 
 export default function NotificationCard(props: NotificationCardProps) {
   return (
-    <Link to={props.link}          
-      onClick={props.onClick}
-    >
+    <Link to={props.link} onClick={props.onClick}>
       <Card
         sx={{
           margin: 'auto',
@@ -24,7 +22,6 @@ export default function NotificationCard(props: NotificationCardProps) {
           width: '100%',
           padding: '0.93rem',
           paddingBottom: '0.688rem',
-          maxWidth: '21.87rem',
           backgroundColor: props.isRead ? '#9C9C9C' : '#FFFFFF',
           // boxShadow:"0 0.25rem rgba(0, 0, 0, 0.3)"
         }}
