@@ -11,8 +11,10 @@ import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { listUserStore } from '@app/stores/listUser'
 import { userStore } from '@app/stores/user'
+import TextareaAutosize from '@mui/base/TextareaAutosize'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import DeleteIcon from '@mui/icons-material/Delete'
+import DoneIcon from '@mui/icons-material/Done'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
@@ -28,8 +30,8 @@ import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { bonusTypeEnum } from './Add'
+
 
 const LunchDetail = () => {
   // navigate
@@ -53,6 +55,7 @@ const LunchDetail = () => {
   const [loading, setLoading] = useState(true)
   const [disableNoti, setDisableNoti] = useState<boolean>(false)
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false)
+  const [alertMessage, setAlertMessage] = useState<boolean>(false)
 
   const isHost = useMemo(() => eventInfo?.userPayId === uid, [eventInfo?.userPayId, uid])
   const hostInfo = useMemo(() => listUser.find((user) => user.uid === eventInfo?.userPayId), [eventInfo?.userPayId, listUser])
@@ -87,7 +90,7 @@ const LunchDetail = () => {
   useEffect(() => {
     async function checkEventNoticed(eventId: string) {
       const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId, uid!)
-      console.log(isNoticed)
+
       setDisableNoti(isNoticed!)
     }
     if (eventInfo) checkEventNoticed(eventInfo.id!)
@@ -124,9 +127,19 @@ const LunchDetail = () => {
     })
   }, [params, navigate])
 
-  const handleAddNote = (memberId: string) => {
-    const tempLoggedMember: IEventDetail = userInEvent.find((item: IEventDetail) => item.id === memberId)!
-    updateEventDetail(memberId, { ...tempLoggedMember, note: memberNote })
+  const handleAddNote = async (memberId: string) => {
+    try {
+      const tempLoggedMember: IEventDetail = userInEvent.find((item: IEventDetail) => item.id === memberId)!
+      await updateEventDetail(memberId, { ...tempLoggedMember, note: memberNote })
+      setAlertMessage('Cập nhật member note thành công!')
+    } catch (e) {
+      setAlertMessage('Lỗi khi cập nhật member note')
+      console.log('ERROR WHEN UPDATE NOTE', e)
+    }
+  }
+
+  const handleCloseAlert = () => {
+    setAlertMessage('')
   }
 
   return loading ? (
@@ -264,32 +277,41 @@ const LunchDetail = () => {
                 </thead>
                 <tbody>
                   {userInEvent.map((user) => (
-                    <tr key={user.uid}>
-                      <td>
-                        <label className="inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="w-6 h-6 accent-green-600 text-green-600 border-0 rounded-md focus:ring-0"
-                            readOnly
-                            disabled={!user.isPaid}
-                            checked={user.isPaid}
-                          />
-                          <span className="ml-3">{user.name || user.email}</span>
-                        </label>
-                      </td>
-                      <td>
-                        {loggedInUser?.uid === user.uid ? (
-                          <>
-                            <TextField value={memberNote} onChange={(e) => setMemberNote(e.target.value)} />
-                            <Button onClick={() => handleAddNote(user.id || '')}>save</Button>
-                          </>
-                        ) : (
-                          user.note
-                        )}
-                      </td>
-                      <td className="text-center">{formatMoney(user.amount, false)}</td>
-                      <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
-                    </tr>
+                    <>
+                      <tr key={user.uid}>
+                        <td>
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="w-6 h-6 accent-green-600 text-green-600 border-0 rounded-md focus:ring-0"
+                              readOnly
+                              disabled={!user.isPaid}
+                              checked={user.isPaid}
+                            />
+                            <span className="ml-3">{user.name || user.email}</span>
+                          </label>
+                        </td>
+
+                        <td className="text-center">{formatMoney(user.amount, false)}</td>
+                        <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
+                      </tr>
+                      <tr key={`user-note-${user.uid}`}>
+                        <td className="w-full">
+                          {loggedInUser?.uid === user.uid ? (
+                            <>
+                              <TextField size="small" value={memberNote} onChange={(e) => setMemberNote(e.target.value)} />
+                            </>
+                          ) : (
+                            user.note
+                          )}
+                        </td>
+                        <td>
+                          {loggedInUser?.uid === user.uid && (
+                            <DoneIcon sx={{ color: 'green', cursor: 'pointer' }} onClick={() => handleAddNote(user.id || '')} />
+                          )}
+                        </td>
+                      </tr>
+                    </>
                   ))}
                 </tbody>
                 <tfoot>
@@ -304,9 +326,15 @@ const LunchDetail = () => {
               </table>
             </div>
           </div>
+          <div>
+            <span className="text-gray-400 font-bold block mb-3 pt-[10px]">Note</span>
+            <div>
+              <TextareaAutosize value={eventInfo?.note || ''} minRows={1} style={{ width: 200 }} />
+            </div>
+          </div>
           {!isPaid ? (
             <>
-              <div className="my-3">
+              <div className="my-3 border-y-[1px] border-gray-400">
                 <span className="text-gray-400 font-bold block mb-3">Bank Account</span>
                 <p>
                   Chủ tài khoản: {hostInfo?.bankAccountName} <br />
@@ -364,6 +392,11 @@ const LunchDetail = () => {
           )}
         </div>
       </Container>
+      <Snackbar open={!!alertMessage} autoHideDuration={1500} onClose={handleCloseAlert} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert onClose={handleCloseAlert} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+          <span className="font-bold"> {alertMessage} </span>
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

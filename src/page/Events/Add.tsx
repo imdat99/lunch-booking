@@ -27,13 +27,15 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
-import { Container, useTheme } from '@mui/system'
+import { Container } from '@mui/system'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
+import './style.css'
+
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
@@ -492,31 +494,24 @@ function Add() {
                   error={!eventState.billAmount}
                 />
               </Box>
-              <TextField
-                sx={(theme) => {
-                  return {
-                    marginTop: '15px',
-                    '& .MuiFormLabel-root': {
-                      ...theme.typography.h6,
-                    },
-                  }
-                }}
-                multiline
-                rows={2}
-                maxRows={4}
-                fullWidth
-                variant="standard"
-                label="Note hóa đơn (Optional)"
+
+              <Typography variant="subtitle2" sx={{ marginTop: '10px' }}>
+                Note
+              </Typography>
+              <TextareaAutosize
+                className="bill-note-textarea"
+                name="billNote"
                 value={eventState.note}
+                style={{ width: '100%', fontFamily: 'Bellota', borderBottom: '1px solid #9c9c9c' }}
                 onChange={(e) =>
                   setEventState((prev) => {
                     return { ...prev, note: e.target.value }
                   })
                 }
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                maxRows={5}
+                minRows={2}
               />
+
               <Box className="mt-5 flex items-center justify-between">
                 <FormControl>
                   <Typography variant="subtitle2">Hoa hồng</Typography>
