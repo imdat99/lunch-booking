@@ -600,7 +600,7 @@ function Add() {
               </Box>
               {/* Submit button */}
               <Box className="flex justify-center my-7">
-                <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers}>
+                <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers || !eventState.billAmount}>
                   <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
                 </ButtonStyled>
               </Box>
