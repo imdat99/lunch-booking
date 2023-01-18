@@ -150,15 +150,15 @@ const Profile = () => {
 
   // Form validation
   const validationSchema = yup.object().shape({
-    name: yup.string().required('Vui lòng nhập tên').max(50, 'Tên không được quá 50 kí tự'),
+    name: yup.string().required('Vui lòng nhập tên').max(30, 'Tên không được quá 30 kí tự'),
     ldapAcc: yup.string().max(10, 'LDAP không quá 10 kí tự'),
     phone: yup
       .string()
       .matches(/^[0-9]*$/, 'Số điện thoại không được có kí tự')
       .max(20, 'Số điện thoại không quá 20 số'),
     address: yup.string().max(50, 'Địa chỉ không quá 50 kí tự'),
-    bankName: yup.string().required('Vui lòng nhập tên ngân hàng').max(50, 'Tên ngân hàng không được quá 50 kí tự'),
-    bankAccountName: yup.string().required('Vui lòng nhập tên').max(50, 'Tên không được quá 50 kí tự'),
+    bankName: yup.string().required('Vui lòng nhập tên ngân hàng').max(30, 'Tên ngân hàng không được quá 30 kí tự'),
+    bankAccountName: yup.string().required('Vui lòng nhập tên').max(30, 'Tên không được quá 30 kí tự'),
     bankAccount: yup.string().required('Vui lòng nhập số tài khoản').max(20, 'Số tài khoản không được quá 20 kí tự'),
   })
 
