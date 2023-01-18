@@ -19,6 +19,7 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
 import TextField from '@mui/material/TextField'
+import { Container } from '@mui/system'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
@@ -152,166 +153,185 @@ const Profile = () => {
         <LoadingScreen />
       ) : (
         <div className="min-h-screen bg-white">
-          <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
-            <div className="flex justify-between self-stretch">
-              <button className="px-4">
-                <ReplyIcon
-                  onClick={() => {
-                    history.back()
-                  }}
-                  fontSize={'large'}
-                />
-              </button>
-              {isLoginUser && (
-                <button className="px-4" onClick={logout}>
-                  <LogoutIcon fontSize={'large'} />
-                </button>
-              )}
-            </div>
-            {isLoginUser ? (
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                badgeContent={
-                  <IconButton color="primary" aria-label="upload picture" component="label" onChange={handlePreviewAvatarChange}>
-                    <input hidden accept="image/*" type="file" />
-                    <div className="bg-white w-[40px] h-[40px] rounded-full">
-                      <AccountCircleSharpIcon sx={{ width: 40, height: 40 }} />
-                    </div>
-                  </IconButton>
-                }
-              >
-                <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
-              </Badge>
-            ) : (
-              <Avatar alt="avatar" src={currentMember?.photoURL!} sx={{ width: 120, height: 120 }} />
-            )}
-            <span className="py-2 text-xl">{currentMember?.name || ''}</span>
-            <span className="pt-2 text-md">
-              <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
-              <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
-            </span>
-          </div>
-          <div className="px-6 py-4">
-            <Formik
-              initialValues={{ ...userFormData }}
-              onSubmit={(values) => {
-                handleSubmitMember(values)
-              }}
-            >
-              {({ values, handleChange, handleBlur, handleSubmit }) => (
-                <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                  <TextField
-                    label="Tên hiển thị"
-                    variant="standard"
-                    fullWidth={true}
-                    id="name"
-                    name="name"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={!isLoginUser}
-                  />
-                  <TextField
-                    label="LDAP"
-                    variant="standard"
-                    fullWidth={true}
-                    id="ldapAcc"
-                    name="ldapAcc"
-                    value={values.ldapAcc}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={!isLoginUser}
-                  />
-
-                  <TextField
-                    label="Điện thoại"
-                    variant="standard"
-                    fullWidth={true}
-                    id="phone"
-                    name="phone"
-                    value={values.phone}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={!isLoginUser}
-                  />
-                  <TextField
-                    label="Địa chỉ"
-                    variant="standard"
-                    fullWidth={true}
-                    id="address"
-                    name="address"
-                    value={values.address}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                  />
-                  <TextField
-                    label="Ngân hàng"
-                    variant="standard"
-                    fullWidth={true}
-                    id="bankName"
-                    name="bankName"
-                    value={values.bankName}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                  />
-                  <TextField
-                    label="Chủ tài khoản"
-                    variant="standard"
-                    fullWidth={true}
-                    id="bankAccountName"
-                    name="bankAccountName"
-                    value={values.bankAccountName}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                  />
-                  <TextField
-                    label="Số tài khoản"
-                    variant="standard"
-                    fullWidth={true}
-                    id="bankAccount"
-                    name="bankAccount"
-                    value={values.bankAccount}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                  />
-                  <div className="flex flex-col pt-2 pb-8">
-                    <span className="font-serif text-sm">Mã QR</span>
-                    <div className="self-center pt-3">
-                      {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
-                      {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
-                    </div>
-                    {isLoginUser && (
-                      <>
-                        <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
-                          <input hidden accept="image/*" type="file" />
-                          <PhotoCamera fontSize={'large'} />
-                        </IconButton>
-                        <Button variant="contained" type="submit" className="self-center" disabled={status === 'updating'}>
-                          Save
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </form>
-              )}
-            </Formik>
-          </div>
-          {showMessage && (
-            <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-                {showMessage === 'success' ? (
-                  <span className="font-bold"> {'Cập nhật user thành công!'} </span>
+          <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] ">
+            <Container>
+              <div className="h-72 rounded-b-2xl flex flex-col items-center justify-center">
+                <div className="flex justify-between self-stretch">
+                  <button className="px-4">
+                    <ReplyIcon
+                      onClick={() => {
+                        history.back()
+                      }}
+                      fontSize={'large'}
+                    />
+                  </button>
+                  {isLoginUser && (
+                    <button className="px-4" onClick={logout}>
+                      <LogoutIcon fontSize={'large'} />
+                    </button>
+                  )}
+                </div>
+                {isLoginUser ? (
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    badgeContent={
+                      <IconButton color="primary" aria-label="upload picture" component="label" onChange={handlePreviewAvatarChange}>
+                        <input hidden accept="image/*" type="file" />
+                        <div className="bg-white w-[40px] h-[40px] rounded-full">
+                          <AccountCircleSharpIcon sx={{ width: 40, height: 40 }} />
+                        </div>
+                      </IconButton>
+                    }
+                  >
+                    <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
+                  </Badge>
                 ) : (
-                  <span className="font-bold"> {'Cập nhật thất bại!'} </span>
+                  <Avatar alt="avatar" src={currentMember?.photoURL || ''} sx={{ width: 120, height: 120 }} />
                 )}
-              </Alert>
-            </Snackbar>
-          )}
+                <span className="py-2 text-xl">{currentMember?.name || ''}</span>
+                <span className="pt-2 text-md">
+                  <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
+                  <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
+                </span>
+              </div>
+            </Container>
+          </div>
+          <Container>
+            <div className="px-6 py-4">
+              <Formik
+                initialValues={{ ...userFormData }}
+                onSubmit={(values) => {
+                  handleSubmitMember(values)
+                }}
+              >
+                {({ values, handleChange, handleBlur, handleSubmit }) => (
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                    <TextField
+                      label="Tên hiển thị"
+                      variant="standard"
+                      fullWidth={true}
+                      id="name"
+                      name="name"
+                      value={values.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!isLoginUser}
+                      error={!values.name || values.name.length > 50}
+                    />
+                    <TextField
+                      label="LDAP"
+                      variant="standard"
+                      fullWidth={true}
+                      id="ldapAcc"
+                      name="ldapAcc"
+                      value={values.ldapAcc}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!isLoginUser}
+                      error={!values.ldapAcc || values.ldapAcc.length > 10}
+                    />
+
+                    <TextField
+                      label="Điện thoại"
+                      variant="standard"
+                      fullWidth={true}
+                      id="phone"
+                      name="phone"
+                      value={values.phone}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!isLoginUser}
+                      type={'number'}
+                      error={!values.phone || values.phone.length > 20}
+                    />
+                    <TextField
+                      label="Địa chỉ"
+                      variant="standard"
+                      fullWidth={true}
+                      id="address"
+                      name="address"
+                      value={values.address}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      error={!values.address || values.address.length > 50}
+                    />
+                    <TextField
+                      label="Ngân hàng"
+                      variant="standard"
+                      fullWidth={true}
+                      id="bankName"
+                      name="bankName"
+                      value={values.bankName}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      error={!values.bankName || values.bankName.length > 50}
+                    />
+                    <TextField
+                      label="Chủ tài khoản"
+                      variant="standard"
+                      fullWidth={true}
+                      id="bankAccountName"
+                      name="bankAccountName"
+                      value={values.bankAccountName}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      error={!values.bankName || values.bankName.length > 50}
+                    />
+                    <TextField
+                      label="Số tài khoản"
+                      variant="standard"
+                      fullWidth={true}
+                      id="bankAccount"
+                      name="bankAccount"
+                      value={values.bankAccount}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      error={!values.bankAccount || values.bankAccount.length > 20}
+                    />
+                    <div className="flex flex-col pt-2 pb-8">
+                      <span className="font-serif text-sm">Mã QR</span>
+                      <div className="self-center pt-3">
+                        {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
+                        {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
+                      </div>
+                      {isLoginUser && (
+                        <>
+                          <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
+                            <input hidden accept="image/*" type="file" />
+                            <PhotoCamera fontSize={'large'} />
+                          </IconButton>
+                          <Button
+                            variant="contained"
+                            type="submit"
+                            className="self-center"
+                            disabled={status === 'updating' || !values.name || !values.bankName || !values.bankAccountName || !values.bankAccount}
+                          >
+                            Save
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </form>
+                )}
+              </Formik>
+            </div>
+            {showMessage && (
+              <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+                  {showMessage === 'success' ? (
+                    <span className="font-bold"> {'Cập nhật user thành công!'} </span>
+                  ) : (
+                    <span className="font-bold"> {'Cập nhật thất bại!'} </span>
+                  )}
+                </Alert>
+              </Snackbar>
+            )}
+          </Container>
         </div>
       )}
     </>
