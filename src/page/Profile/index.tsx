@@ -23,6 +23,7 @@ import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import * as yup from 'yup'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -146,6 +147,24 @@ const Profile = () => {
     }
   }
 
+  // Form validation
+  const validationSchema = yup.object().shape({
+    name: yup.string().required('Vui lòng nhập tên').max(50, 'Tên không được quá 50 kí tự'),
+    ldapAcc: yup.string().max(10, 'LDAP không quá 10 kí tự'),
+    phone: yup
+      .string()
+      .matches(/^[0-9]*$/, 'Số điện thoại không được có kí tự')
+      .max(20, 'Số điện thoại không quá 20 số'),
+    address: yup.string().max(50, 'Địa chỉ không quá 50 kí tự'),
+    bankName: yup.string().required('Vui lòng nhập tên ngân hàng').max(50, 'Tên ngân hàng không được quá 50 kí tự'),
+    bankAccountName: yup.string().required('Vui lòng nhập tên').max(50, 'Tên không được quá 50 kí tự'),
+    bankAccount: yup.string().required('Vui lòng nhập số tài khoản').max(20, 'Số tài khoản không được quá 20 kí tự'),
+  })
+
+  function isInvalidForm(errors: any) {
+    return errors.name || errors.bankAccount || errors.bankName || errors.bankAccountName
+  }
+
   return (
     <>
       {loading ? (
@@ -198,8 +217,9 @@ const Profile = () => {
               onSubmit={(values) => {
                 handleSubmitMember(values)
               }}
+              validationSchema={validationSchema}
             >
-              {({ values, handleChange, handleBlur, handleSubmit }) => (
+              {({ values, handleChange, handleBlur, handleSubmit, errors }) => (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                   <TextField
                     label="Tên hiển thị"
@@ -211,7 +231,8 @@ const Profile = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={!isLoginUser}
-                    error={!values.name || values.name.length > 50}
+                    helperText={errors.name || ''}
+                    error={Boolean(errors.name)}
                   />
                   <TextField
                     label="LDAP"
@@ -223,7 +244,8 @@ const Profile = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={!isLoginUser}
-                    error={!values.ldapAcc || values.ldapAcc.length > 10}
+                    helperText={errors.ldapAcc || ''}
+                    error={Boolean(errors.ldapAcc)}
                   />
 
                   <TextField
@@ -236,8 +258,8 @@ const Profile = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={!isLoginUser}
-                    type={'number'}
-                    error={!values.phone || values.phone.length > 20}
+                    helperText={errors.phone || ''}
+                    error={Boolean(errors.phone)}
                   />
                   <TextField
                     label="Địa chỉ"
@@ -249,7 +271,8 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
-                    error={!values.address || values.address.length > 50}
+                    helperText={errors.address || ''}
+                    error={Boolean(errors.address)}
                   />
                   <TextField
                     label="Ngân hàng"
@@ -261,7 +284,8 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
-                    error={!values.bankName || values.bankName.length > 50}
+                    helperText={errors.bankName || ''}
+                    error={Boolean(errors.bankName)}
                   />
                   <TextField
                     label="Chủ tài khoản"
@@ -273,7 +297,8 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
-                    error={!values.bankName || values.bankName.length > 50}
+                    helperText={errors.bankAccountName || ''}
+                    error={Boolean(errors.bankAccountName)}
                   />
                   <TextField
                     label="Số tài khoản"
@@ -285,10 +310,11 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
-                    error={!values.bankAccount || values.bankAccount.length > 20}
+                    helperText={errors.bankAccount || ''}
+                    error={Boolean(errors.bankAccount)}
                   />
-                  <div className="flex flex-col pt-2 pb-8">
-                    <span className="font-serif text-sm">Mã QR</span>
+                  <div className="flex flex-col pb-8">
+                    <span className="font-bellota text-sm">Mã QR</span>
                     <div className="self-center pt-3">
                       {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
                       {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
@@ -299,12 +325,7 @@ const Profile = () => {
                           <input hidden accept="image/*" type="file" />
                           <PhotoCamera fontSize={'large'} />
                         </IconButton>
-                        <Button
-                          variant="contained"
-                          type="submit"
-                          className="self-center"
-                          disabled={status === 'updating' || !values.name || !values.bankName || !values.bankAccountName || !values.bankAccount}
-                        >
+                        <Button variant="contained" type="submit" className="self-center" disabled={isInvalidForm(errors)}>
                           Save
                         </Button>
                       </>
