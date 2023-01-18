@@ -184,7 +184,7 @@ const Profile = () => {
                 <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
               </Badge>
             ) : (
-              <Avatar alt="avatar" src={currentMember?.photoURL!} sx={{ width: 120, height: 120 }} />
+              <Avatar alt="avatar" src={currentMember?.photoURL || ''} sx={{ width: 120, height: 120 }} />
             )}
             <span className="py-2 text-xl">{currentMember?.name || ''}</span>
             <span className="pt-2 text-md">
@@ -211,6 +211,7 @@ const Profile = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={!isLoginUser}
+                    error={!values.name || values.name.length > 50}
                   />
                   <TextField
                     label="LDAP"
@@ -222,6 +223,7 @@ const Profile = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={!isLoginUser}
+                    error={!values.ldapAcc || values.ldapAcc.length > 10}
                   />
 
                   <TextField
@@ -234,6 +236,8 @@ const Profile = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     disabled={!isLoginUser}
+                    type={'number'}
+                    error={!values.phone || values.phone.length > 20}
                   />
                   <TextField
                     label="Địa chỉ"
@@ -245,6 +249,7 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
+                    error={!values.address || values.address.length > 50}
                   />
                   <TextField
                     label="Ngân hàng"
@@ -256,6 +261,7 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
+                    error={!values.bankName || values.bankName.length > 50}
                   />
                   <TextField
                     label="Chủ tài khoản"
@@ -267,6 +273,7 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
+                    error={!values.bankName || values.bankName.length > 50}
                   />
                   <TextField
                     label="Số tài khoản"
@@ -278,6 +285,7 @@ const Profile = () => {
                     onChange={handleChange}
                     disabled={!isLoginUser}
                     onBlur={handleBlur}
+                    error={!values.bankAccount || values.bankAccount.length > 20}
                   />
                   <div className="flex flex-col pt-2 pb-8">
                     <span className="font-serif text-sm">Mã QR</span>
@@ -291,7 +299,12 @@ const Profile = () => {
                           <input hidden accept="image/*" type="file" />
                           <PhotoCamera fontSize={'large'} />
                         </IconButton>
-                        <Button variant="contained" type="submit" className="self-center" disabled={status === 'updating'}>
+                        <Button
+                          variant="contained"
+                          type="submit"
+                          className="self-center"
+                          disabled={status === 'updating' || !values.name || !values.bankName || !values.bankAccountName || !values.bankAccount}
+                        >
                           Save
                         </Button>
                       </>
