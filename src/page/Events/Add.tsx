@@ -10,6 +10,7 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
@@ -386,6 +387,7 @@ function Add() {
                           <TableCell style={{ minWidth: '130px' }}>
                             <Typography variant="subtitle1">Thành Tiền</Typography>
                           </TableCell>
+                          <TableCell>Note</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -442,8 +444,13 @@ function Add() {
                                 />
                               </TableCell>
                               <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                                <Tooltip title={member.note || 'No note'}>
+                                  <RecordVoiceOverIcon sx={{ color: '#439D0D' }} />
+                                </Tooltip>
+                              </TableCell>
+                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
                                 <ButtonStyled onClick={() => handleDelete(member)}>
-                                  <DeleteIcon />
+                                  <DeleteIcon color="error" />
                                 </ButtonStyled>
                               </TableCell>
                             </TableRow>

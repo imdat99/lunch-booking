@@ -25,6 +25,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Snackbar from '@mui/material/Snackbar'
+import Tooltip from '@mui/material/Tooltip'
 import { Container } from '@mui/system'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -298,9 +299,9 @@ const LunchDetail = () => {
                       <tr key={`user-note-${user.uid}`}>
                         <td className="w-full">
                           {loggedInUser?.uid === user.uid ? (
-                            <>
+                            <Tooltip title={memberNote}>
                               <TextField size="small" value={memberNote} onChange={(e) => setMemberNote(e.target.value)} />
-                            </>
+                            </Tooltip>
                           ) : (
                             user.note
                           )}
@@ -330,6 +331,12 @@ const LunchDetail = () => {
             <span className="text-gray-400 font-bold block mb-3 pt-[10px]">Note</span>
             <div>
               <TextareaAutosize value={eventInfo?.note || ''} minRows={1} style={{ width: 200 }} />
+            </div>
+          </div>
+          <div>
+            <span className="text-gray-400 font-bold block mb-3 pt-[10px]">Ảnh hoá đơn</span>
+            <div>
+              <img className="w-96 h-auto mx-auto" src={eventInfo?.photoURL || ''} referrerPolicy="no-referrer" alt={'Không có ảnh bill'} />
             </div>
           </div>
           {!isPaid ? (
