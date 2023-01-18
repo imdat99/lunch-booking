@@ -162,7 +162,7 @@ const Profile = () => {
   })
 
   function isInvalidForm(errors: any) {
-    return errors.name || errors.bankAccount || errors.bankName || errors.bankAccountName
+    return errors.name || errors.bankAccount || errors.bankName || errors.bankAccountName || errors.ldapAcc || errors.phone || errors.address
   }
 
   return (
