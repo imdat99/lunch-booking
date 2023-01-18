@@ -1,13 +1,12 @@
 // import { ReactComponent as DishImg } from '@app/assets/react.svg'
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
-import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updateEventDetail, updatePayCount } from '@app/libs/api/EventApi'
+import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount } from '@app/libs/api/EventApi'
 import { auth } from '@app/server/firebase'
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
-import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ReplyIcon from '@mui/icons-material/Reply'
@@ -27,7 +26,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
-import { Container, useTheme } from '@mui/system'
+import { Container } from '@mui/system'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
@@ -192,8 +191,7 @@ function Add() {
   const handleCreateEvent = async () => {
     const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
     const eventData = { ...eventState, isAllPaid, bonusType }
-    const listDeletedFromData = _.differenceWith(userInEvent, selectedListMember, _.isEqual)
-    for (const item of listDeletedFromData) {
+    for (const item of userInEvent) {
       if (item.id) {
         deleteEventDetail(item.id)
       }
@@ -204,11 +202,7 @@ function Add() {
         const promises: Promise<any>[] = []
         selectedListMember.map((member) => {
           const eventDetail = { ...member, eventId }
-          if (member.id) {
-            promises.push(updateEventDetail(member.id, eventDetail))
-          } else {
-            promises.push(setEventDetail(eventDetail))
-          }
+          promises.push(setEventDetail(eventDetail))
         })
         await Promise.all(promises)
         setOpenModalSuccess(true)
