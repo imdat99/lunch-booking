@@ -34,6 +34,7 @@ export interface IEvent {
   isAllPaid?: boolean
   bonusType?: bonusTypeEnum
   note?: string
+  photoURL?: string
 }
 export interface IEventDetail {
   id?: string | null
@@ -60,8 +61,8 @@ export interface INoti {
 }
 
 export interface ILastTimeCheckNoti {
-  uid:string
-  checkTime:number
+  uid: string
+  checkTime: number
 }
 
 export interface IAllowedEmail {
