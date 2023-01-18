@@ -1,7 +1,7 @@
 // import { ReactComponent as DishImg } from '@app/assets/react.svg'
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
-import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updateEventDetail, updatePayCount } from '@app/libs/api/EventApi'
+import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount, uploadEventImg } from '@app/libs/api/EventApi'
 import { auth } from '@app/server/firebase'
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
@@ -10,6 +10,7 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
@@ -27,13 +28,15 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
-import { Container, useTheme } from '@mui/system'
+import { Container } from '@mui/system'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
+import './style.css'
+
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
@@ -92,6 +95,8 @@ function Add() {
   const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
     userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
   )
+  const [imgAvatarPreview, setImgAvatarPreview] = useState(eventInfo?.photoURL)
+  const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
   const navigate = useNavigate()
   const [forceRerender, setForceRerender] = useState(Date.now())
   // const dispatch = useAppDispatch()
@@ -191,9 +196,9 @@ function Add() {
 
   const handleCreateEvent = async () => {
     const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
-    const eventData = { ...eventState, isAllPaid, bonusType }
-    const listDeletedFromData = _.differenceWith(userInEvent, selectedListMember, _.isEqual)
-    for (const item of listDeletedFromData) {
+    const photoURL = imgAvatarObj ? await uploadEventImg(imgAvatarObj) : imgAvatarPreview
+    const eventData = { ...eventState, isAllPaid, bonusType, photoURL }
+    for (const item of userInEvent) {
       if (item.id) {
         deleteEventDetail(item.id)
       }
@@ -204,11 +209,7 @@ function Add() {
         const promises: Promise<any>[] = []
         selectedListMember.map((member) => {
           const eventDetail = { ...member, eventId }
-          if (member.id) {
-            promises.push(updateEventDetail(member.id, eventDetail))
-          } else {
-            promises.push(setEventDetail(eventDetail))
-          }
+          promises.push(setEventDetail(eventDetail))
         })
         await Promise.all(promises)
         setOpenModalSuccess(true)
@@ -271,13 +272,6 @@ function Add() {
     handleChangeTip(Number(eventState.tip), type)
   }
 
-  useEffect(() => {
-    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
-    const total = (eventState.billAmount || 0) + bonus
-    setEventState({ ...eventState, totalAmount: total })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventState.billAmount])
-
   const onChangeBillOwner = (_event: any, selectedUser: any) => {
     if (!selectedUser) {
       setEventState({ ...eventState, userPayName: '', userPayId: '' })
@@ -285,6 +279,29 @@ function Add() {
     }
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
+  const handlePreviewAvatarChange = (event: any) => {
+    const fileUploaded = event.target ? event.target.files[0] : null
+    if (fileUploaded) {
+      setImgAvatarObj(fileUploaded)
+      setImgAvatarPreview(URL.createObjectURL(fileUploaded))
+    }
+  }
+
+  //***UseEffect***
+  useEffect(() => {
+    const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
+    const total = (eventState.billAmount || 0) + bonus
+    setEventState({ ...eventState, totalAmount: total })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventState.billAmount])
+
+  useEffect(() => {
+    return () => {
+      if (imgAvatarPreview) {
+        URL.revokeObjectURL(imgAvatarPreview)
+      }
+    }
+  }, [imgAvatarPreview])
 
   return (
     <Container>
@@ -370,6 +387,7 @@ function Add() {
                           <TableCell style={{ minWidth: '130px' }}>
                             <Typography variant="subtitle1">Thành Tiền</Typography>
                           </TableCell>
+                          <TableCell>Note</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -426,8 +444,13 @@ function Add() {
                                 />
                               </TableCell>
                               <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                                <Tooltip title={member.note || 'No note'}>
+                                  <RecordVoiceOverIcon sx={{ color: '#439D0D' }} />
+                                </Tooltip>
+                              </TableCell>
+                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
                                 <ButtonStyled onClick={() => handleDelete(member)}>
-                                  <DeleteIcon />
+                                  <DeleteIcon color="error" />
                                 </ButtonStyled>
                               </TableCell>
                             </TableRow>
@@ -492,31 +515,24 @@ function Add() {
                   error={!eventState.billAmount}
                 />
               </Box>
-              <TextField
-                sx={(theme) => {
-                  return {
-                    marginTop: '15px',
-                    '& .MuiFormLabel-root': {
-                      ...theme.typography.h6,
-                    },
-                  }
-                }}
-                multiline
-                rows={2}
-                maxRows={4}
-                fullWidth
-                variant="standard"
-                label="Note hóa đơn (Optional)"
+
+              <Typography variant="subtitle2" sx={{ marginTop: '10px' }}>
+                Note
+              </Typography>
+              <TextareaAutosize
+                className="bill-note-textarea"
+                name="billNote"
                 value={eventState.note}
+                style={{ width: '100%', fontFamily: 'Bellota', borderBottom: '1px solid #9c9c9c' }}
                 onChange={(e) =>
                   setEventState((prev) => {
                     return { ...prev, note: e.target.value }
                   })
                 }
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                maxRows={5}
+                minRows={2}
               />
+
               <Box className="mt-5 flex items-center justify-between">
                 <FormControl>
                   <Typography variant="subtitle2">Hoa hồng</Typography>
@@ -582,10 +598,16 @@ function Add() {
                   defaultValue={0}
                 />
               </Box>
-
+              <Box className="flex items-center justify-between">
+                <Button onChange={handlePreviewAvatarChange} component="label">
+                  <Typography>Upload</Typography>
+                  <input hidden accept="image/*" type="file" />
+                </Button>
+                <img alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ''} className="w-20 h-20" />
+              </Box>
               {/* Submit button */}
               <Box className="flex justify-center my-7">
-                <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers}>
+                <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers || !eventState.billAmount}>
                   <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
                 </ButtonStyled>
               </Box>

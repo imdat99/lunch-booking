@@ -24,6 +24,7 @@ import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import * as yup from 'yup'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -147,6 +148,24 @@ const Profile = () => {
     }
   }
 
+  // Form validation
+  const validationSchema = yup.object().shape({
+    name: yup.string().required('Vui lòng nhập tên').max(30, 'Tên không được quá 30 kí tự'),
+    ldapAcc: yup.string().max(10, 'LDAP không quá 10 kí tự'),
+    phone: yup
+      .string()
+      .matches(/^[0-9]*$/, 'Số điện thoại không được có kí tự')
+      .max(20, 'Số điện thoại không quá 20 số'),
+    address: yup.string().max(50, 'Địa chỉ không quá 50 kí tự'),
+    bankName: yup.string().required('Vui lòng nhập tên ngân hàng').max(30, 'Tên ngân hàng không được quá 30 kí tự'),
+    bankAccountName: yup.string().required('Vui lòng nhập tên').max(30, 'Tên không được quá 30 kí tự'),
+    bankAccount: yup.string().required('Vui lòng nhập số tài khoản').max(20, 'Số tài khoản không được quá 20 kí tự'),
+  })
+
+  function isInvalidForm(errors: any) {
+    return errors.name || errors.bankAccount || errors.bankName || errors.bankAccountName
+  }
+
   return (
     <>
       {loading ? (
@@ -197,141 +216,142 @@ const Profile = () => {
               </div>
             </Container>
           </div>
-          <Container>
-            <div className="px-6 py-4">
-              <Formik
-                initialValues={{ ...userFormData }}
-                onSubmit={(values) => {
-                  handleSubmitMember(values)
-                }}
-              >
-                {({ values, handleChange, handleBlur, handleSubmit }) => (
-                  <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                    <TextField
-                      label="Tên hiển thị"
-                      variant="standard"
-                      fullWidth={true}
-                      id="name"
-                      name="name"
-                      value={values.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      disabled={!isLoginUser}
-                      error={!values.name || values.name.length > 50}
-                    />
-                    <TextField
-                      label="LDAP"
-                      variant="standard"
-                      fullWidth={true}
-                      id="ldapAcc"
-                      name="ldapAcc"
-                      value={values.ldapAcc}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      disabled={!isLoginUser}
-                      error={!values.ldapAcc || values.ldapAcc.length > 10}
-                    />
+          <div className="px-6 py-4">
+            <Formik
+              initialValues={{ ...userFormData }}
+              onSubmit={(values) => {
+                handleSubmitMember(values)
+              }}
+              validationSchema={validationSchema}
+            >
+              {({ values, handleChange, handleBlur, handleSubmit, errors }) => (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                  <TextField
+                    label="Tên hiển thị"
+                    variant="standard"
+                    fullWidth={true}
+                    id="name"
+                    name="name"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={!isLoginUser}
+                    helperText={errors.name || ''}
+                    error={Boolean(errors.name)}
+                  />
+                  <TextField
+                    label="LDAP"
+                    variant="standard"
+                    fullWidth={true}
+                    id="ldapAcc"
+                    name="ldapAcc"
+                    value={values.ldapAcc}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={!isLoginUser}
+                    helperText={errors.ldapAcc || ''}
+                    error={Boolean(errors.ldapAcc)}
+                  />
 
-                    <TextField
-                      label="Điện thoại"
-                      variant="standard"
-                      fullWidth={true}
-                      id="phone"
-                      name="phone"
-                      value={values.phone}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      disabled={!isLoginUser}
-                      type={'number'}
-                      error={!values.phone || values.phone.length > 20}
-                    />
-                    <TextField
-                      label="Địa chỉ"
-                      variant="standard"
-                      fullWidth={true}
-                      id="address"
-                      name="address"
-                      value={values.address}
-                      onChange={handleChange}
-                      disabled={!isLoginUser}
-                      onBlur={handleBlur}
-                      error={!values.address || values.address.length > 50}
-                    />
-                    <TextField
-                      label="Ngân hàng"
-                      variant="standard"
-                      fullWidth={true}
-                      id="bankName"
-                      name="bankName"
-                      value={values.bankName}
-                      onChange={handleChange}
-                      disabled={!isLoginUser}
-                      onBlur={handleBlur}
-                      error={!values.bankName || values.bankName.length > 50}
-                    />
-                    <TextField
-                      label="Chủ tài khoản"
-                      variant="standard"
-                      fullWidth={true}
-                      id="bankAccountName"
-                      name="bankAccountName"
-                      value={values.bankAccountName}
-                      onChange={handleChange}
-                      disabled={!isLoginUser}
-                      onBlur={handleBlur}
-                      error={!values.bankName || values.bankName.length > 50}
-                    />
-                    <TextField
-                      label="Số tài khoản"
-                      variant="standard"
-                      fullWidth={true}
-                      id="bankAccount"
-                      name="bankAccount"
-                      value={values.bankAccount}
-                      onChange={handleChange}
-                      disabled={!isLoginUser}
-                      onBlur={handleBlur}
-                      error={!values.bankAccount || values.bankAccount.length > 20}
-                    />
-                    <div className="flex flex-col pt-2 pb-8">
-                      <span className="font-serif text-sm">Mã QR</span>
-                      <div className="self-center pt-3">
-                        {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
-                        {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
-                      </div>
-                      {isLoginUser && (
-                        <>
-                          <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
-                            <input hidden accept="image/*" type="file" />
-                            <PhotoCamera fontSize={'large'} />
-                          </IconButton>
-                          <Button
-                            variant="contained"
-                            type="submit"
-                            className="self-center"
-                            disabled={status === 'updating' || !values.name || !values.bankName || !values.bankAccountName || !values.bankAccount}
-                          >
-                            Save
-                          </Button>
-                        </>
-                      )}
+                  <TextField
+                    label="Điện thoại"
+                    variant="standard"
+                    fullWidth={true}
+                    id="phone"
+                    name="phone"
+                    value={values.phone}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={!isLoginUser}
+                    helperText={errors.phone || ''}
+                    error={Boolean(errors.phone)}
+                  />
+                  <TextField
+                    label="Địa chỉ"
+                    variant="standard"
+                    fullWidth={true}
+                    id="address"
+                    name="address"
+                    value={values.address}
+                    onChange={handleChange}
+                    disabled={!isLoginUser}
+                    onBlur={handleBlur}
+                    helperText={errors.address || ''}
+                    error={Boolean(errors.address)}
+                  />
+                  <TextField
+                    label="Ngân hàng"
+                    variant="standard"
+                    fullWidth={true}
+                    id="bankName"
+                    name="bankName"
+                    value={values.bankName}
+                    onChange={handleChange}
+                    disabled={!isLoginUser}
+                    onBlur={handleBlur}
+                    helperText={errors.bankName || ''}
+                    error={Boolean(errors.bankName)}
+                  />
+                  <TextField
+                    label="Chủ tài khoản"
+                    variant="standard"
+                    fullWidth={true}
+                    id="bankAccountName"
+                    name="bankAccountName"
+                    value={values.bankAccountName}
+                    onChange={handleChange}
+                    disabled={!isLoginUser}
+                    onBlur={handleBlur}
+                    helperText={errors.bankAccountName || ''}
+                    error={Boolean(errors.bankAccountName)}
+                  />
+                  <TextField
+                    label="Số tài khoản"
+                    variant="standard"
+                    fullWidth={true}
+                    id="bankAccount"
+                    name="bankAccount"
+                    value={values.bankAccount}
+                    onChange={handleChange}
+                    disabled={!isLoginUser}
+                    onBlur={handleBlur}
+                    helperText={errors.bankAccount || ''}
+                    error={Boolean(errors.bankAccount)}
+                  />
+                  <div className="flex flex-col pb-8">
+                    <span className="font-bellota text-sm">Mã QR</span>
+                    <div className="self-center pt-3">
+                      {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
+                      {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
                     </div>
-                  </form>
+                    {isLoginUser && (
+                      <>
+                        <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
+                          <input hidden accept="image/*" type="file" />
+                          <PhotoCamera fontSize={'large'} />
+                        </IconButton>
+                        <Button variant="contained" type="submit" className="self-center" disabled={isInvalidForm(errors)}>
+                          Save
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </form>
+              )}
+            </Formik>
+          </div>
+
+          {showMessage && (
+            <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+              <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+                {showMessage === 'success' ? (
+                  <span className="font-bold"> {'Cập nhật user thành công!'} </span>
+                ) : (
+                  <span className="font-bold"> {'Cập nhật thất bại!'} </span>
                 )}
-              </Formik>
-            </div>
-            {showMessage && (
-              <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-                  {showMessage === 'success' ? (
-                    <span className="font-bold"> {'Cập nhật user thành công!'} </span>
-                  ) : (
-                    <span className="font-bold"> {'Cập nhật thất bại!'} </span>
-                  )}
-                </Alert>
-              </Snackbar>
-            )}
-          </Container>
+              </Alert>
+            </Snackbar>
+          )}
         </div>
       )}
     </>
