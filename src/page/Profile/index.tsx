@@ -1,9 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import ProfilePicture from '@app/assets/profile-picture.png'
+import { LoadingScreen } from '@app/components/Suspense'
 import { getHomeDataByUid } from '@app/libs/api/home'
+import { getUserByUid } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
+import { User } from '@app/server/firebaseType'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
-import { listUserStore } from '@app/stores/listUser'
 import { clearNotiList } from '@app/stores/noti'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
@@ -24,10 +26,11 @@ import { useParams } from 'react-router-dom'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
-  const listUser = useAppSelector(listUserStore)
   const status = useAppSelector(userStatus)
   const dispatch = useAppDispatch()
   const [showMessage, setShowMessage] = useState<'success' | 'error' | null>(null)
+  const [currentMember, setCurrentMember] = useState<User>()
+  const [loading, setLoading] = useState<boolean>(false)
 
   const { userUid } = useParams()
 
@@ -37,12 +40,26 @@ const Profile = () => {
 
   const [imgAvatarPreview, setImgAvatarPreview] = useState(loginUser?.photoURL)
   const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
-  //
 
   const [listEvent, setListEvent] = useState<any>({})
-  const normalUser = listUser.find((user) => user.uid === userUid)
-  const isLoginUser = normalUser?.uid === loginUser.uid
-  const userFormData = useMemo(() => (isLoginUser ? loginUser : normalUser), [loginUser, normalUser, isLoginUser])
+  const isLoginUser = currentMember?.uid === loginUser.uid
+  const userFormData = useMemo(() => (isLoginUser ? loginUser : currentMember), [loginUser, isLoginUser, currentMember])
+
+  const getCurrentMemberInfo = async () => {
+    try {
+      setLoading(true)
+      const memberInfo = await getUserByUid(userUid!)
+      setCurrentMember(memberInfo)
+      setLoading(false)
+    } catch (e) {
+      setLoading(false)
+      console.log('Error when get member', e)
+    }
+  }
+
+  useEffect(() => {
+    getCurrentMemberInfo()
+  }, [])
 
   //Handle QR Image
   useEffect(() => {
@@ -89,10 +106,10 @@ const Profile = () => {
   //--------------------------------------
 
   useEffect(() => {
-    getHomeDataByUid(normalUser?.uid || '').then((e) => {
+    getHomeDataByUid(loginUser?.uid || '').then((e) => {
       setListEvent(e)
     })
-  }, [dispatch, normalUser?.uid])
+  }, [dispatch, loginUser?.uid])
 
   useEffect(() => {
     if (status === 'succeeded') {
@@ -117,15 +134,69 @@ const Profile = () => {
     dispatch(idle())
     setShowMessage(null)
   }
+  const handleSubmitMember = async (formValues: any) => {
+    try {
+      setLoading(true)
+      await dispatch(updateUserInfo(loginUser.uid as string, formValues, imgObj, imgAvatarObj))
+      await getCurrentMemberInfo()
+      setLoading(false)
+    } catch (e) {
+      setLoading(false)
+      console.log('Error when update member', e)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
-        <div className="flex justify-between self-stretch">
-          <button className="px-4">
-            <ReplyIcon
-              onClick={() => {
-                history.back()
+    <>
+      {loading ? (
+        <LoadingScreen />
+      ) : (
+        <div className="min-h-screen bg-white">
+          <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
+            <div className="flex justify-between self-stretch">
+              <button className="px-4">
+                <ReplyIcon
+                  onClick={() => {
+                    history.back()
+                  }}
+                  fontSize={'large'}
+                />
+              </button>
+              {isLoginUser && (
+                <button className="px-4" onClick={logout}>
+                  <LogoutIcon fontSize={'large'} />
+                </button>
+              )}
+            </div>
+            {isLoginUser ? (
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                badgeContent={
+                  <IconButton color="primary" aria-label="upload picture" component="label" onChange={handlePreviewAvatarChange}>
+                    <input hidden accept="image/*" type="file" />
+                    <div className="bg-white w-[40px] h-[40px] rounded-full">
+                      <AccountCircleSharpIcon sx={{ width: 40, height: 40 }} />
+                    </div>
+                  </IconButton>
+                }
+              >
+                <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
+              </Badge>
+            ) : (
+              <Avatar alt="avatar" src={currentMember?.photoURL!} sx={{ width: 120, height: 120 }} />
+            )}
+            <span className="py-2 text-xl">{currentMember?.name || ''}</span>
+            <span className="pt-2 text-md">
+              <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
+              <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
+            </span>
+          </div>
+          <div className="px-6 py-4">
+            <Formik
+              initialValues={{ ...userFormData }}
+              onSubmit={(values) => {
+                handleSubmitMember(values)
               }}
               fontSize={'large'}
             />
@@ -277,23 +348,12 @@ const Profile = () => {
                     </Button>
                   </>
                 )}
-              </div>
-            </form>
+              </Alert>
+            </Snackbar>
           )}
-        </Formik>
-      </div>
-      {showMessage && (
-        <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-          <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-            {showMessage === 'success' ? (
-              <span className="font-bold"> {'Cập nhật user thành công!'} </span>
-            ) : (
-              <span className="font-bold"> {'Cập nhật thất bại!'} </span>
-            )}
-          </Alert>
-        </Snackbar>
+        </div>
       )}
-    </div>
+    </>
   )
 }
 
