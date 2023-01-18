@@ -2,6 +2,7 @@ import { getListUser } from '@app/libs/api/EventApi'
 import MemberCard from '@app/page/Members/MemberCard'
 import { User } from '@app/server/firebaseType'
 import SearchIcon from '@mui/icons-material/Search'
+import { Container } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import React, { useEffect, useState } from 'react'
@@ -29,11 +30,13 @@ const Members = () => {
   }
 
   return (
-    <div className="flex flex-col items-center pt-6 pb-12">
-      <h1 className="font-bellota text-center text-2xl pb-4">Thành viên</h1>
-      <div>
+    <Container>
+      <div className="mt-[1.875rem] mb-[1.875rem]">
+        <h1 className="font-bellota text-center text-2xl">Thành viên</h1>
+      </div>
+      <div className="text-center  mb-[1.875rem]">
         <OutlinedInput
-          sx={{ width: '300px', height: '46px', borderRadius: '30px', backgroundColor: 'white', fontFamily: 'Bellota' }}
+          sx={{ width: '290px', height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
           id="outlined-adornment-password"
           type={'text'}
           placeholder={'Tìm kiếm'}
@@ -45,18 +48,20 @@ const Members = () => {
           onChange={onChangeSearch}
         />
       </div>
-      <div className="pt-6 flex flex-col gap-4">
+      <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
         {users.length === 0 ? (
           <div>Team Front-end không có ai cả!</div>
         ) : (
           users.map((user) => (
-            <Link to={'/profile/' + user.uid} key={user.uid}>
-              <MemberCard user={user} />
-            </Link>
+            <div className="mb-[0.625rem] rounded-3xl block" key={user.uid}>
+              <Link className="flex bg-white rounded-3xl p-3 max-w-md" to={'/profile/' + user.uid} key={user.uid}>
+                <MemberCard user={user} />
+              </Link>
+            </div>
           ))
         )}
       </div>
-    </div>
+    </Container>
   )
 }
 
