@@ -19,6 +19,7 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
 import TextField from '@mui/material/TextField'
+import { Container } from '@mui/system'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
@@ -171,45 +172,49 @@ const Profile = () => {
         <LoadingScreen />
       ) : (
         <div className="min-h-screen bg-white">
-          <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] h-72 rounded-b-2xl flex flex-col items-center justify-center">
-            <div className="flex justify-between self-stretch">
-              <button className="px-4">
-                <ReplyIcon
-                  onClick={() => {
-                    history.back()
-                  }}
-                  fontSize={'large'}
-                />
-              </button>
-              {isLoginUser && (
-                <button className="px-4" onClick={logout}>
-                  <LogoutIcon fontSize={'large'} />
-                </button>
-              )}
-            </div>
-            {isLoginUser ? (
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                badgeContent={
-                  <IconButton color="primary" aria-label="upload picture" component="label" onChange={handlePreviewAvatarChange}>
-                    <input hidden accept="image/*" type="file" />
-                    <div className="bg-white w-[40px] h-[40px] rounded-full">
-                      <AccountCircleSharpIcon sx={{ width: 40, height: 40 }} />
-                    </div>
-                  </IconButton>
-                }
-              >
-                <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
-              </Badge>
-            ) : (
-              <Avatar alt="avatar" src={currentMember?.photoURL || ''} sx={{ width: 120, height: 120 }} />
-            )}
-            <span className="py-2 text-xl">{currentMember?.name || ''}</span>
-            <span className="pt-2 text-md">
-              <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
-              <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
-            </span>
+          <div className="bg-gradient-to-b from-[#CAF5B1] to-[#8AD769] ">
+            <Container>
+              <div className="h-72 rounded-b-2xl flex flex-col items-center justify-center">
+                <div className="flex justify-between self-stretch">
+                  <button className="px-4">
+                    <ReplyIcon
+                      onClick={() => {
+                        history.back()
+                      }}
+                      fontSize={'large'}
+                    />
+                  </button>
+                  {isLoginUser && (
+                    <button className="px-4" onClick={logout}>
+                      <LogoutIcon fontSize={'large'} />
+                    </button>
+                  )}
+                </div>
+                {isLoginUser ? (
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    badgeContent={
+                      <IconButton color="primary" aria-label="upload picture" component="label" onChange={handlePreviewAvatarChange}>
+                        <input hidden accept="image/*" type="file" />
+                        <div className="bg-white w-[40px] h-[40px] rounded-full">
+                          <AccountCircleSharpIcon sx={{ width: 40, height: 40 }} />
+                        </div>
+                      </IconButton>
+                    }
+                  >
+                    <Avatar alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ProfilePicture} sx={{ width: 120, height: 120 }} />
+                  </Badge>
+                ) : (
+                  <Avatar alt="avatar" src={currentMember?.photoURL || ''} sx={{ width: 120, height: 120 }} />
+                )}
+                <span className="py-2 text-xl">{currentMember?.name || ''}</span>
+                <span className="pt-2 text-md">
+                  <span className="font-bellota">Chủ chi</span>: <span className="font-bold">{listEvent.isHostCount} lần</span> |
+                  <span className="font-bellota"> Tham gia</span>: <span className="font-bold">{listEvent.isMemberCount} lần</span>
+                </span>
+              </div>
+            </Container>
           </div>
           <div className="px-6 py-4">
             <Formik
@@ -335,6 +340,7 @@ const Profile = () => {
               )}
             </Formik>
           </div>
+
           {showMessage && (
             <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
               <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>

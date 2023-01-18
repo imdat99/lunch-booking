@@ -1,6 +1,9 @@
+import { storage } from '@app/server/firebase'
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { EventColection, EventDetail, EventDetailColection, EventRef, UserDetail, usersColection } from '@app/server/useDB'
+import dayjs from 'dayjs'
 import { addDoc, deleteDoc, getDocs, updateDoc } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 
 export const getListUser = async () => {
   const userDocs = await getDocs(usersColection)
@@ -59,4 +62,14 @@ export const updateMemberInfo = async (member_id: string, data: User) => {
 
 export const updatePayCount = async (member_id: string, count: number) => {
   updateDoc(UserDetail(member_id), { count: count })
+}
+
+export async function uploadEventImg(obj: any) {
+  const imgRef = ref(storage, `images/event/${dayjs(Date.now()).unix() + obj.name}`)
+  try {
+    await uploadBytes(imgRef, obj)
+    return getDownloadURL(imgRef)
+  } catch (error) {
+    console.log('ERROR UPLOAD Event IMG FAILED', error)
+  }
 }

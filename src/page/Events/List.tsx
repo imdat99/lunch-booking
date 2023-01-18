@@ -7,6 +7,7 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { listUserStore } from '@app/stores/listUser'
 import { userStore } from '@app/stores/user'
 import SearchIcon from '@mui/icons-material/Search'
+import { Container } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import dayjs from 'dayjs'
@@ -45,10 +46,10 @@ const List = () => {
   }
 
   return (
-    <main className="flex pb-6 bg-gradient-to-b from-light-green-2 to-light-green-3">
+    <Container>
       <div className="mx-auto w-11/12 max-w-md">
-        <div className="text-center my-6">
-          <h2 className="text-2xl">Lịch sử đi ăn</h2>
+        <div className="mt-[1.875rem] mb-[1.875rem]">
+          <h2 className="font-bellota text-center text-2xl">Lịch sử đi ăn</h2>
         </div>
         <div className="text-center">
           <OutlinedInput
@@ -150,7 +151,7 @@ const List = () => {
             })}
         </ul>
       </div>
-    </main>
+    </Container>
   )
 }
 
