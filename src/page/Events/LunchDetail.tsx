@@ -15,8 +15,9 @@ import TextareaAutosize from '@mui/base/TextareaAutosize'
 import BorderColorIcon from '@mui/icons-material/BorderColor'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DoneIcon from '@mui/icons-material/Done'
+import EditIcon from '@mui/icons-material/Edit'
 import ReplyIcon from '@mui/icons-material/Reply'
-import { TextField, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -51,12 +52,13 @@ const LunchDetail = () => {
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
 
   // state
-  const [memberNote, setMemberNote] = useState(userInEvent.find((item) => item.uid === (loggedInUser?.uid || ''))?.note || '')
+  const [loggedUserNote, setLoggedUserNote] = useState(userInEvent.find((item) => item.uid === (loggedInUser?.uid || ''))?.note || '')
   const [openAlert, setOpenAlert] = useState('')
   const [loading, setLoading] = useState(true)
   const [disableNoti, setDisableNoti] = useState<boolean>(false)
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false)
   const [alertMessage, setAlertMessage] = useState<string>('')
+  const [isEditingNote, setIsEditingNote] = useState<boolean>(false)
 
   const isHost = useMemo(() => eventInfo?.userPayId === uid, [eventInfo?.userPayId, uid])
   const hostInfo = useMemo(() => listUser.find((user) => user.uid === eventInfo?.userPayId), [eventInfo?.userPayId, listUser])
@@ -131,11 +133,13 @@ const LunchDetail = () => {
   const handleAddNote = async (memberId: string) => {
     try {
       const tempLoggedMember: IEventDetail = userInEvent.find((item: IEventDetail) => item.id === memberId)!
-      await updateEventDetail(memberId, { ...tempLoggedMember, note: memberNote })
+      await updateEventDetail(memberId, { ...tempLoggedMember, note: loggedUserNote })
       setAlertMessage('Cập nhật member note thành công!')
+      setIsEditingNote(false)
     } catch (e) {
       setAlertMessage('Lỗi khi cập nhật member note')
       console.log('ERROR WHEN UPDATE NOTE', e)
+      setIsEditingNote(false)
     }
   }
 
@@ -267,7 +271,6 @@ const LunchDetail = () => {
                     <th scope="col" className="py-3">
                       Thành viên
                     </th>
-                    <th>Note</th>
                     <th scope="col" className="py-3 text-center">
                       Bill
                     </th>
@@ -296,19 +299,42 @@ const LunchDetail = () => {
                         <td className="text-center">{formatMoney(user.amount, false)}</td>
                         <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
                       </tr>
+
                       <tr key={`user-note-${user.uid}`}>
-                        <td className="w-full">
-                          {loggedInUser?.uid === user.uid ? (
-                            <Tooltip title={memberNote}>
-                              <TextField size="small" value={memberNote} onChange={(e) => setMemberNote(e.target.value)} />
+                        <td className="w-full pb-[10px] italic text-[14px] text-[#9c9c9c]">
+                          {loggedInUser?.uid === user.uid && isEditingNote && (
+                            <Tooltip title={loggedUserNote}>
+                              <TextareaAutosize
+                                value={loggedUserNote}
+                                onChange={(e) => setLoggedUserNote(e.target.value)}
+                                aria-label="minimum height"
+                                minRows={2}
+                                maxRows={5}
+                                placeholder="Note"
+                                style={{ width: '100%', border: '1px solid gray' }}
+                              />
                             </Tooltip>
-                          ) : (
-                            user.note
                           )}
+                          {loggedInUser?.uid === user.uid && !isEditingNote && loggedUserNote && <>`{loggedUserNote}`</>}
+                          {loggedInUser?.uid === user.uid && !isEditingNote && !loggedUserNote && <>`No note`</>}
+                          {loggedInUser?.uid !== user.uid && user.note && <>`{user.note}`</>}
                         </td>
-                        <td>
+                        <td className="pb-[10px] text-center">
                           {loggedInUser?.uid === user.uid && (
-                            <DoneIcon sx={{ color: 'green', cursor: 'pointer' }} onClick={() => handleAddNote(user.id || '')} />
+                            <>
+                              {isEditingNote ? (
+                                <DoneIcon sx={{ color: 'green', cursor: 'pointer' }} onClick={() => handleAddNote(user.id || '')} />
+                              ) : (
+                                <Tooltip title="Sửa note">
+                                  <EditIcon
+                                    onClick={() => {
+                                      setIsEditingNote(true)
+                                    }}
+                                    sx={{ cursor: 'pointer' }}
+                                  />
+                                </Tooltip>
+                              )}
+                            </>
                           )}
                         </td>
                       </tr>
@@ -333,15 +359,17 @@ const LunchDetail = () => {
               <TextareaAutosize value={eventInfo?.note || ''} minRows={1} style={{ width: 200 }} />
             </div>
           </div>
-          <div>
-            <span className="text-gray-400 font-bold block mb-3 pt-[10px]">Ảnh hoá đơn</span>
-            <div>
+          <div className=" block mb-3 pt-[10px] border-t-[1px] border-gray-400">
+            <div className="text-gray-400 font-bold">Ảnh hoá đơn</div>
+            {eventInfo?.photoURL ? (
               <img className="w-96 h-auto mx-auto" src={eventInfo?.photoURL || ''} referrerPolicy="no-referrer" alt={'Không có ảnh bill'} />
-            </div>
+            ) : (
+              <span>No image</span>
+            )}
           </div>
           {!isPaid ? (
             <>
-              <div className="my-3 border-y-[1px] border-gray-400">
+              <div className="my-3 border-y-[1px] border-gray-400 pb-[10px]">
                 <span className="text-gray-400 font-bold block mb-3">Bank Account</span>
                 <p>
                   Chủ tài khoản: {hostInfo?.bankAccountName} <br />
