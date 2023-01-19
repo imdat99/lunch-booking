@@ -10,6 +10,7 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
@@ -264,7 +265,6 @@ function Add() {
 
   const handleCloseModalSuccess = () => {
     setOpenModalSuccess(false)
-    navigate('/events')
   }
 
   const handleChangeBonusType = (type: bonusTypeEnum) => {
@@ -598,12 +598,21 @@ function Add() {
                   defaultValue={0}
                 />
               </Box>
-              <Box className="flex items-center justify-between">
-                <Button onChange={handlePreviewAvatarChange} component="label">
-                  <Typography>Upload</Typography>
-                  <input hidden accept="image/*" type="file" />
-                </Button>
-                <img alt="avatar" src={imgAvatarPreview ? imgAvatarPreview : ''} className="w-20 h-20" />
+              <Box className="flex flex-col mt-[10px]">
+                <span className="text-center">
+                  {imgAvatarPreview ? (
+                    <img alt="bill_image" src={imgAvatarPreview} className="max-w-[60%] max-h-[60%]  m-auto" />
+                  ) : (
+                    <span className="italic">Không có ảnh hoá đơn</span>
+                  )}
+                </span>
+
+                <Tooltip title="Upload ảnh hoá đơn">
+                  <Button onChange={handlePreviewAvatarChange} component="label">
+                    <PhotoCamera fontSize={'large'} />
+                    <input hidden accept="image/*" type="file" />
+                  </Button>
+                </Tooltip>
               </Box>
               {/* Submit button */}
               <Box className="flex justify-center my-7">
