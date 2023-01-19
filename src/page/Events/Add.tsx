@@ -10,8 +10,9 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver'
 import ReplyIcon from '@mui/icons-material/Reply'
 import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
@@ -19,7 +20,9 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Checkbox from '@mui/material/Checkbox'
+import Collapse from '@mui/material/Collapse'
 import Grid from '@mui/material/Grid'
+import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
 import { styled } from '@mui/material/styles'
 import Table from '@mui/material/Table'
@@ -35,9 +38,8 @@ import dayjs from 'dayjs'
 import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import './style.css'
-
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
@@ -98,9 +100,9 @@ function Add() {
   )
   const [imgAvatarPreview, setImgAvatarPreview] = useState(eventInfo?.photoURL)
   const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
-  const navigate = useNavigate()
   const [forceRerender, setForceRerender] = useState(Date.now())
-  // const dispatch = useAppDispatch()
+  const [openingMemberRows, setOpeningMemberRows] = useState<string[]>([])
+
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
   const isEmptyMembers = useMemo(() => !selectedListMember.length, [selectedListMember])
 
@@ -303,6 +305,16 @@ function Add() {
     }
   }, [imgAvatarPreview])
 
+  const handleOpenMemberDetail = (memberUid: string) => {
+    let newOpeningMemberRows = [...openingMemberRows]
+    if (openingMemberRows.includes(memberUid)) {
+      newOpeningMemberRows = openingMemberRows.filter((item) => item !== memberUid)
+    } else {
+      newOpeningMemberRows.push(memberUid)
+    }
+    setOpeningMemberRows(newOpeningMemberRows)
+  }
+
   return (
     <Container>
       <div>
@@ -375,6 +387,7 @@ function Add() {
                     <Table stickyHeader>
                       <TableHead>
                         <TableRow sx={{ border: 'none' }}>
+                          <TableCell style={{ minWidth: '20px' }}></TableCell>
                           <TableCell style={{ minWidth: '85px' }}>
                             <Typography variant="subtitle1">Đã trả</Typography>
                           </TableCell>
@@ -387,7 +400,6 @@ function Add() {
                           <TableCell style={{ minWidth: '130px' }}>
                             <Typography variant="subtitle1">Thành Tiền</Typography>
                           </TableCell>
-                          <TableCell>Note</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -395,65 +407,83 @@ function Add() {
                         {selectedListMember.map((member) => {
                           const labelId = `checkbox-list-label-${member.uid}`
                           return (
-                            <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
-                              <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
-                                <Checkbox
-                                  onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
-                                  key={forceRerender}
-                                  className="w-[20px]"
-                                  edge="start"
-                                  checked={member.isPaid}
-                                  tabIndex={-1}
-                                  disableRipple
-                                  inputProps={{ 'aria-labelledby': labelId }}
-                                />
-                              </TableCell>
-                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                <Typography noWrap>
-                                  <Tooltip title={member.name || member.email}>
-                                    <span> {member.name || member.email} </span>
-                                  </Tooltip>
-                                </Typography>
-                              </TableCell>
-                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                <TextNumberInput
-                                  thousandSeparator=","
-                                  fullWidth
-                                  id="filled-required"
-                                  variant="standard"
-                                  value={member.amount}
-                                  onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
-                                  InputLabelProps={{
-                                    shrink: true,
-                                  }}
-                                  defaultValue={0}
-                                />
-                              </TableCell>
-                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                <TextNumberInput
-                                  thousandSeparator=","
-                                  fullWidth
-                                  id="filled-required"
-                                  variant="standard"
-                                  value={member.amountToPay}
-                                  disabled
-                                  InputLabelProps={{
-                                    shrink: true,
-                                  }}
-                                  defaultValue={0}
-                                />
-                              </TableCell>
-                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                <Tooltip title={member.note || 'No note'}>
-                                  <RecordVoiceOverIcon sx={{ color: '#439D0D' }} />
-                                </Tooltip>
-                              </TableCell>
-                              <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                <ButtonStyled onClick={() => handleDelete(member)}>
-                                  <DeleteIcon color="error" />
-                                </ButtonStyled>
-                              </TableCell>
-                            </TableRow>
+                            <>
+                              <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
+                                <TableCell style={{ border: 'none' }}>
+                                  <IconButton
+                                    aria-label="expand row"
+                                    size="small"
+                                    onClick={() => {
+                                      handleOpenMemberDetail(member?.uid || '')
+                                    }}
+                                  >
+                                    {openingMemberRows.includes(member?.uid || '') ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                                  </IconButton>
+                                </TableCell>
+
+                                <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
+                                  <Checkbox
+                                    onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
+                                    key={forceRerender}
+                                    className="w-[20px]"
+                                    edge="start"
+                                    checked={member.isPaid}
+                                    tabIndex={-1}
+                                    disableRipple
+                                    inputProps={{ 'aria-labelledby': labelId }}
+                                  />
+                                </TableCell>
+                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                                  <Typography noWrap>
+                                    <Tooltip title={member.name || member.email}>
+                                      <span> {member.name || member.email} </span>
+                                    </Tooltip>
+                                  </Typography>
+                                </TableCell>
+                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                                  <TextNumberInput
+                                    thousandSeparator=","
+                                    fullWidth
+                                    id="filled-required"
+                                    variant="standard"
+                                    value={member.amount}
+                                    onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                    defaultValue={0}
+                                  />
+                                </TableCell>
+                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                                  <TextNumberInput
+                                    thousandSeparator=","
+                                    fullWidth
+                                    id="filled-required"
+                                    variant="standard"
+                                    value={member.amountToPay}
+                                    disabled
+                                    InputLabelProps={{
+                                      shrink: true,
+                                    }}
+                                    defaultValue={0}
+                                  />
+                                </TableCell>
+
+                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                                  <ButtonStyled onClick={() => handleDelete(member)}>
+                                    <DeleteIcon color="error" />
+                                  </ButtonStyled>
+                                </TableCell>
+                              </TableRow>
+
+                              <TableRow key={`more-infor-${member.uid}`}>
+                                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                                  <Collapse in={openingMemberRows.includes(member?.uid || '')} timeout="auto" unmountOnExit>
+                                    <p className="italic text-[#9c9c9c]">`{member.note || 'No note'}`</p>
+                                  </Collapse>
+                                </TableCell>
+                              </TableRow>
+                            </>
                           )
                         })}
                       </TableBody>

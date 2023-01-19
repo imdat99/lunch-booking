@@ -105,7 +105,7 @@ const List = () => {
                         <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-20 h-20 rounded-full mx-auto" alt="" />
                         <span
                           className={
-                            'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 ' +
+                            'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 text-center ' +
                             (isHost ? 'bg-red-700 w-[70px]' : 'bg-green-600 w-[80px]')
                           }
                         >
