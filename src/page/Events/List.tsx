@@ -135,7 +135,8 @@ const List = () => {
                       </div>
                       <span
                         className={
-                          'absolute py-1 px-3 block font-normal text-white rounded-xl text-xl top-0 right-0 ' + (isPaid ? 'bg-green-600' : 'bg-red-700')
+                          'absolute py-1 px-3 block font-normal text-white rounded-xl text-xl top-0 right-0 text-[16px] ' +
+                          (isPaid ? 'bg-green-600' : 'bg-red-700')
                         }
                       >
                         {isHost && isPaid && 'Đã hoàn tất'}
