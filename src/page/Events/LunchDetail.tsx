@@ -312,7 +312,7 @@ const LunchDetail = () => {
                                 minRows={2}
                                 maxRows={5}
                                 placeholder="Note"
-                                style={{ width: '100%', border: '1px solid gray' }}
+                                style={{ width: '100%', border: '1px solid gray', padding: '3px 5px' }}
                               />
                             </Tooltip>
                           )}
