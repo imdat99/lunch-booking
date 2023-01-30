@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import { Box, Button, Modal, TextField, Typography } from '@mui/material'
+import { height } from '@mui/system'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 
@@ -24,7 +25,7 @@ const style = {
   boxShadow: 24,
   p: 4,
   overflowY: 'scroll',
-  maxHeight: '75%',
+  maxHeight: '100vh',
 }
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
@@ -106,21 +107,23 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        {allMembers?.map((item: IEventDetail) => (
-          <Box className="flex w-full" key={item.uid}>
-            <Box
-              className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2`}
-              onClick={() => handleClickRow(item)}
-            >
-              <Typography>{item.name || item.email || 'no name'}</Typography>
+        <div style={{ height: '30vh', overflow: 'scroll' }}>
+          {allMembers?.map((item: IEventDetail) => (
+            <Box className="flex w-full" key={item.uid}>
+              <Box
+                className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2 w-96`}
+                onClick={() => handleClickRow(item)}
+              >
+                <Typography>{item.name || item.email || 'no name'}</Typography>
+              </Box>
+              {item.isGuess && item.uid && (
+                <Button onClick={() => dellMember(item.uid || '')}>
+                  <DeleteForeverIcon />
+                </Button>
+              )}
             </Box>
-            {item.isGuess && item.uid && (
-              <Button onClick={() => dellMember(item.uid || '')}>
-                <DeleteForeverIcon />
-              </Button>
-            )}
-          </Box>
-        ))}
+          ))}
+        </div>
         <Typography variant="h5" sx={{ marginBottom: '10px' }}>
           Thêm người ngoài
         </Typography>
