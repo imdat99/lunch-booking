@@ -42,7 +42,7 @@ const LunchDetail = () => {
   const params = useParams<{ id: string }>()
   const [loggedInUser] = useAuthState(auth)
   //store
-  const { uid } = useAppSelector(userStore)!
+  const { uid: loginUserUid } = useAppSelector(userStore)!
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
   const listUser = useAppSelector(listUserStore)
@@ -60,16 +60,16 @@ const LunchDetail = () => {
   const [alertMessage, setAlertMessage] = useState<string>('')
   const [isEditingNote, setIsEditingNote] = useState<boolean>(false)
 
-  const isHost = useMemo(() => eventInfo?.userPayId === uid, [eventInfo?.userPayId, uid])
+  const isHost = useMemo(() => eventInfo?.userPayId === loginUserUid, [eventInfo?.userPayId, loginUserUid])
   const hostInfo = useMemo(() => listUser.find((user) => user.uid === eventInfo?.userPayId), [eventInfo?.userPayId, listUser])
   const isPaid = useMemo(() => {
-    const member = userInEvent.find((member) => member.uid === uid)
+    const member = userInEvent.find((member) => member.uid === loginUserUid)
     if (member && member.uid !== eventInfo?.userPayId) {
       return member.isPaid
     } else {
       return !userInEvent.find((member) => !member.isPaid)
     }
-  }, [eventInfo?.userPayId, uid, userInEvent])
+  }, [eventInfo?.userPayId, loginUserUid, userInEvent])
 
   //handle
   const handleClick = () => {
@@ -92,7 +92,7 @@ const LunchDetail = () => {
   }, [eventInfo])
   useEffect(() => {
     async function checkEventNoticed(eventId: string) {
-      const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId, uid!)
+      const isNoticed = isHost ? await IsDemandPaymentNoticed(eventId) : await IsPaymentNoticed(eventId, loginUserUid!)
 
       setDisableNoti(isNoticed!)
     }
@@ -101,11 +101,12 @@ const LunchDetail = () => {
 
   const handleNoti = useCallback(() => {
     setDisableNoti(true)
+    const toUids = isHost ? userInEvent.filter((user) => !user.isPaid && user.uid !== loginUserUid).map((user) => user.uid!) : [eventInfo?.userPayId || '']
     createNoti({
       date: dayjs(Date.now()).unix(),
       content: isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG,
-      fromUid: uid!,
-      toUids: isHost ? userInEvent.filter((user) => !user.isPaid).map((user) => user.uid!) : [eventInfo?.userPayId || ''],
+      fromUid: loginUserUid!,
+      toUids: toUids,
       eventId: eventInfo?.id || '',
       userSeen: [],
       type: isHost ? 'DemandPayment' : 'PaymentNotice',
@@ -114,7 +115,7 @@ const LunchDetail = () => {
         setOpenAlert('Đã Thông báo')
       }
     })
-  }, [eventInfo, isHost, uid, userInEvent])
+  }, [eventInfo, isHost, loginUserUid, userInEvent])
 
   const handleCloseDialog = () => {
     setConfirmDialog(false)
@@ -311,12 +312,12 @@ const LunchDetail = () => {
                                 minRows={2}
                                 maxRows={5}
                                 placeholder="Note"
-                                style={{ width: '100%', border: '1px solid gray' }}
+                                style={{ width: '100%', border: '1px solid gray', padding: '3px 5px' }}
                               />
                             </Tooltip>
                           )}
-                          {loggedInUser?.uid === user.uid && !isEditingNote && loggedUserNote && <>`{loggedUserNote}`</>}
-                          {loggedInUser?.uid === user.uid && !isEditingNote && !loggedUserNote && <>`No note`</>}
+                          {loggedInUser?.uid === user.uid && !isEditingNote && loggedUserNote && <>{`"${loggedUserNote}"`}</>}
+                          {loggedInUser?.uid === user.uid && !isEditingNote && !loggedUserNote && <>No note</>}
                           {loggedInUser?.uid !== user.uid && user.note && <>`{user.note}`</>}
                         </td>
                         <td className="pb-[10px] text-center">
@@ -355,9 +356,7 @@ const LunchDetail = () => {
           </div>
           <div>
             <span className="text-gray-400 font-bold block mb-3 pt-[10px]">Note</span>
-            <div>
-              <TextareaAutosize value={eventInfo?.note || ''} minRows={1} style={{ width: 200 }} />
-            </div>
+            <div className="italic text-[#9c9c9c]"> {eventInfo?.note ? `"${eventInfo.note}"` : 'No note'} </div>
           </div>
           <div className=" block mb-3 pt-[10px] border-t-[1px] border-gray-400">
             <div className="text-gray-400 font-bold">Ảnh hoá đơn</div>

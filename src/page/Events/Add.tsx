@@ -41,6 +41,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { useParams } from 'react-router-dom'
 import './style.css'
 
+
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
     ...theme.typography.subtitle1,
@@ -198,41 +199,45 @@ function Add() {
   }
 
   const handleCreateEvent = async () => {
-    const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
-    const photoURL = imgAvatarObj ? await uploadEventImg(imgAvatarObj) : imgAvatarPreview
-    const eventData = { ...eventState, isAllPaid, bonusType, photoURL }
-    for (const item of userInEvent) {
-      if (item.id) {
-        deleteEventDetail(item.id)
+    try {
+      const isAllPaid = selectedListMember.every((item: IEventDetail) => item.isPaid === true)
+      const billImage = imgAvatarObj ? await uploadEventImg(imgAvatarObj) : imgAvatarPreview
+      const eventData = { ...eventState, isAllPaid, bonusType, photoURL: billImage ? billImage : '' }
+      for (const item of userInEvent) {
+        if (item.id) {
+          deleteEventDetail(item.id)
+        }
       }
-    }
-    if (params.id) {
-      const { isSuccess, eventId } = await updateEvent(params.id, eventData)
-      if (isSuccess) {
-        const promises: Promise<any>[] = []
-        selectedListMember.map((member) => {
-          const eventDetail = { ...member, eventId }
-          promises.push(setEventDetail(eventDetail))
-        })
-        await Promise.all(promises)
-        setOpenModalSuccess(true)
+      if (params.id) {
+        const { isSuccess, eventId } = await updateEvent(params.id, eventData)
+        if (isSuccess) {
+          const promises: Promise<any>[] = []
+          selectedListMember.map((member) => {
+            const eventDetail = { ...member, eventId }
+            promises.push(setEventDetail(eventDetail))
+          })
+          await Promise.all(promises)
+          setOpenModalSuccess(true)
+        }
+      } else {
+        const { isSuccess, eventId } = await setEvent(eventData)
+        if (isSuccess) {
+          const promises: Promise<any>[] = []
+          selectedListMember.map((member) => {
+            const eventDetail = { ...member, eventId }
+            setEventDetail(eventDetail)
+          })
+          await Promise.all(promises)
+          setOpenModalSuccess(true)
+        }
       }
-    } else {
-      const { isSuccess, eventId } = await setEvent(eventData)
-      if (isSuccess) {
-        const promises: Promise<any>[] = []
-        selectedListMember.map((member) => {
-          const eventDetail = { ...member, eventId }
-          setEventDetail(eventDetail)
-        })
-        await Promise.all(promises)
-        setOpenModalSuccess(true)
-      }
-    }
 
-    if (memberToPayState?.uid) {
-      const payCount = (memberToPayState?.count || 0) + 1
-      updatePayCount(memberToPayState.uid, payCount)
+      if (memberToPayState?.uid) {
+        const payCount = (memberToPayState?.count || 0) + 1
+        updatePayCount(memberToPayState.uid, payCount)
+      }
+    } catch (e) {
+      console.log('ERROR UPDATING BILL: ', e)
     }
   }
 
@@ -479,7 +484,7 @@ function Add() {
                               <TableRow key={`more-infor-${member.uid}`}>
                                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                                   <Collapse in={openingMemberRows.includes(member?.uid || '')} timeout="auto" unmountOnExit>
-                                    <p className="italic text-[#9c9c9c]">`{member.note || 'No note'}`</p>
+                                    <p className="italic text-[#9c9c9c]">{member.note ? `"${member.note}"` : 'No note'}</p>
                                   </Collapse>
                                 </TableCell>
                               </TableRow>
