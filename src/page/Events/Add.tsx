@@ -479,7 +479,7 @@ function Add() {
                               <TableRow key={`more-infor-${member.uid}`}>
                                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                                   <Collapse in={openingMemberRows.includes(member?.uid || '')} timeout="auto" unmountOnExit>
-                                    <p className="italic text-[#9c9c9c]">`{member.note || 'No note'}`</p>
+                                    <p className="italic text-[#9c9c9c]">{member.note ? `"${member.note}"` : 'No note'}</p>
                                   </Collapse>
                                 </TableCell>
                               </TableRow>
