@@ -704,6 +704,7 @@ function Add() {
             handleSelectedMember={handleSelectedMember}
             selectedListMember={selectedListMember}
             selectedGroup={selectedGroup}
+            useSelectPeopleInGroup={true}
           />
         )}
 

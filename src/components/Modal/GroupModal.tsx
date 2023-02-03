@@ -28,7 +28,7 @@ const style = {
   overflowY: 'scroll',
   maxHeight: '100vh',
 }
-function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup, useSelectPeopleInGroup = false }: PropsType) {
+function GroupModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup, useSelectPeopleInGroup = false }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
   const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
@@ -144,4 +144,4 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
   )
 }
 
-export default PeopleModal
+export default GroupModal

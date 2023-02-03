@@ -3,7 +3,6 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import { Box, Button, Typography } from '@mui/material'
 
 type PropsType = {
-  handleOnClose: () => void
   selectingMembers: IEventDetail[]
   handleClickRow: (user: IEventDetail) => void
   dellMember: (uid: string) => void
