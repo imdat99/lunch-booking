@@ -1,9 +1,12 @@
 // import { ReactComponent as DishImg } from '@app/assets/react.svg'
+import './style.css'
+
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
 import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount, uploadEventImg } from '@app/libs/api/EventApi'
+import { getUserGroup } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
-import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
+import { IEvent, IEventDetail, User, UserGroup } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
@@ -39,8 +42,6 @@ import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useParams } from 'react-router-dom'
-import './style.css'
-
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
@@ -70,6 +71,8 @@ const initEventValue = {
   billAmount: 0,
   userPayId: '',
   userPayName: '',
+  groupId: '',
+  groupName: '',
 }
 export const enum bonusTypeEnum {
   PERCENT = 'PERCENT',
@@ -80,7 +83,7 @@ export interface IDropdownMembers {
   label: string | null | undefined | ''
   value: string | null | undefined | ''
 }
-const sortListByPaidCount = (members: User[]) => {
+const sortListByPaidCount = (members: IEventDetail[]) => {
   return members.sort((a, b) => (a.count || 0) - (b.count || 0))
 }
 function Add() {
@@ -92,9 +95,12 @@ function Add() {
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
   const [openModalSuccess, setOpenModalSuccess] = useState<boolean>(false)
-  const [listBillOwner, setListBillOwner] = useState<User[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
+  const [listBillOwner, setListBillOwner] = useState<IEventDetail[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
   const [selectedListMember, setSelectedListMember] = useState<IEventDetail[]>([...userInEvent])
   const [memberToPayState, setMemberToPayState] = useState<IEventDetail>()
+  const [userGroupSelectBox, setUserGroupSelectBox] = useState<IDropdownMembers[]>()
+  const [userGroupData, setUserGroupData] = useState<UserGroup[]>()
+  const [selectedGroup, setSelectedGroup] = useState<UserGroup>()
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(eventInfo?.bonusType || bonusTypeEnum.PERCENT)
   const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
     userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
@@ -286,6 +292,17 @@ function Add() {
     }
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
+  const onChangeGroup = (_event: any, selectedGroup: any) => {
+    if (!selectedGroup) {
+      setEventState({ ...eventState, groupId: '', groupName: '' })
+      return
+    }
+    const tempSelectedGroup = userGroupData?.find((item: UserGroup) => item.groupId === selectedGroup.value)
+    if (tempSelectedGroup) {
+      setSelectedGroup(tempSelectedGroup)
+    }
+    setEventState({ ...eventState, groupId: selectedGroup.value, groupName: selectedGroup.label })
+  }
   const handlePreviewAvatarChange = (event: any) => {
     const fileUploaded = event.target ? event.target.files[0] : null
     if (fileUploaded) {
@@ -309,6 +326,14 @@ function Add() {
       }
     }
   }, [imgAvatarPreview])
+
+  useEffect(() => {
+    getUserGroup().then((group: UserGroup[] | undefined) => {
+      const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId }))
+      setUserGroupSelectBox(groupSelectBox)
+      setUserGroupData(group)
+    })
+  }, [])
 
   const handleOpenMemberDetail = (memberUid: string) => {
     let newOpeningMemberRows = [...openingMemberRows]
@@ -370,19 +395,32 @@ function Add() {
                   )}
                 />
               </Box>
+              <Box>
+                <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
+                  Group
+                </Typography>
+                <Autocomplete
+                  value={{ value: eventState?.groupId, label: eventState.groupName }}
+                  options={userGroupSelectBox || []}
+                  onChange={onChangeGroup}
+                  renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
+                />
+              </Box>
               <Box className="flex items-center mt-3">
                 <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
                   Thành viên
                 </Typography>
                 <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
-                <ButtonStyled>
-                  <AddIcon
-                    color="success"
-                    onClick={() => {
-                      setOpen(true)
-                    }}
-                  />
-                </ButtonStyled>
+                {selectedGroup && (
+                  <ButtonStyled>
+                    <AddIcon
+                      color="success"
+                      onClick={() => {
+                        setOpen(true)
+                      }}
+                    />
+                  </ButtonStyled>
+                )}
               </Box>
 
               {/* Members table */}
@@ -658,8 +696,15 @@ function Add() {
             </CardContent>
           </CardStyled>
         </Box>
-
-        <PeopleModal open={open} setOpen={setOpen} handleSelectedMember={handleSelectedMember} selectedListMember={selectedListMember} />
+        {selectedGroup && (
+          <PeopleModal
+            open={open}
+            setOpen={setOpen}
+            handleSelectedMember={handleSelectedMember}
+            selectedListMember={selectedListMember}
+            selectedGroup={selectedGroup}
+          />
+        )}
 
         <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>

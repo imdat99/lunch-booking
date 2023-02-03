@@ -1,7 +1,7 @@
 import { auth, storage } from '@app/server/firebase'
-import { User } from '@app/server/firebaseType'
+import { User, UserGroup } from '@app/server/firebaseType'
 // import {User} from 'firebase/auth'
-import { AllowedEmail, UserDetail, usersColection } from '@app/server/useDB'
+import { AllowedEmail, UserDetail, UserGroupCollection, usersColection } from '@app/server/useDB'
 import { store } from '@app/stores'
 import { clearUser } from '@app/stores/user'
 import { signOut } from 'firebase/auth'
@@ -43,7 +43,7 @@ export async function updateUser(uid: string, userInfo: User) {
 }
 
 export async function uploadQRImg(obj: any) {
-  const imgRef = ref(storage, `images/qr/${ dayjs(Date.now()).unix() + obj.name}`)
+  const imgRef = ref(storage, `images/qr/${dayjs(Date.now()).unix() + obj.name}`)
   try {
     await uploadBytes(imgRef, obj)
     return getDownloadURL(imgRef)
@@ -75,4 +75,18 @@ export const hadleLogout = async () => {
 export const getAllowedEmail = async (email: string) => {
   const allowedEmail = await getDoc(AllowedEmail)
   return allowedEmail.data()?.email.includes(email)
+}
+
+export async function getUserGroup() {
+  try {
+    const userDocs = await getDocs(UserGroupCollection)
+    const listUser: UserGroup[] = []
+    userDocs.docs.forEach((userDoc) => {
+      const user = { ...userDoc.data(), groupId: userDoc.id }
+      listUser.push(user)
+    })
+    return listUser
+  } catch (error) {
+    console.log('ERROR GETTING USER INFO IN DB', error)
+  }
 }

@@ -1,5 +1,5 @@
 import { getListUser } from '@app/libs/api/EventApi'
-import { IEventDetail, User } from '@app/server/firebaseType'
+import { IEventDetail, User, UserGroup } from '@app/server/firebaseType'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
@@ -7,12 +7,16 @@ import { Box, Button, Modal, TextField, Typography } from '@mui/material'
 import { height } from '@mui/system'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
+import NomarlSelectPeople from './NomarlSelectPeople'
+import GroupSelectPeople from './GroupSelectPeople'
+import { getUserGroup } from '@app/libs/api/userAPI'
 
 type PropsType = {
   open: boolean
   setOpen: any
   handleSelectedMember: any
   selectedListMember: IEventDetail[]
+  selectedGroup: UserGroup
 }
 const style = {
   position: 'absolute',
@@ -27,8 +31,9 @@ const style = {
   overflowY: 'scroll',
   maxHeight: '100vh',
 }
-function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }: PropsType) {
+function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
+  const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
   const [selectingMembers, setSelectingMembers] = useState<IEventDetail[]>([...selectedListMember])
   const handleClickRow = (user: IEventDetail) => {
@@ -56,8 +61,8 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
     setOpen(false)
   }
 
-  const removeDuplicateMembers = (allMembers: User[]) => {
-    const uniqueListMembers = allMembers.filter((item, index, list) => index === list.findIndex((member) => member.uid === item.uid))
+  const removeDuplicateMembers = (allMembersInGroup: IEventDetail[]) => {
+    const uniqueListMembers = allMembersInGroup.filter((item, index, list) => index === list.findIndex((member) => member.uid === item.uid))
     return uniqueListMembers
   }
 
@@ -70,6 +75,19 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
   }, [])
 
   useEffect(() => {
+    const tempMembers: IEventDetail[] = []
+    selectedGroup.members.forEach((uid: string) => {
+      const member = allMembers.find((member: IEventDetail) => member.uid === uid)
+      if (member) {
+        tempMembers.push(member)
+      }
+    })
+    const allMemberAndOthers = [...tempMembers, ...selectingMembers]
+    const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
+    setAllMembersInGroup(uniqueListMembers)
+  }, [allMembers, selectedGroup, selectingMembers])
+
+  useEffect(() => {
     setSelectingMembers([...selectedListMember])
     setNewMemberName('')
   }, [open])
@@ -80,7 +98,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
   }
   const handleAddNewMember = () => {
     const tempListSelectingMember = _.cloneDeep(selectingMembers)
-    const tempListAllMember = _.cloneDeep(allMembers)
+    const tempListAllMember = _.cloneDeep(allMembersInGroup)
     const newMember: IEventDetail = {
       name: newMemberName,
       uid: (Math.random() + 1).toString(36).substring(7),
@@ -94,7 +112,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
     setNewMemberName('')
   }
   const dellMember = (uid: string) => {
-    const tempMember = _.cloneDeep(allMembers)
+    const tempMember = _.cloneDeep(allMembersInGroup)
     const listMemberAfterDel = tempMember.filter((item) => item.uid !== uid)
     const filterListSelectingMember = selectingMembers.filter((item) => item.uid !== uid)
     setAllMembers(listMemberAfterDel)
@@ -107,23 +125,13 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember }
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        <div style={{ height: '30vh', overflow: 'scroll' }}>
-          {allMembers?.map((item: IEventDetail) => (
-            <Box className="flex w-full" key={item.uid}>
-              <Box
-                className={`hover:cursor-pointer ${selectingMembers.find((user) => item.uid === user.uid) ? 'bg-green-300' : ''} p-3 rounded-md mb-2 w-96`}
-                onClick={() => handleClickRow(item)}
-              >
-                <Typography>{item.name || item.email || 'no name'}</Typography>
-              </Box>
-              {item.isGuess && item.uid && (
-                <Button onClick={() => dellMember(item.uid || '')}>
-                  <DeleteForeverIcon />
-                </Button>
-              )}
-            </Box>
-          ))}
-        </div>
+        <NomarlSelectPeople
+          handleOnClose={handleOnClose}
+          selectingMembers={selectingMembers}
+          handleClickRow={handleClickRow}
+          dellMember={dellMember}
+          allMembers={allMembersInGroup}
+        />
         <Typography variant="h5" sx={{ marginBottom: '10px' }}>
           Thêm người ngoài
         </Typography>

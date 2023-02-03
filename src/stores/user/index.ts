@@ -1,4 +1,4 @@
-import { createUser, getUserByUid, updateUser, uploadQRImg , uploadAvatarImg} from '@app/libs/api/userAPI'
+import { createUser, getUserByUid, updateUser, uploadAvatarImg, uploadQRImg } from '@app/libs/api/userAPI'
 import { User as UserType } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
@@ -71,6 +71,7 @@ export function initializeUser(authUser: User): ThunkAction<void, RootState, unk
         bankAccountName: '',
         address: '',
         phone: '',
+        groups: [],
       }
 
       try {
@@ -90,7 +91,7 @@ export function initializeUser(authUser: User): ThunkAction<void, RootState, unk
   }
 }
 
-export function updateUserInfo(uid: string, userInfo: UserType, imgObj: any , imgAvatarObj : any): ThunkAction<void, RootState, unknown, AnyAction> {
+export function updateUserInfo(uid: string, userInfo: UserType, imgObj: any, imgAvatarObj: any): ThunkAction<void, RootState, unknown, AnyAction> {
   return async (dispatch) => {
     dispatch(update())
     try {

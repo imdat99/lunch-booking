@@ -1,7 +1,7 @@
 import { collection, CollectionReference, doc, DocumentData, DocumentReference } from 'firebase/firestore'
 
 import { db } from './firebase'
-import { IAllowedEmail, IEvent, IEventDetail, INoti, User ,ILastTimeCheckNoti} from './firebaseType'
+import { IAllowedEmail, IEvent, IEventDetail, INoti, User, ILastTimeCheckNoti, UserGroup } from './firebaseType'
 
 const createCollection = <T = DocumentData>(collectionName: string) => {
   return collection(db, collectionName) as CollectionReference<T>
@@ -17,6 +17,7 @@ export const NotiColection = createCollection<INoti>('Notification')
 export const EventDetailColection = createCollection<IEventDetail>('EventDetail')
 export const LastTimeCheckNotiColection = createCollection<ILastTimeCheckNoti>('LastTimeCheckNoti')
 export const AllowedEmail = createDocumentReference<IAllowedEmail>('allowedEmail', 'email')
+export const UserGroupCollection = createCollection<UserGroup>('userGroup')
 export const EventDetail = (id: string) => createDocumentReference<IEventDetail>('EventDetail', id)
 export const EventRef = (id: string) => createDocumentReference<IEvent>('Events', id)
 export const UserDetail = (id: string) => createDocumentReference<User>('Users', id)
