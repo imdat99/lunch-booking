@@ -9,12 +9,11 @@ import { RouterProvider } from 'react-router-dom'
 import { getListEventDetail } from './libs/api/event'
 import { getListUser } from './libs/api/events'
 import { listenCommingNoti } from './libs/api/noti'
-import { getAllowedEmail, hadleLogout } from './libs/api/userAPI'
 import Router from './router/Router'
 import { auth } from './server/firebase'
 import { useAppDispatch } from './stores/hook'
 import { setListUser } from './stores/listUser'
-import { addNewNotiCome , initializeNotiList , updateNewNotiCount} from './stores/noti'
+import { addNewNotiCome, initializeNotiList, updateNewNotiCount } from './stores/noti'
 import { initializeUser } from './stores/user'
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

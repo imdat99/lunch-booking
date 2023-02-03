@@ -16,8 +16,14 @@ export type User = {
   count?: number
   photoURL?: string | null
   qrCodeURL?: string
+  groups?: string[]
 }
-
+export type UserGroup = {
+  groupName: string
+  members: string[]
+  groupId: string
+  createUser: string
+}
 // export type PayHistory = {}
 
 export interface IEvent {
@@ -35,6 +41,8 @@ export interface IEvent {
   bonusType?: bonusTypeEnum
   note?: string
   photoURL?: string
+  groupId?: string
+  groupName?: string
 }
 export interface IEventDetail {
   id?: string | null
