@@ -10,6 +10,7 @@ import { IEvent, IEventDetail, User, UserGroup } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
+import { userStore } from '@app/stores/user'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -88,6 +89,7 @@ const sortListByPaidCount = (members: IEventDetail[]) => {
 }
 function Add() {
   const params = useParams()
+  const userLoginData = useAppSelector(userStore)
   const [loggedInUser] = useAuthState(auth)
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
@@ -122,7 +124,6 @@ function Add() {
     }
     setSelectedListMember(tempMembers)
   }
-
   const handleChangeAmount = (memberId: string | null | undefined, value: number) => {
     const tempMembers = _.cloneDeep(selectedListMember)
     const tempEvenState = _.cloneDeep(eventState)
@@ -329,7 +330,9 @@ function Add() {
 
   useEffect(() => {
     getUserGroup().then((group: UserGroup[] | undefined) => {
-      const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId }))
+      const groupSelectBox = group
+        ?.filter((item: UserGroup) => userLoginData.groups?.includes(item.groupId))
+        .map((item) => ({ label: item.groupName, value: item.groupId }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
     })
@@ -395,7 +398,7 @@ function Add() {
                   )}
                 />
               </Box>
-              <Box>
+              <Box className="mt-5">
                 <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
                   Group
                 </Typography>
