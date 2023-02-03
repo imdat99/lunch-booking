@@ -82,6 +82,7 @@ export const enum bonusTypeEnum {
 export interface IDropdownMembers {
   label: string | null | undefined | ''
   value: string | null | undefined | ''
+  isCreator: boolean | null | undefined | ''
 }
 const sortListByPaidCount = (members: IEventDetail[]) => {
   return members.sort((a, b) => (a.count || 0) - (b.count || 0))
@@ -103,7 +104,7 @@ function Add() {
   const [selectedGroup, setSelectedGroup] = useState<UserGroup>()
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(eventInfo?.bonusType || bonusTypeEnum.PERCENT)
   const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
-    userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
+    userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid, isCreator: null })) : []
   )
   const [imgAvatarPreview, setImgAvatarPreview] = useState(eventInfo?.photoURL)
   const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
@@ -144,7 +145,7 @@ function Add() {
     const tempMemberToPay = listSortedMember.find((item) => item.uid === loggedInUser?.uid)
     setListBillOwner(listSortedMember)
     setSelectedListMember(listSelectingMembers)
-    setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid })))
+    setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid, isCreator: null })))
     if (tempMemberToPay && tempMemberToPay.uid) {
       setMemberToPayState(tempMemberToPay)
       setEventState({ ...eventState, userPayId: tempMemberToPay.uid, userPayName: tempMemberToPay.name ? tempMemberToPay.name : 'chưa được đặt tên' })
@@ -329,7 +330,7 @@ function Add() {
 
   useEffect(() => {
     getUserGroup().then((group: UserGroup[] | undefined) => {
-      const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId }))
+      const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: null }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
     })
@@ -400,7 +401,7 @@ function Add() {
                   Group
                 </Typography>
                 <Autocomplete
-                  value={{ value: eventState?.groupId, label: eventState.groupName }}
+                  value={{ value: eventState?.groupId, label: eventState.groupName, isCreator: null }}
                   options={userGroupSelectBox || []}
                   onChange={onChangeGroup}
                   renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
@@ -553,7 +554,7 @@ function Add() {
                   <Grid item md={8} xs={7}>
                     <Autocomplete
                       disabled={!selectedListMember.length}
-                      value={{ value: eventState?.userPayName, label: eventState.userPayName }}
+                      value={{ value: eventState?.userPayName, label: eventState.userPayName, isCreator: null }}
                       options={dropdownMembers}
                       onChange={onChangeBillOwner}
                       renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}

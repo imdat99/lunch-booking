@@ -1,14 +1,18 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import ProfilePicture from '@app/assets/profile-picture.png'
+import PeopleModal from '@app/components/Modal/PeopleModal'
 import { LoadingScreen } from '@app/components/Suspense'
 import { getHomeDataByUid } from '@app/libs/api/home'
-import { getUserByUid } from '@app/libs/api/userAPI'
+import { getUserByUid, getUserGroup } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
-import { User } from '@app/server/firebaseType'
+import { User, UserGroup } from '@app/server/firebaseType'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { clearNotiList } from '@app/stores/noti'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
+import { ButtonUnstyled } from '@mui/base'
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
 import LogoutIcon from '@mui/icons-material/Logout'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
@@ -25,6 +29,8 @@ import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import * as yup from 'yup'
+
+import { IDropdownMembers } from '../Events/Add'
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -46,6 +52,7 @@ const Profile = () => {
   const [listEvent, setListEvent] = useState<any>({})
   const isLoginUser = currentMember?.uid === loginUser.uid
   const userFormData = useMemo(() => (isLoginUser ? loginUser : currentMember), [loginUser, isLoginUser, currentMember])
+  const [open, setOpen] = useState(false)
 
   const getCurrentMemberInfo = async () => {
     try {
@@ -58,9 +65,19 @@ const Profile = () => {
       console.log('Error when get member', e)
     }
   }
+  const [userGroup, setUserGroup] = useState<IDropdownMembers[]>()
 
   useEffect(() => {
     getCurrentMemberInfo()
+
+    getUserGroup().then((group: UserGroup[] | undefined) => {
+      const lstGroup = group?.map((item) => ({
+        label: item.groupName,
+        value: item.groupId,
+        isCreator: item.createUser == loginUser.uid ? true : false,
+      }))
+      setUserGroup(lstGroup)
+    })
   }, [])
 
   //Handle QR Image
@@ -216,142 +233,178 @@ const Profile = () => {
               </div>
             </Container>
           </div>
-          <div className="px-6 py-4">
-            <Formik
-              initialValues={{ ...userFormData }}
-              onSubmit={(values) => {
-                handleSubmitMember(values)
-              }}
-              validationSchema={validationSchema}
-            >
-              {({ values, handleChange, handleBlur, handleSubmit, errors }) => (
-                <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                  <TextField
-                    label="Tên hiển thị"
-                    variant="standard"
-                    fullWidth={true}
-                    id="name"
-                    name="name"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={!isLoginUser}
-                    helperText={errors.name || ''}
-                    error={Boolean(errors.name)}
-                  />
-                  <TextField
-                    label="LDAP"
-                    variant="standard"
-                    fullWidth={true}
-                    id="ldapAcc"
-                    name="ldapAcc"
-                    value={values.ldapAcc}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={!isLoginUser}
-                    helperText={errors.ldapAcc || ''}
-                    error={Boolean(errors.ldapAcc)}
-                  />
-
-                  <TextField
-                    label="Điện thoại"
-                    variant="standard"
-                    fullWidth={true}
-                    id="phone"
-                    name="phone"
-                    value={values.phone}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={!isLoginUser}
-                    helperText={errors.phone || ''}
-                    error={Boolean(errors.phone)}
-                  />
-                  <TextField
-                    label="Địa chỉ"
-                    variant="standard"
-                    fullWidth={true}
-                    id="address"
-                    name="address"
-                    value={values.address}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                    helperText={errors.address || ''}
-                    error={Boolean(errors.address)}
-                  />
-                  <TextField
-                    label="Ngân hàng"
-                    variant="standard"
-                    fullWidth={true}
-                    id="bankName"
-                    name="bankName"
-                    value={values.bankName}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                    helperText={errors.bankName || ''}
-                    error={Boolean(errors.bankName)}
-                  />
-                  <TextField
-                    label="Chủ tài khoản"
-                    variant="standard"
-                    fullWidth={true}
-                    id="bankAccountName"
-                    name="bankAccountName"
-                    value={values.bankAccountName}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                    helperText={errors.bankAccountName || ''}
-                    error={Boolean(errors.bankAccountName)}
-                  />
-                  <TextField
-                    label="Số tài khoản"
-                    variant="standard"
-                    fullWidth={true}
-                    id="bankAccount"
-                    name="bankAccount"
-                    value={values.bankAccount}
-                    onChange={handleChange}
-                    disabled={!isLoginUser}
-                    onBlur={handleBlur}
-                    helperText={errors.bankAccount || ''}
-                    error={Boolean(errors.bankAccount)}
-                  />
-                  <div className="flex flex-col pb-8">
-                    <span className="font-bellota text-sm">Mã QR</span>
-                    <div className="self-center pt-3">
-                      {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
-                      {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
+          <Container>
+            <div className="px-6 py-4">
+              <div className="mb-3" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.42)' }}>
+                <span className="mb-2">Group</span>
+                <AddIcon
+                  color="success"
+                  onClick={() => {
+                    // setOpen(true)
+                  }}
+                />
+                <div>
+                  {userGroup?.map((group) => (
+                    <div key={group.value} style={{ margin: '10px' }}>
+                      <span>{group.label}</span>
+                      {group.isCreator ? (
+                        <EditIcon
+                          onClick={() => {
+                            // setIsEditingNote(true)
+                          }}
+                          sx={{ cursor: 'pointer', width: '16px', marginLeft: '5px' }}
+                        />
+                      ) : (
+                        <></>
+                      )}
                     </div>
-                    {isLoginUser && (
-                      <>
-                        <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
-                          <input hidden accept="image/*" type="file" />
-                          <PhotoCamera fontSize={'large'} />
-                        </IconButton>
-                        <Button variant="contained" type="submit" className="self-center" disabled={isInvalidForm(errors)}>
-                          Save
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </form>
-              )}
-            </Formik>
-          </div>
+                  ))}
+                </div>
+              </div>
+              <Formik
+                initialValues={{ ...userFormData }}
+                onSubmit={(values) => {
+                  handleSubmitMember(values)
+                }}
+                validationSchema={validationSchema}
+              >
+                {({ values, handleChange, handleBlur, handleSubmit, errors }) => (
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                    <TextField
+                      label="Tên hiển thị"
+                      variant="standard"
+                      fullWidth={true}
+                      id="name"
+                      name="name"
+                      value={values.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!isLoginUser}
+                      helperText={errors.name || ''}
+                      error={Boolean(errors.name)}
+                    />
+                    <TextField
+                      label="LDAP"
+                      variant="standard"
+                      fullWidth={true}
+                      id="ldapAcc"
+                      name="ldapAcc"
+                      value={values.ldapAcc}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!isLoginUser}
+                      helperText={errors.ldapAcc || ''}
+                      error={Boolean(errors.ldapAcc)}
+                    />
 
-          {showMessage && (
-            <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-                {showMessage === 'success' ? (
-                  <span className="font-bold"> {'Cập nhật user thành công!'} </span>
-                ) : (
-                  <span className="font-bold"> {'Cập nhật thất bại!'} </span>
+                    <TextField
+                      label="Điện thoại"
+                      variant="standard"
+                      fullWidth={true}
+                      id="phone"
+                      name="phone"
+                      value={values.phone}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={!isLoginUser}
+                      helperText={errors.phone || ''}
+                      error={Boolean(errors.phone)}
+                    />
+                    <TextField
+                      label="Địa chỉ"
+                      variant="standard"
+                      fullWidth={true}
+                      id="address"
+                      name="address"
+                      value={values.address}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      helperText={errors.address || ''}
+                      error={Boolean(errors.address)}
+                    />
+                    <TextField
+                      label="Ngân hàng"
+                      variant="standard"
+                      fullWidth={true}
+                      id="bankName"
+                      name="bankName"
+                      value={values.bankName}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      helperText={errors.bankName || ''}
+                      error={Boolean(errors.bankName)}
+                    />
+                    <TextField
+                      label="Chủ tài khoản"
+                      variant="standard"
+                      fullWidth={true}
+                      id="bankAccountName"
+                      name="bankAccountName"
+                      value={values.bankAccountName}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      helperText={errors.bankAccountName || ''}
+                      error={Boolean(errors.bankAccountName)}
+                    />
+                    <TextField
+                      label="Số tài khoản"
+                      variant="standard"
+                      fullWidth={true}
+                      id="bankAccount"
+                      name="bankAccount"
+                      value={values.bankAccount}
+                      onChange={handleChange}
+                      disabled={!isLoginUser}
+                      onBlur={handleBlur}
+                      helperText={errors.bankAccount || ''}
+                      error={Boolean(errors.bankAccount)}
+                    />
+                    <div className="flex flex-col pb-8">
+                      <span className="font-bellota text-sm">Mã QR</span>
+                      <div className="self-center pt-3">
+                        {isLoginUser && imgQRPreview && <img alt="qrcode" className="max-w-xs" src={imgQRPreview} />}
+                        {!isLoginUser && currentMember?.qrCodeURL && <img src={currentMember?.qrCodeURL} className="max-w-xs" alt="qrcode" />}
+                      </div>
+                      {isLoginUser && (
+                        <>
+                          <IconButton size={'large'} color="primary" aria-label="upload picture" component="label" onChange={handlePreviewQRChange}>
+                            <input hidden accept="image/*" type="file" />
+                            <PhotoCamera fontSize={'large'} />
+                          </IconButton>
+                          <Button variant="contained" type="submit" className="self-center" disabled={isInvalidForm(errors)}>
+                            Save
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </form>
                 )}
-              </Alert>
-            </Snackbar>
-          )}
+              </Formik>
+            </div>
+
+            {/* <PeopleModal
+              open={open}
+              setOpen={setOpen}
+              handleSelectedMember={handleSelectedMember}
+              selectedListMember={selectedListMember}
+              selectedGroup={selectedGroup}
+            /> */}
+
+            {showMessage && (
+              <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert severity={showMessage} sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+                  {showMessage === 'success' ? (
+                    <span className="font-bold"> {'Cập nhật user thành công!'} </span>
+                  ) : (
+                    <span className="font-bold"> {'Cập nhật thất bại!'} </span>
+                  )}
+                </Alert>
+              </Snackbar>
+            )}
+          </Container>
         </div>
       )}
     </>
