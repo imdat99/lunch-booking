@@ -1,5 +1,5 @@
 import { getListUser } from '@app/libs/api/EventApi'
-import { getUserGroup } from '@app/libs/api/userAPI'
+import { getMyUserGroups } from '@app/libs/api/userAPI'
 import MemberCard from '@app/page/Members/MemberCard'
 import { User, UserGroup } from '@app/server/firebaseType'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -24,7 +24,7 @@ const Members = () => {
   }, [])
 
   useEffect(() => {
-    getUserGroup().then((data) => {
+    getMyUserGroups().then((data) => {
       setUserGroups(data)
     })
   }, [])

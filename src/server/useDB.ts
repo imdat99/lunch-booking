@@ -1,7 +1,7 @@
 import { collection, CollectionReference, doc, DocumentData, DocumentReference } from 'firebase/firestore'
 
 import { db } from './firebase'
-import { IAllowedEmail, IEvent, IEventDetail, INoti, User, ILastTimeCheckNoti, UserGroup } from './firebaseType'
+import { IAllowedEmail, IEvent, IEventDetail, ILastTimeCheckNoti, INoti, User, UserGroup } from './firebaseType'
 
 const createCollection = <T = DocumentData>(collectionName: string) => {
   return collection(db, collectionName) as CollectionReference<T>

@@ -4,11 +4,16 @@ import { User, UserGroup } from '@app/server/firebaseType'
 import { AllowedEmail, UserDetail, UserGroupCollection, usersColection } from '@app/server/useDB'
 import { store } from '@app/stores'
 import { clearUser } from '@app/stores/user'
-import { signOut } from 'firebase/auth'
-import { doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { uniqueId } from 'lodash'
 import dayjs from 'dayjs'
+import { getAuth, signOut } from 'firebase/auth'
+import { doc, getDoc, getDocs, query, QuerySnapshot, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+
+export function getCurrentUser() {
+  const auth = getAuth()
+
+  return auth.currentUser
+}
 
 export async function createUser(userInfo: User) {
   try {
@@ -77,15 +82,60 @@ export const getAllowedEmail = async (email: string) => {
   return allowedEmail.data()?.email.includes(email)
 }
 
-export async function getUserGroup() {
+function toUserGroupData(snapshot: QuerySnapshot<UserGroup>): UserGroup[] {
+  return snapshot.docs.map((d) => ({
+    ...d.data(),
+    groupId: d.id,
+  }))
+}
+
+/**
+ * Gets all user-group that contains `uid` in `members`
+ * @param uid firebase userId
+ * @returns
+ */
+export async function getUserGroupsByUserId(uid: string) {
   try {
-    const userDocs = await getDocs(UserGroupCollection)
-    const listUser: UserGroup[] = []
-    userDocs.docs.forEach((userDoc) => {
-      const user = { ...userDoc.data(), groupId: userDoc.id }
-      listUser.push(user)
-    })
-    return listUser
+    const q = query(UserGroupCollection, where('members', 'array-contains', uid))
+
+    const docs = await getDocs(q)
+
+    return toUserGroupData(docs)
+  } catch (error) {
+    console.log('🚀 ~ file: userAPI.ts:115 ~ getUserGroupByUserId ~ error', error)
+
+    return []
+  }
+}
+
+/**
+ * Get all user-group that contains `user`
+ * @param user User
+ * @returns
+ */
+export async function getUserGroupsByUser(user: User) {
+  if (!user.uid) {
+    return []
+  }
+
+  return getUserGroupsByUserId(user.uid)
+}
+
+export async function getMyUserGroups() {
+  const user = getCurrentUser()
+
+  if (!user) {
+    return []
+  }
+
+  return getUserGroupsByUser(user)
+}
+
+export async function getAllUserGroup() {
+  try {
+    const groupDocs = await getDocs(UserGroupCollection)
+
+    return toUserGroupData(groupDocs)
   } catch (error) {
     console.log('ERROR GETTING USER INFO IN DB', error)
   }
