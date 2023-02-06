@@ -1,15 +1,12 @@
 import { getListUser } from '@app/libs/api/EventApi'
-import { IEventDetail, User, UserGroup } from '@app/server/firebaseType'
+import { IEventDetail, UserGroup } from '@app/server/firebaseType'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import { Box, Button, Modal, TextField, Typography } from '@mui/material'
-import { height } from '@mui/system'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
+
 import NomarlSelectPeople from './NomarlSelectPeople'
-import GroupSelectPeople from './GroupSelectPeople'
-import { getUserGroup } from '@app/libs/api/userAPI'
 
 type PropsType = {
   open: boolean
@@ -18,6 +15,7 @@ type PropsType = {
   selectedListMember: IEventDetail[]
   selectedGroup: UserGroup
 }
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -31,11 +29,13 @@ const style = {
   overflowY: 'scroll',
   maxHeight: '100vh',
 }
+
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
   const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
   const [selectingMembers, setSelectingMembers] = useState<IEventDetail[]>([...selectedListMember])
+
   const handleClickRow = (user: IEventDetail) => {
     const tempMembers = [...selectingMembers]
     const index = tempMembers.findIndex((u) => u.uid === user.uid)
@@ -96,6 +96,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setOpen(false)
     setSelectingMembers([])
   }
+
   const handleAddNewMember = () => {
     const tempListSelectingMember = _.cloneDeep(selectingMembers)
     const tempListAllMember = _.cloneDeep(allMembersInGroup)
@@ -111,6 +112,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setAllMembers(tempListAllMember)
     setNewMemberName('')
   }
+
   const dellMember = (uid: string) => {
     const tempMember = _.cloneDeep(allMembersInGroup)
     const listMemberAfterDel = tempMember.filter((item) => item.uid !== uid)
@@ -118,6 +120,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setAllMembers(listMemberAfterDel)
     setSelectingMembers(filterListSelectingMember)
   }
+
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>

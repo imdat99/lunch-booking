@@ -4,9 +4,9 @@ import './style.css'
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
 import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount, uploadEventImg } from '@app/libs/api/EventApi'
-import { getUserGroup } from '@app/libs/api/userAPI'
+import { getMyUserGroups } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
-import { IEvent, IEventDetail, User, UserGroup } from '@app/server/firebaseType'
+import { IEvent, IEventDetail, UserGroup } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
@@ -49,11 +49,13 @@ const TextFieldStyled = styled(TextField)(({ theme }) => ({
     ...theme.typography.subtitle1,
   },
 }))
+
 const ButtonStyled = styled(Button)(() => ({
   '&.MuiButton-root': {
     borderRadius: '10px',
   },
 }))
+
 const CardStyled = styled(Card)(() => ({
   marginTop: '30px',
   marginBottom: '15px',
@@ -75,6 +77,7 @@ const initEventValue = {
   groupId: '',
   groupName: '',
 }
+
 export const enum bonusTypeEnum {
   PERCENT = 'PERCENT',
   MONEY = 'MONEY',
@@ -84,9 +87,11 @@ export interface IDropdownMembers {
   label: string | null | undefined | ''
   value: string | null | undefined | ''
 }
+
 const sortListByPaidCount = (members: IEventDetail[]) => {
   return members.sort((a, b) => (a.count || 0) - (b.count || 0))
 }
+
 function Add() {
   const params = useParams()
   const userLoginData = useAppSelector(userStore)
@@ -95,6 +100,7 @@ function Add() {
   const listEvent = useAppSelector(listEventStore)
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
+  const [open, setOpen] = useState(false)
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
   const [openModalSuccess, setOpenModalSuccess] = useState<boolean>(false)
   const [listBillOwner, setListBillOwner] = useState<IEventDetail[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
@@ -124,6 +130,7 @@ function Add() {
     }
     setSelectedListMember(tempMembers)
   }
+
   const handleChangeAmount = (memberId: string | null | undefined, value: number) => {
     const tempMembers = _.cloneDeep(selectedListMember)
     const tempEvenState = _.cloneDeep(eventState)
@@ -151,7 +158,7 @@ function Add() {
       setEventState({ ...eventState, userPayId: tempMemberToPay.uid, userPayName: tempMemberToPay.name ? tempMemberToPay.name : 'chưa được đặt tên' })
     }
   }
-  const [open, setOpen] = useState(false)
+
   const handleDelete = (member: IEventDetail) => {
     const newSelectedMember = [...selectedListMember]
     const index = newSelectedMember.findIndex((u) => u.uid === member.uid)
@@ -312,7 +319,6 @@ function Add() {
     }
   }
 
-  //***UseEffect***
   useEffect(() => {
     const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
     const total = (eventState.billAmount || 0) + bonus
@@ -329,7 +335,7 @@ function Add() {
   }, [imgAvatarPreview])
 
   useEffect(() => {
-    getUserGroup().then((group: UserGroup[] | undefined) => {
+    getMyUserGroups().then((group: UserGroup[] | undefined) => {
       const groupSelectBox = group
         ?.filter((item: UserGroup) => userLoginData.groups?.includes(item.groupId))
         .map((item) => ({ label: item.groupName, value: item.groupId }))
