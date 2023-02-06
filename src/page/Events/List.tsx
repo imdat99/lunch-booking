@@ -34,11 +34,14 @@ const Divider = () => {
 
 const buttonClassname = (index: number, length: number) => {
   return `
+  text-sm
   max-w-[33%]
   w-full
   flex
+  h-[52px]
+  py-4
+  items-center
   justify-center
-  py-4 px-4 
   text-gray-900 
   border-gray-200 
   hover:bg-gray-100 
@@ -153,8 +156,8 @@ const List = () => {
   const renderSortIcon = (sortType: SortType) => {
     if (!sort) return null
     if (sortType === orderBy) {
-      if (sort === Order.ASC) return <ArrowDropDown className="ml-2" />
-      return <ArrowDropUp className="ml-2" />
+      if (sort === Order.ASC) return <ArrowDropDown />
+      return <ArrowDropUp />
     }
   }
 
@@ -217,7 +220,7 @@ const List = () => {
                     </div>
                   </div>
                   <div className="w-2/3 relative flex flex-col justify-between">
-                    <time>{item.date}</time>
+                    <time>{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</time>
                     <div className="mt-3">
                       <h3 className="font-medium">{item.eventName}</h3>
                       <span>
