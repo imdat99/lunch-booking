@@ -125,7 +125,7 @@ const Profile = () => {
   //--------------------------------------
 
   useEffect(() => {
-    getHomeDataByUid(loginUser?.uid || '').then((e) => {
+    getHomeDataByUid(userUid!).then((e) => {
       setListEvent(e)
     })
   }, [dispatch, loginUser?.uid])

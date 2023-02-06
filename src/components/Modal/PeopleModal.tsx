@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Modal, TextField, Typography } from '@mui/material'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
+
 import NomarlSelectPeople from './NomarlSelectPeople'
 
 type PropsType = {
@@ -15,6 +16,7 @@ type PropsType = {
   selectedGroup: UserGroup
   useSelectPeopleInGroup?: boolean
 }
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -28,11 +30,13 @@ const style = {
   overflowY: 'scroll',
   maxHeight: '100vh',
 }
+
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup, useSelectPeopleInGroup = false }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
   const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
   const [selectingMembers, setSelectingMembers] = useState<IEventDetail[]>([...selectedListMember])
+
   const handleClickRow = (user: IEventDetail) => {
     const tempMembers = [...selectingMembers]
     const index = tempMembers.findIndex((u) => u.uid === user.uid)
@@ -97,6 +101,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setOpen(false)
     setSelectingMembers([])
   }
+
   const handleAddNewMember = () => {
     const tempListSelectingMember = _.cloneDeep(selectingMembers)
     const tempListAllMember = _.cloneDeep(allMembersInGroup)
@@ -112,6 +117,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setAllMembers(tempListAllMember)
     setNewMemberName('')
   }
+
   const dellMember = (uid: string) => {
     const tempMember = _.cloneDeep(allMembersInGroup)
     const listMemberAfterDel = tempMember.filter((item) => item.uid !== uid)
@@ -119,6 +125,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setAllMembers(listMemberAfterDel)
     setSelectingMembers(filterListSelectingMember)
   }
+
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
