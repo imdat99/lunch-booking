@@ -3,7 +3,7 @@ import ProfilePicture from '@app/assets/profile-picture.png'
 import GroupModal from '@app/components/Modal/GroupModal'
 import { LoadingScreen } from '@app/components/Suspense'
 import { getHomeDataByUid } from '@app/libs/api/home'
-import { createGroup, getUserByUid, getUserGroupsByUserId } from '@app/libs/api/userAPI'
+import { createGroup, deleteGroup, getUserByUid, getUserGroupsByUserId } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
 import { User, UserGroup } from '@app/server/firebaseType'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
@@ -70,10 +70,7 @@ const Profile = () => {
     }
   }
   const [userGroup, setUserGroup] = useState<IDropdownMembers[]>()
-
-  useEffect(() => {
-    getCurrentMemberInfo()
-
+  const getGroupByUser = () => {
     getUserGroupsByUserId(loginUser.uid || '').then((group: UserGroup[] | undefined) => {
       const lstGroup = group?.map((item) => ({
         label: item.groupName,
@@ -82,6 +79,27 @@ const Profile = () => {
       }))
       setUserGroup(lstGroup)
     })
+  }
+
+  const handleDelete = (groupId: string) => {
+    try {
+      // setLoading(true)
+      if (groupId) {
+        deleteGroup(groupId).then(() => {
+          // setLoading(false)
+          setModalData({ isOpen: false, groupId: '' })
+          getGroupByUser()
+        })
+      }
+    } catch (error) {
+      console.log(error)
+
+      // setLoading(false)
+    }
+  }
+  useEffect(() => {
+    getCurrentMemberInfo()
+    getGroupByUser()
   }, [])
 
   //Handle QR Image
@@ -160,7 +178,7 @@ const Profile = () => {
         // const tempGroups = _.cloneDeep(userGroup)
         // tempGroups?.push(newGroup)
         // setUserGroup(tempGroups)
-        window.location.reload()
+        getGroupByUser()
       }
       console.log(isSuccess, GroupData)
     })
@@ -407,6 +425,8 @@ const Profile = () => {
               setOpen={setModalData}
               handleSelectedMember={handleSelectedMember}
               groupId={modalData.groupId}
+              setLoading={setLoading}
+              handleDelete={handleDelete}
               // selectedListMember={selectedListMember}
               // selectedGroup={selectedGroup}
             />

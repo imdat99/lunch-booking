@@ -6,7 +6,7 @@ import { store } from '@app/stores'
 import { clearUser } from '@app/stores/user'
 import dayjs from 'dayjs'
 import { getAuth, signOut } from 'firebase/auth'
-import { addDoc, doc, getDoc, getDocs, query, QuerySnapshot, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { addDoc, deleteDoc, doc, getDoc, getDocs, query, QuerySnapshot, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 
 export function getCurrentUser() {
@@ -139,7 +139,6 @@ export async function getUserGroupsByUser(user: User) {
 export async function createGroup(GroupData: UserGroup) {
   try {
     let isSuccess = false
-    console.log('GroupData.groupId', GroupData)
     if (GroupData.groupId !== '') {
       await updateDoc(GroupDetail(GroupData.groupId), GroupData).then(() => {
         isSuccess = true
@@ -154,6 +153,12 @@ export async function createGroup(GroupData: UserGroup) {
   } catch (error) {
     console.log('ERROR SETTING USER INFO IN DB', error)
   }
+}
+export async function deleteGroup(groupId: string) {
+  console.log('groupId', groupId)
+
+  const res = await deleteDoc(GroupDetail(groupId))
+  return res
 }
 
 export async function getMyUserGroups() {

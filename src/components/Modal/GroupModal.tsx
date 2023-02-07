@@ -1,5 +1,5 @@
 import { getListUser } from '@app/libs/api/EventApi'
-import { getGroupById } from '@app/libs/api/userAPI'
+import { deleteGroup, getGroupById } from '@app/libs/api/userAPI'
 import { IEventDetail, UserGroup } from '@app/server/firebaseType'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Modal, TextField, Typography } from '@mui/material'
@@ -16,6 +16,8 @@ type PropsType = {
   handleSelectedMember: any
   useSelectPeopleInGroup?: boolean
   groupId: string
+  setLoading: any
+  handleDelete: any
 }
 const style = {
   position: 'absolute',
@@ -30,7 +32,7 @@ const style = {
   overflowY: 'scroll',
   maxHeight: '100vh',
 }
-function GroupModal({ open, setOpen, handleSelectedMember, groupId }: PropsType) {
+function GroupModal({ open, setOpen, handleSelectedMember, groupId, setLoading, handleDelete }: PropsType) {
   const loginUser = useAppSelector(userStore)
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
   const [groupInfo, setGroupInfo] = useState<UserGroup>({ members: [], createUser: loginUser.uid || '', groupName: '', groupId: '' })
@@ -61,6 +63,7 @@ function GroupModal({ open, setOpen, handleSelectedMember, groupId }: PropsType)
     const uniqueListMembers = allMembersInGroup.filter((item, index, list) => index === list.findIndex((member) => member.uid === item.uid))
     return uniqueListMembers
   }
+
   useEffect(() => {
     getListUser().then((allMembers) => {
       const uniqueListMembers = removeDuplicateMembers(allMembers)
@@ -105,9 +108,14 @@ function GroupModal({ open, setOpen, handleSelectedMember, groupId }: PropsType)
         <TextField value={groupInfo?.groupName} className="w-full" onChange={handleChangeGroupName} />
         <Typography variant="subtitle1">Member</Typography>
         <NomarlSelectPeople selectingMembers={selectingMembers} handleClickRow={handleClickRow} dellMember={dellMember} allMembers={allMembers} />
-        <Button onClick={handleAdd} variant="contained" sx={{ marginTop: '20px' }}>
-          OK
-        </Button>
+        <Box className="flex justify-center">
+          <Button onClick={handleAdd} variant="contained" sx={{ margin: '20px 15px 0px 0px' }}>
+            OK
+          </Button>
+          <Button color="error" onClick={() => handleDelete(groupInfo.groupId)} variant="contained" sx={{ marginTop: '20px' }}>
+            delete
+          </Button>
+        </Box>
       </Box>
     </Modal>
   )

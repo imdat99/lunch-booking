@@ -4,7 +4,7 @@ import './style.css'
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
 import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount, uploadEventImg } from '@app/libs/api/EventApi'
-import { getMyUserGroups } from '@app/libs/api/userAPI'
+import { getMyUserGroups, getUserGroupsByUserId } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
 import { IEvent, IEventDetail, UserGroup } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
@@ -337,10 +337,8 @@ function Add() {
   }, [imgAvatarPreview])
 
   useEffect(() => {
-    getMyUserGroups().then((group: UserGroup[] | undefined) => {
-      const groupSelectBox = group
-        ?.filter((item: UserGroup) => userLoginData.groups?.includes(item.groupId))
-        .map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
+    getUserGroupsByUserId(loggedInUser?.uid || '').then((group: UserGroup[] | undefined) => {
+      const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
     })
