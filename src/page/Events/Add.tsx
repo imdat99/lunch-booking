@@ -541,11 +541,6 @@ function Add() {
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  <Box className="w-full flex justify-end mt-3">
-                    <ButtonStyled variant="contained" className="mt-6" onClick={handleShareBill}>
-                      <Typography>Chia đều</Typography>
-                    </ButtonStyled>
-                  </Box>
                 </>
               )}
 
@@ -570,7 +565,7 @@ function Add() {
                   </Grid>
                 </Grid>
               </Box>
-              <Box className="mt-5">
+              <Box className="w-full flex mt-3 items-center gap-2">
                 <TextNumberInput
                   thousandSeparator=","
                   allowLeadingZeros={false}
@@ -596,8 +591,10 @@ function Add() {
                   defaultValue={0}
                   error={!eventState.billAmount}
                 />
+                <ButtonStyled variant="contained" className="text-[14px] w-[140px]" sx={{ marginTop: '16px' }} onClick={handleShareBill}>
+                  Chia đều
+                </ButtonStyled>
               </Box>
-
               <Typography variant="subtitle2" sx={{ marginTop: '10px' }}>
                 Note
               </Typography>
