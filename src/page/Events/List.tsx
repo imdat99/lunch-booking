@@ -207,17 +207,12 @@ const List = () => {
             return (
               <li className="my-4" key={index}>
                 <Link to={item.id!}>
-                  <Box className="bg-white rounded-3xl flex items-center p-3">
-                    <div className="relative w-full max-w-[30%]">
-                      <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full mx-auto" alt="" />
-                      <span
-                        className={
-                          'absolute py-1 px-2 font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 text-center text-[14px] ' +
-                          (isHost ? 'bg-red-700 w-[70px]' : 'bg-green-600 w-[85px]')
-                        }
-                      >
+                  <Box className="bg-white rounded-3xl flex justify-around items-center p-5">
+                    <div className="relative">
+                      <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full" alt="" />
+                      <div className={'font-bold text-white rounded-lg text-center text-[14px] ' + (isHost ? 'text-green-600' : 'text-red-700')}>
                         {isHost ? TEXT__HOST : TEXT__MEMBER}
-                      </span>
+                      </div>
                     </div>
                     <Box className="w-full max-w-[70%]">
                       <div className="flex justify-between items-center">
