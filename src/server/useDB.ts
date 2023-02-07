@@ -22,4 +22,5 @@ export const EventDetail = (id: string) => createDocumentReference<IEventDetail>
 export const EventRef = (id: string) => createDocumentReference<IEvent>('Events', id)
 export const UserDetail = (id: string) => createDocumentReference<User>('Users', id)
 export const NotiDetail = (id: string) => createDocumentReference<INoti>('Notification', id)
+export const GroupDetail = (id: string) => createDocumentReference<UserGroup>('userGroup', id)
 export const LastTimeCheckNotiDetail = (id: string) => createDocumentReference<ILastTimeCheckNoti>('LastTimeCheckNoti', id)

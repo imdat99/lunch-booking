@@ -14,6 +14,7 @@ type PropsType = {
   handleSelectedMember: any
   selectedListMember: IEventDetail[]
   selectedGroup: UserGroup
+  useSelectPeopleInGroup?: boolean
 }
 
 const style = {
@@ -30,7 +31,7 @@ const style = {
   maxHeight: '100vh',
 }
 
-function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup }: PropsType) {
+function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup, useSelectPeopleInGroup = false }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
   const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
@@ -75,17 +76,21 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
   }, [])
 
   useEffect(() => {
-    const tempMembers: IEventDetail[] = []
-    selectedGroup.members.forEach((uid: string) => {
-      const member = allMembers.find((member: IEventDetail) => member.uid === uid)
-      if (member) {
-        tempMembers.push(member)
-      }
-    })
-    const allMemberAndOthers = [...tempMembers, ...selectingMembers]
-    const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
-    setAllMembersInGroup(uniqueListMembers)
-  }, [allMembers, selectedGroup, selectingMembers])
+    if (useSelectPeopleInGroup) {
+      const tempMembers: IEventDetail[] = []
+      selectedGroup.members.forEach((uid: string) => {
+        const member = allMembers.find((member: IEventDetail) => member.uid === uid)
+        if (member) {
+          tempMembers.push(member)
+        }
+      })
+      const allMemberAndOthers = [...tempMembers, ...selectingMembers]
+      const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
+      setAllMembersInGroup(uniqueListMembers)
+    } else {
+      setAllMembersInGroup(allMembers)
+    }
+  }, [allMembers, selectedGroup, selectingMembers, useSelectPeopleInGroup])
 
   useEffect(() => {
     setSelectingMembers([...selectedListMember])
@@ -128,13 +133,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        <NomarlSelectPeople
-          handleOnClose={handleOnClose}
-          selectingMembers={selectingMembers}
-          handleClickRow={handleClickRow}
-          dellMember={dellMember}
-          allMembers={allMembersInGroup}
-        />
+        <NomarlSelectPeople selectingMembers={selectingMembers} handleClickRow={handleClickRow} dellMember={dellMember} allMembers={allMembersInGroup} />
         <Typography variant="h5" sx={{ marginBottom: '10px' }}>
           Thêm người ngoài
         </Typography>

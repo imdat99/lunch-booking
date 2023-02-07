@@ -272,10 +272,10 @@ const LunchDetail = () => {
                     <th scope="col" className="py-3">
                       Thành viên
                     </th>
-                    <th scope="col" className="py-3 text-center">
+                    <th scope="col" className="py-3 pl-5 text-right">
                       Bill
                     </th>
-                    <th scope="col" className="py-3 text-right">
+                    <th scope="col" className="py-3 pl-10 text-right">
                       Pay
                     </th>
                   </tr>
@@ -297,8 +297,8 @@ const LunchDetail = () => {
                           </label>
                         </td>
 
-                        <td className="text-center">{formatMoney(user.amount, false)}</td>
-                        <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
+                        <td className="text-right">{formatMoney(user.amount, false)} K</td>
+                        <td className="text-right">{formatMoney(user.amountToPay, false)} K</td>
                       </tr>
 
                       <tr key={`user-note-${user.uid}`}>

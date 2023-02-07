@@ -86,6 +86,7 @@ const List = () => {
     [listEventDetail, userData]
   )
   const listEventUser = useMemo(() => listEvent.filter((event) => eventOfUser.includes(event.id)), [eventOfUser, listEvent])
+  console.log(listEventUser)
 
   const listButton = useMemo(() => {
     return [
