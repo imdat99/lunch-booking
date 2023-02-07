@@ -8,7 +8,7 @@ import { listUserStore } from '@app/stores/listUser'
 import { userStore } from '@app/stores/user'
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material'
 // import SearchIcon from '@mui/icons-material/Search'
-import { Container } from '@mui/material'
+import { Box, Container } from '@mui/material'
 // import InputAdornment from '@mui/material/InputAdornment'
 // import OutlinedInput from '@mui/material/OutlinedInput'
 import dayjs from 'dayjs'
@@ -205,53 +205,49 @@ const List = () => {
               : 0
             return (
               <li className="my-4" key={index}>
-                <Link to={item.id!} className="flex bg-white rounded-3xl p-3">
-                  <div className="mx-auto mb-5 p-1 w-1/3">
-                    <div className="relative">
-                      <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-20 h-20 rounded-full mx-auto" alt="" />
+                <Link to={item.id!}>
+                  <Box className="bg-white rounded-3xl flex items-center p-3">
+                    <div className="relative w-full max-w-[30%]">
+                      <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full mx-auto" alt="" />
                       <span
                         className={
-                          'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 text-center ' +
+                          'absolute py-1 px-2 font-normal text-white rounded-lg -bottom-4 inset-x-2/4 -translate-x-2/4 text-center text-[14px] ' +
                           (isHost ? 'bg-red-700 w-[70px]' : 'bg-green-600 w-[85px]')
                         }
                       >
                         {isHost ? TEXT__HOST : TEXT__MEMBER}
                       </span>
                     </div>
-                  </div>
-                  <div className="w-2/3 relative flex flex-col justify-between">
-                    <time>{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</time>
-                    <div className="mt-3">
-                      <h3 className="font-medium">{item.eventName}</h3>
-                      <span>
-                        Chủ chi:&nbsp;
-                        <b>{item.userPayName}</b>
-                      </span>
-                      <br />
-                      <span>
-                        Số tiền:&nbsp;
-                        <b>
-                          {formatMoney(
-                            isHost
-                              ? Number(item.totalAmount)! - paidMoney
-                              : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
-                          )}
-                        </b>
-                      </span>
-                    </div>
-                    <span
-                      className={
-                        'absolute py-1 px-3 block font-normal text-white rounded-xl text-xl top-0 right-0 text-[16px] ' +
-                        (isPaid ? 'bg-green-600' : 'bg-red-700')
-                      }
-                    >
-                      {isHost && isPaid && 'Đã hoàn tất'}
-                      {isHost && !isPaid && 'Chưa hoàn tất'}
-                      {!isHost && isPaid && 'Đã trả'}
-                      {!isHost && !isPaid && 'Chưa trả'}
-                      {}
-                    </span>
-                  </div>
+                    <Box className="w-full max-w-[70%]">
+                      <div className="flex justify-between items-center">
+                        <div className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</div>
+                        <div className={'font-bold text-white rounded-xl text-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
+                          {isHost && isPaid && 'Đã hoàn tất'}
+                          {isHost && !isPaid && 'Chưa hoàn tất'}
+                          {!isHost && isPaid && 'Đã trả'}
+                          {!isHost && !isPaid && 'Chưa trả'}
+                          {}
+                        </div>
+                      </div>
+                      <div className="w-full relative flex flex-col justify-between text-[14px]">
+                        <h3 className="font-medium">{item.eventName}</h3>
+                        <span>
+                          Chủ chi:&nbsp;
+                          <b>{item.userPayName}</b>
+                        </span>
+                        <span>
+                          Số tiền:&nbsp;
+                          <b>
+                            {formatMoney(
+                              isHost
+                                ? Number(item.totalAmount)! - paidMoney
+                                : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
+                            )}
+                          </b>
+                        </span>
+                      </div>
+                    </Box>
+                  </Box>
                 </Link>
               </li>
             )

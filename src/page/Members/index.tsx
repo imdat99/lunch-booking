@@ -62,7 +62,8 @@ const Members = () => {
       </div>
       <div className="text-center mb-[1.875rem]">
         <OutlinedInput
-          sx={{ width: '290px', height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
+          className="max-w-md w-11/12"
+          sx={{ height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
           id="outlined-adornment-password"
           type={'text'}
           placeholder={'Tìm kiếm'}
