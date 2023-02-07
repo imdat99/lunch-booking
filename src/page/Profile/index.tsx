@@ -1,15 +1,14 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import ProfilePicture from '@app/assets/profile-picture.png'
-import PeopleModal from '@app/components/Modal/PeopleModal'
+import GroupModal from '@app/components/Modal/GroupModal'
 import { LoadingScreen } from '@app/components/Suspense'
 import { getHomeDataByUid } from '@app/libs/api/home'
-import { getUserByUid, getUserGroup } from '@app/libs/api/userAPI'
+import { createGroup, getUserByUid, getUserGroupsByUserId } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
 import { User, UserGroup } from '@app/server/firebaseType'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { clearNotiList } from '@app/stores/noti'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
-import { ButtonUnstyled } from '@mui/base'
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
@@ -26,11 +25,16 @@ import TextField from '@mui/material/TextField'
 import { Container } from '@mui/system'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
+import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import * as yup from 'yup'
 
 import { IDropdownMembers } from '../Events/Add'
+type ModalType = {
+  isOpen: boolean
+  groupId: string
+}
 
 const Profile = () => {
   const loginUser = useAppSelector(userStore)
@@ -38,6 +42,7 @@ const Profile = () => {
   const dispatch = useAppDispatch()
   const [showMessage, setShowMessage] = useState<'success' | 'error' | null>(null)
   const [currentMember, setCurrentMember] = useState<User>()
+  const [modalData, setModalData] = useState<ModalType>({ isOpen: false, groupId: '' })
   const [loading, setLoading] = useState<boolean>(false)
 
   const { userUid } = useParams()
@@ -52,7 +57,6 @@ const Profile = () => {
   const [listEvent, setListEvent] = useState<any>({})
   const isLoginUser = currentMember?.uid === loginUser.uid
   const userFormData = useMemo(() => (isLoginUser ? loginUser : currentMember), [loginUser, isLoginUser, currentMember])
-  const [open, setOpen] = useState(false)
 
   const getCurrentMemberInfo = async () => {
     try {
@@ -70,7 +74,7 @@ const Profile = () => {
   useEffect(() => {
     getCurrentMemberInfo()
 
-    getUserGroup().then((group: UserGroup[] | undefined) => {
+    getUserGroupsByUserId(loginUser.uid || '').then((group: UserGroup[] | undefined) => {
       const lstGroup = group?.map((item) => ({
         label: item.groupName,
         value: item.groupId,
@@ -149,6 +153,18 @@ const Profile = () => {
     }
   }
 
+  const handleSelectedMember = (data: any) => {
+    createGroup(data).then(({ isSuccess, GroupData }: any) => {
+      if (isSuccess) {
+        // const newGroup = { label: GroupData.groupName, value: GroupData.groupId, isCreator: true }
+        // const tempGroups = _.cloneDeep(userGroup)
+        // tempGroups?.push(newGroup)
+        // setUserGroup(tempGroups)
+        window.location.reload()
+      }
+      console.log(isSuccess, GroupData)
+    })
+  }
   const handleCloseMessage = () => {
     dispatch(idle())
     setShowMessage(null)
@@ -240,7 +256,7 @@ const Profile = () => {
                 <AddIcon
                   color="success"
                   onClick={() => {
-                    // setOpen(true)
+                    setModalData({ isOpen: true, groupId: '' })
                   }}
                 />
                 <div>
@@ -251,6 +267,7 @@ const Profile = () => {
                         <EditIcon
                           onClick={() => {
                             // setIsEditingNote(true)
+                            setModalData({ isOpen: true, groupId: group.value! })
                           }}
                           sx={{ cursor: 'pointer', width: '16px', marginLeft: '5px' }}
                         />
@@ -385,13 +402,14 @@ const Profile = () => {
               </Formik>
             </div>
 
-            {/* <PeopleModal
-              open={open}
-              setOpen={setOpen}
+            <GroupModal
+              open={modalData?.isOpen}
+              setOpen={setModalData}
               handleSelectedMember={handleSelectedMember}
-              selectedListMember={selectedListMember}
-              selectedGroup={selectedGroup}
-            /> */}
+              groupId={modalData.groupId}
+              // selectedListMember={selectedListMember}
+              // selectedGroup={selectedGroup}
+            />
 
             {showMessage && (
               <Snackbar open={true} onClose={handleCloseMessage} autoHideDuration={1500} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>

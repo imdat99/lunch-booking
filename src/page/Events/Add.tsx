@@ -94,12 +94,13 @@ const sortListByPaidCount = (members: IEventDetail[]) => {
 }
 
 function Add() {
+  const loginUser = useAppSelector(userStore)
   const params = useParams()
   const userLoginData = useAppSelector(userStore)
   const [loggedInUser] = useAuthState(auth)
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
-  const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
+  const userInEvent = useMemo(() => listEventDetail.filter((event: IEventDetail) => event.eventId === params.id), [listEventDetail, params])
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
   const [open, setOpen] = useState(false)
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
@@ -339,7 +340,7 @@ function Add() {
     getMyUserGroups().then((group: UserGroup[] | undefined) => {
       const groupSelectBox = group
         ?.filter((item: UserGroup) => userLoginData.groups?.includes(item.groupId))
-        .map((item) => ({ label: item.groupName, value: item.groupId }))
+        .map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
     })

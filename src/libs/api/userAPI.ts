@@ -1,12 +1,12 @@
 import { auth, storage } from '@app/server/firebase'
 import { User, UserGroup } from '@app/server/firebaseType'
 // import {User} from 'firebase/auth'
-import { AllowedEmail, UserDetail, UserGroupCollection, usersColection } from '@app/server/useDB'
+import { AllowedEmail, GroupDetail, UserDetail, UserGroupCollection, usersColection } from '@app/server/useDB'
 import { store } from '@app/stores'
 import { clearUser } from '@app/stores/user'
 import dayjs from 'dayjs'
 import { getAuth, signOut } from 'firebase/auth'
-import { doc, getDoc, getDocs, query, QuerySnapshot, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { addDoc, doc, getDoc, getDocs, query, QuerySnapshot, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 
 export function getCurrentUser() {
@@ -109,6 +109,21 @@ export async function getUserGroupsByUserId(uid: string) {
 }
 
 /**
+ * Gets group by groupID
+ * @param uid firebase userId
+ * @returns
+ */
+export const getGroupById = async (groupId: string): Promise<UserGroup | undefined> => {
+  try {
+    const res = await getDoc(GroupDetail(groupId))
+    return { ...res.data()!, groupId: res.id }
+  } catch (error) {
+    console.log('🚀 ~ file: userAPI.ts:115 ~ getUserGroupByUserId ~ error', error)
+    return undefined
+  }
+}
+
+/**
  * Get all user-group that contains `user`
  * @param user User
  * @returns
@@ -119,6 +134,26 @@ export async function getUserGroupsByUser(user: User) {
   }
 
   return getUserGroupsByUserId(user.uid)
+}
+
+export async function createGroup(GroupData: UserGroup) {
+  try {
+    let isSuccess = false
+    console.log('GroupData.groupId', GroupData)
+    if (GroupData.groupId !== '') {
+      await updateDoc(GroupDetail(GroupData.groupId), GroupData).then(() => {
+        isSuccess = true
+      })
+    } else {
+      await addDoc(UserGroupCollection, GroupData).then((docRef) => {
+        isSuccess = true
+        GroupData.groupId = docRef.id
+      })
+    }
+    return { isSuccess, GroupData }
+  } catch (error) {
+    console.log('ERROR SETTING USER INFO IN DB', error)
+  }
 }
 
 export async function getMyUserGroups() {
