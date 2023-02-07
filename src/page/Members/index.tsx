@@ -13,13 +13,11 @@ import { Link } from 'react-router-dom'
 const Members = () => {
   const [searchText, setSearchText] = useState<string>('')
   const [users, setUsers] = useState<User[]>([])
-  // const [allUsers, setAllUsers] = useState<User[]>([])
   const [userGroups, setUserGroups] = useState<UserGroup[] | undefined>([])
   const [selectedGroup, setSelectedGroup] = useState<{ label: string; value: string } | null>(null)
 
   useEffect(() => {
     getListUser().then((data) => {
-      // setAllUsers(data)
       setUsers(data)
     })
   }, [])
@@ -42,19 +40,20 @@ const Members = () => {
     if (!selectedGroup) return <Box className="text-center">Vui lòng chọn nhóm</Box>
     else {
       const listMember = userGroups?.find((i) => i.groupId === selectedGroup.value)?.members
-      if (!listMember || !listMember?.length) return <div>Team Front-end không có ai cả!</div>
-      const totalUsers = listMember
-        .map((userId) => users.find((org) => org?.uid?.trim() === userId?.trim()))
-        .filter((item) => item?.name?.toLowerCase()?.includes(searchText.toLowerCase()))
-      return totalUsers.map((user) => (
-        <div className="mb-[0.625rem] rounded-3xl block" key={user?.uid}>
-          <Link className="flex bg-white rounded-3xl p-3 max-w-md" to={'/profile/' + user?.uid} key={user?.uid}>
-            <MemberCard user={user} />
-          </Link>
-        </div>
-      ))
+      if (!listMember || !listMember?.length) return <div>Nhóm không có ai cả!</div>
+      const usersData = listMember.map((userId) => users.find((org) => org?.uid?.trim() === userId?.trim()))
+      const totalUsers = searchText ? usersData.filter((item) => item?.name?.toLowerCase()?.includes(searchText.toLowerCase())) : usersData
+      return totalUsers.length
+        ? totalUsers.map((user, index) => (
+            <div className="mb-[0.625rem] rounded-3xl block" key={index}>
+              <Link className="flex bg-white rounded-3xl p-3 max-w-md" to={'/profile/' + user?.uid} key={user?.uid}>
+                <MemberCard user={user} />
+              </Link>
+            </div>
+          ))
+        : null
     }
-  }, [selectedGroup, userGroups, users, searchText])
+  }, [searchText, selectedGroup, userGroups, users])
 
   return (
     <Container>
