@@ -1,12 +1,16 @@
 // import { ReactComponent as DishImg } from '@app/assets/react.svg'
+import './style.css'
+
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
 import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount, uploadEventImg } from '@app/libs/api/EventApi'
+import { getMyUserGroups, getUserGroupsByUserId } from '@app/libs/api/userAPI'
 import { auth } from '@app/server/firebase'
-import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
+import { IEvent, IEventDetail, UserGroup } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
 import { listEventDetailStore } from '@app/stores/listEventDetail'
+import { userStore } from '@app/stores/user'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -39,19 +43,19 @@ import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useParams } from 'react-router-dom'
-import './style.css'
-
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiFormLabel-root': {
     ...theme.typography.subtitle1,
   },
 }))
+
 const ButtonStyled = styled(Button)(() => ({
   '&.MuiButton-root': {
     borderRadius: '10px',
   },
 }))
+
 const CardStyled = styled(Card)(() => ({
   marginTop: '30px',
   marginBottom: '15px',
@@ -70,7 +74,10 @@ const initEventValue = {
   billAmount: 0,
   userPayId: '',
   userPayName: '',
+  groupId: '',
+  groupName: '',
 }
+
 export const enum bonusTypeEnum {
   PERCENT = 'PERCENT',
   MONEY = 'MONEY',
@@ -79,25 +86,34 @@ export const enum bonusTypeEnum {
 export interface IDropdownMembers {
   label: string | null | undefined | ''
   value: string | null | undefined | ''
+  isCreator: boolean | null | undefined | ''
 }
-const sortListByPaidCount = (members: User[]) => {
+
+const sortListByPaidCount = (members: IEventDetail[]) => {
   return members.sort((a, b) => (a.count || 0) - (b.count || 0))
 }
+
 function Add() {
+  const loginUser = useAppSelector(userStore)
   const params = useParams()
+  const userLoginData = useAppSelector(userStore)
   const [loggedInUser] = useAuthState(auth)
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
-  const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
+  const userInEvent = useMemo(() => listEventDetail.filter((event: IEventDetail) => event.eventId === params.id), [listEventDetail, params])
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
+  const [open, setOpen] = useState(false)
   const [eventState, setEventState] = useState<IEvent>(params.id && eventInfo ? eventInfo : initEventValue)
   const [openModalSuccess, setOpenModalSuccess] = useState<boolean>(false)
-  const [listBillOwner, setListBillOwner] = useState<User[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
+  const [listBillOwner, setListBillOwner] = useState<IEventDetail[]>(userInEvent ? sortListByPaidCount([...userInEvent]) : [])
   const [selectedListMember, setSelectedListMember] = useState<IEventDetail[]>([...userInEvent])
   const [memberToPayState, setMemberToPayState] = useState<IEventDetail>()
+  const [userGroupSelectBox, setUserGroupSelectBox] = useState<IDropdownMembers[]>()
+  const [userGroupData, setUserGroupData] = useState<UserGroup[]>()
+  const [selectedGroup, setSelectedGroup] = useState<UserGroup>()
   const [bonusType, setBonusType] = useState<bonusTypeEnum>(eventInfo?.bonusType || bonusTypeEnum.PERCENT)
   const [dropdownMembers, setDropdownMembers] = useState<IDropdownMembers[]>(
-    userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid })) : []
+    userInEvent ? userInEvent.map((item) => ({ label: item.name || item.email, value: item.uid, isCreator: null })) : []
   )
   const [imgAvatarPreview, setImgAvatarPreview] = useState(eventInfo?.photoURL)
   const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
@@ -138,13 +154,13 @@ function Add() {
     const tempMemberToPay = listSortedMember.find((item) => item.uid === loggedInUser?.uid)
     setListBillOwner(listSortedMember)
     setSelectedListMember(listSelectingMembers)
-    setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid })))
+    setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid, isCreator: null })))
     if (tempMemberToPay && tempMemberToPay.uid) {
       setMemberToPayState(tempMemberToPay)
       setEventState({ ...eventState, userPayId: tempMemberToPay.uid, userPayName: tempMemberToPay.name ? tempMemberToPay.name : 'chưa được đặt tên' })
     }
   }
-  const [open, setOpen] = useState(false)
+
   const handleDelete = (member: IEventDetail) => {
     const newSelectedMember = [...selectedListMember]
     const index = newSelectedMember.findIndex((u) => u.uid === member.uid)
@@ -286,6 +302,17 @@ function Add() {
     }
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
+  const onChangeGroup = (_event: any, selectedGroup: any) => {
+    if (!selectedGroup) {
+      setEventState({ ...eventState, groupId: '', groupName: '' })
+      return
+    }
+    const tempSelectedGroup = userGroupData?.find((item: UserGroup) => item.groupId === selectedGroup.value)
+    if (tempSelectedGroup) {
+      setSelectedGroup(tempSelectedGroup)
+    }
+    setEventState({ ...eventState, groupId: selectedGroup.value, groupName: selectedGroup.label })
+  }
   const handlePreviewAvatarChange = (event: any) => {
     const fileUploaded = event.target ? event.target.files[0] : null
     if (fileUploaded) {
@@ -294,7 +321,6 @@ function Add() {
     }
   }
 
-  //***UseEffect***
   useEffect(() => {
     const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
     const total = (eventState.billAmount || 0) + bonus
@@ -309,6 +335,14 @@ function Add() {
       }
     }
   }, [imgAvatarPreview])
+
+  useEffect(() => {
+    getUserGroupsByUserId(loggedInUser?.uid || '').then((group: UserGroup[] | undefined) => {
+      const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
+      setUserGroupSelectBox(groupSelectBox)
+      setUserGroupData(group)
+    })
+  }, [])
 
   const handleOpenMemberDetail = (memberUid: string) => {
     let newOpeningMemberRows = [...openingMemberRows]
@@ -370,19 +404,32 @@ function Add() {
                   )}
                 />
               </Box>
+              <Box className="mt-5">
+                <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
+                  Group
+                </Typography>
+                <Autocomplete
+                  value={{ value: eventState?.groupId, label: eventState.groupName, isCreator: null }}
+                  options={userGroupSelectBox || []}
+                  onChange={onChangeGroup}
+                  renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
+                />
+              </Box>
               <Box className="flex items-center mt-3">
                 <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
                   Thành viên
                 </Typography>
                 <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
-                <ButtonStyled>
-                  <AddIcon
-                    color="success"
-                    onClick={() => {
-                      setOpen(true)
-                    }}
-                  />
-                </ButtonStyled>
+                {selectedGroup && (
+                  <ButtonStyled>
+                    <AddIcon
+                      color="success"
+                      onClick={() => {
+                        setOpen(true)
+                      }}
+                    />
+                  </ButtonStyled>
+                )}
               </Box>
 
               {/* Members table */}
@@ -494,11 +541,6 @@ function Add() {
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  <Box className="w-full flex justify-end mt-3">
-                    <ButtonStyled variant="contained" className="mt-6" onClick={handleShareBill}>
-                      <Typography>Chia đều</Typography>
-                    </ButtonStyled>
-                  </Box>
                 </>
               )}
 
@@ -515,7 +557,7 @@ function Add() {
                   <Grid item md={8} xs={7}>
                     <Autocomplete
                       disabled={!selectedListMember.length}
-                      value={{ value: eventState?.userPayName, label: eventState.userPayName }}
+                      value={{ value: eventState?.userPayName, label: eventState.userPayName, isCreator: null }}
                       options={dropdownMembers}
                       onChange={onChangeBillOwner}
                       renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
@@ -523,7 +565,7 @@ function Add() {
                   </Grid>
                 </Grid>
               </Box>
-              <Box className="mt-5">
+              <Box className="w-full flex mt-3 items-center gap-2">
                 <TextNumberInput
                   thousandSeparator=","
                   allowLeadingZeros={false}
@@ -549,8 +591,10 @@ function Add() {
                   defaultValue={0}
                   error={!eventState.billAmount}
                 />
+                <ButtonStyled variant="contained" className="text-[14px] w-[140px]" sx={{ marginTop: '16px' }} onClick={handleShareBill}>
+                  Chia đều
+                </ButtonStyled>
               </Box>
-
               <Typography variant="subtitle2" sx={{ marginTop: '10px' }}>
                 Note
               </Typography>
@@ -658,8 +702,16 @@ function Add() {
             </CardContent>
           </CardStyled>
         </Box>
-
-        <PeopleModal open={open} setOpen={setOpen} handleSelectedMember={handleSelectedMember} selectedListMember={selectedListMember} />
+        {selectedGroup && (
+          <PeopleModal
+            open={open}
+            setOpen={setOpen}
+            handleSelectedMember={handleSelectedMember}
+            selectedListMember={selectedListMember}
+            selectedGroup={selectedGroup}
+            useSelectPeopleInGroup={true}
+          />
+        )}
 
         <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>

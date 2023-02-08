@@ -34,7 +34,6 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
 import { bonusTypeEnum } from './Add'
 
-
 const LunchDetail = () => {
   // navigate
   const navigate = useNavigate()
@@ -50,6 +49,7 @@ const LunchDetail = () => {
   // calc - memo
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
+  console.log('user', loggedInUser?.uid)
 
   // state
   const [loggedUserNote, setLoggedUserNote] = useState(userInEvent.find((item) => item.uid === (loggedInUser?.uid || ''))?.note || '')
@@ -272,10 +272,10 @@ const LunchDetail = () => {
                     <th scope="col" className="py-3">
                       Thành viên
                     </th>
-                    <th scope="col" className="py-3 text-center">
+                    <th scope="col" className="py-3 pl-5 text-right">
                       Bill
                     </th>
-                    <th scope="col" className="py-3 text-right">
+                    <th scope="col" className="py-3 pl-10 text-right">
                       Pay
                     </th>
                   </tr>
@@ -297,8 +297,8 @@ const LunchDetail = () => {
                           </label>
                         </td>
 
-                        <td className="text-center">{formatMoney(user.amount, false)}</td>
-                        <td className="text-right">{formatMoney(user.amountToPay, false)}</td>
+                        <td className="text-right">{formatMoney(user.amount, false)} K</td>
+                        <td className="text-right">{formatMoney(user.amountToPay, false)} K</td>
                       </tr>
 
                       <tr key={`user-note-${user.uid}`}>
@@ -306,7 +306,7 @@ const LunchDetail = () => {
                           {loggedInUser?.uid === user.uid && isEditingNote && (
                             <Tooltip title={loggedUserNote}>
                               <TextareaAutosize
-                                value={loggedUserNote}
+                                value={loggedUserNote || user.note}
                                 onChange={(e) => setLoggedUserNote(e.target.value)}
                                 aria-label="minimum height"
                                 minRows={2}
@@ -317,7 +317,8 @@ const LunchDetail = () => {
                             </Tooltip>
                           )}
                           {loggedInUser?.uid === user.uid && !isEditingNote && loggedUserNote && <>{`"${loggedUserNote}"`}</>}
-                          {loggedInUser?.uid === user.uid && !isEditingNote && !loggedUserNote && <>No note</>}
+                          {loggedInUser?.uid === user.uid && !isEditingNote && !loggedUserNote && user.note && <>{user.note}</>}
+                          {loggedInUser?.uid === user.uid && !isEditingNote && !loggedUserNote && !user.note && <> no note</>}
                           {loggedInUser?.uid !== user.uid && user.note && <>`{user.note}`</>}
                         </td>
                         <td className="pb-[10px] text-center">
