@@ -10,8 +10,6 @@ import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { clearNotiList } from '@app/stores/noti'
 import { clearUser, idle, updateUserInfo, userStatus, userStore } from '@app/stores/user'
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
 import LogoutIcon from '@mui/icons-material/Logout'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
@@ -25,7 +23,6 @@ import TextField from '@mui/material/TextField'
 import { Container } from '@mui/system'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
-import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import * as yup from 'yup'
@@ -271,24 +268,29 @@ const Profile = () => {
             <div className="px-6 py-4">
               <div className="mb-3" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.42)' }}>
                 <span className="mb-2">Group</span>
-                <AddIcon
-                  color="success"
+                <Button
+                  color="info"
+                  sx={{ marginLeft: '5px' }}
                   onClick={() => {
                     setModalData({ isOpen: true, groupId: '' })
                   }}
-                />
+                >
+                  Add
+                </Button>
                 <div>
                   {userGroup?.map((group) => (
                     <div key={group.value} style={{ margin: '10px' }}>
                       <span>{group.label}</span>
                       {group.isCreator ? (
-                        <EditIcon
+                        <Button
+                          color="warning"
                           onClick={() => {
-                            // setIsEditingNote(true)
                             setModalData({ isOpen: true, groupId: group.value! })
                           }}
-                          sx={{ cursor: 'pointer', width: '16px', marginLeft: '5px' }}
-                        />
+                          sx={{ marginLeft: '5px' }}
+                        >
+                          Edit
+                        </Button>
                       ) : (
                         <></>
                       )}
