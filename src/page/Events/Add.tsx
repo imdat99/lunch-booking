@@ -4,8 +4,7 @@ import './style.css'
 import TextNumberInput from '@app/components/Input/NumericInput'
 import PeopleModal from '@app/components/Modal/PeopleModal'
 import { deleteEventDetail, setEvent, setEventDetail, updateEvent, updatePayCount, uploadEventImg } from '@app/libs/api/EventApi'
-import { getMyUserGroups, getUserGroupsByUserId } from '@app/libs/api/userAPI'
-import { auth } from '@app/server/firebase'
+import { getUserGroupsByUserId } from '@app/libs/api/userAPI'
 import { IEvent, IEventDetail, UserGroup } from '@app/server/firebaseType'
 import { useAppSelector } from '@app/stores/hook'
 import { listEventStore } from '@app/stores/listEvent'
@@ -13,12 +12,13 @@ import { listEventDetailStore } from '@app/stores/listEventDetail'
 import { userStore } from '@app/stores/user'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import AddIcon from '@mui/icons-material/Add'
+import CloseIcon from '@mui/icons-material/Close'
 import DeleteIcon from '@mui/icons-material/Delete'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
-import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, CardContent, FormControl, FormControlLabel, InputAdornment, Modal, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Button from '@mui/material/Button'
@@ -41,7 +41,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import _, { round } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { useParams } from 'react-router-dom'
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
@@ -78,6 +77,18 @@ const initEventValue = {
   groupName: '',
 }
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+  maxHeight: '100vh',
+}
 export const enum bonusTypeEnum {
   PERCENT = 'PERCENT',
   MONEY = 'MONEY',
@@ -96,8 +107,6 @@ const sortListByPaidCount = (members: IEventDetail[]) => {
 function Add() {
   const loginUser = useAppSelector(userStore)
   const params = useParams()
-  const userLoginData = useAppSelector(userStore)
-  const [loggedInUser] = useAuthState(auth)
   const listEventDetail = useAppSelector(listEventDetailStore)
   const listEvent = useAppSelector(listEventStore)
   const userInEvent = useMemo(() => listEventDetail.filter((event: IEventDetail) => event.eventId === params.id), [listEventDetail, params])
@@ -119,6 +128,7 @@ function Add() {
   const [imgAvatarObj, setImgAvatarObj] = useState<any>(null)
   const [forceRerender, setForceRerender] = useState(Date.now())
   const [openingMemberRows, setOpeningMemberRows] = useState<string[]>([])
+  const [modalConfirmGroupData, setModalConfirmGroupData] = useState<any>({ isOpen: false, groupId: '', groupName: '' })
 
   const isEdit = useMemo(() => !!params.id && !!eventInfo, [eventInfo, params.id])
   const isEmptyMembers = useMemo(() => !selectedListMember.length, [selectedListMember])
@@ -151,7 +161,7 @@ function Add() {
 
   const handleSelectedMember = (listSelectingMembers: IEventDetail[]) => {
     const listSortedMember = sortListByPaidCount([...listSelectingMembers])
-    const tempMemberToPay = listSortedMember.find((item) => item.uid === loggedInUser?.uid)
+    const tempMemberToPay = listSortedMember.find((item) => item.uid === loginUser?.uid)
     setListBillOwner(listSortedMember)
     setSelectedListMember(listSelectingMembers)
     setDropdownMembers(listSelectingMembers.map((item) => ({ label: item.name || item.email, value: item.uid, isCreator: null })))
@@ -311,7 +321,16 @@ function Add() {
     if (tempSelectedGroup) {
       setSelectedGroup(tempSelectedGroup)
     }
+    if (eventState.groupId) {
+      setModalConfirmGroupData({ isOpen: true, groupId: selectedGroup.value, groupName: selectedGroup.label })
+      return
+    }
     setEventState({ ...eventState, groupId: selectedGroup.value, groupName: selectedGroup.label })
+  }
+  const handleConfirmGroupChange = () => {
+    setEventState({ ...eventState, groupId: modalConfirmGroupData.groupId, groupName: modalConfirmGroupData.groupName })
+    setSelectedListMember([])
+    setModalConfirmGroupData({ isOpen: false, groupId: '', groupName: '' })
   }
   const handlePreviewAvatarChange = (event: any) => {
     const fileUploaded = event.target ? event.target.files[0] : null
@@ -321,6 +340,9 @@ function Add() {
     }
   }
 
+  const handleCancelChangeGroup = () => {
+    setModalConfirmGroupData({ isOpen: false, groupId: '', groupName: '' })
+  }
   useEffect(() => {
     const bonus = calBonus(eventState.billAmount || 0, eventState.tip || 0, bonusType)
     const total = (eventState.billAmount || 0) + bonus
@@ -337,7 +359,7 @@ function Add() {
   }, [imgAvatarPreview])
 
   useEffect(() => {
-    getUserGroupsByUserId(loggedInUser?.uid || '').then((group: UserGroup[] | undefined) => {
+    getUserGroupsByUserId(loginUser?.uid || '').then((group: UserGroup[] | undefined) => {
       const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
@@ -712,7 +734,27 @@ function Add() {
             useSelectPeopleInGroup={true}
           />
         )}
-
+        <Modal
+          open={modalConfirmGroupData.isOpen}
+          onClose={handleCancelChangeGroup}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <button className="absolute top-[10px] right-[10px]" onClick={handleCancelChangeGroup}>
+              <CloseIcon />
+            </button>
+            <Typography variant="h5">Khi chuyển group sẽ xóa thông tin thành viên bạn đã chọn. Bạn đã chắc chưa?</Typography>
+            <Box className="flex mt-5 justify-center">
+              <Button onClick={handleConfirmGroupChange} variant="contained" sx={{ marginRight: '15px' }}>
+                Chắc
+              </Button>
+              <Button onClick={handleCancelChangeGroup} variant="contained">
+                Bỏ đi
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
         <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
             <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>

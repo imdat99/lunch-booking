@@ -31,6 +31,7 @@ import { useParams } from 'react-router-dom'
 import * as yup from 'yup'
 
 import { IDropdownMembers } from '../Events/Add'
+import { Box, Typography } from '@mui/material'
 type ModalType = {
   isOpen: boolean
   groupId: string
@@ -270,26 +271,42 @@ const Profile = () => {
           <Container>
             <div className="px-6 py-4">
               <div className="mb-3" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.42)' }}>
-                <span className="mb-2">Group</span>
-                <AddIcon
-                  color="success"
-                  onClick={() => {
-                    setModalData({ isOpen: true, groupId: '' })
-                  }}
-                />
+                <Box className="flex items-center">
+                  <Typography className="mb-2" variant="subtitle1">
+                    Group
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    sx={{ marginLeft: '15px' }}
+                    onClick={() => {
+                      setModalData({ isOpen: true, groupId: '' })
+                    }}
+                  >
+                    Thêm group
+                  </Button>
+                </Box>
                 <div>
                   {userGroup?.map((group) => (
-                    <div key={group.value} style={{ margin: '10px' }}>
-                      <span>{group.label}</span>
+                    <div key={group.value} style={{ margin: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>{group.label}</Typography>
                       {group.isCreator ? (
-                        <EditIcon
+                        <Button
+                          variant="contained"
                           onClick={() => {
                             // setIsEditingNote(true)
                             setModalData({ isOpen: true, groupId: group.value! })
                           }}
-                          sx={{ cursor: 'pointer', width: '16px', marginLeft: '5px' }}
-                        />
+                        >
+                          sửa
+                        </Button>
                       ) : (
+                        // <EditIcon
+                        //   onClick={() => {
+                        //     // setIsEditingNote(true)
+                        //     setModalData({ isOpen: true, groupId: group.value! })
+                        //   }}
+                        //   sx={{ cursor: 'pointer', width: '16px', marginLeft: '5px' }}
+                        // />
                         <></>
                       )}
                     </div>
