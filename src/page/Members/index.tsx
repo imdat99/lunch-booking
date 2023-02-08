@@ -24,6 +24,10 @@ const Members = () => {
 
   useEffect(() => {
     getMyUserGroups().then((data) => {
+      const defaultSelected = { label: data?.[0]?.groupName, value: data?.[0]?.groupId }
+      if (defaultSelected) {
+        setSelectedGroup(defaultSelected)
+      }
       setUserGroups(data)
     })
   }, [])

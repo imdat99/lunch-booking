@@ -32,6 +32,7 @@ import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate, useParams } from 'react-router-dom'
+
 import { bonusTypeEnum } from './Add'
 
 const LunchDetail = () => {
@@ -147,7 +148,7 @@ const LunchDetail = () => {
   const handleCloseAlert = () => {
     setAlertMessage('')
   }
-
+  console.log(eventInfo)
   return loading ? (
     <LoadingScreen />
   ) : (
@@ -183,7 +184,7 @@ const LunchDetail = () => {
             <button
               className="h-[36px]"
               onClick={() => {
-                history.back()
+                navigate('/events')
               }}
             >
               <ReplyIcon fontSize={'large'} />
@@ -198,7 +199,7 @@ const LunchDetail = () => {
                 />
                 <span
                   className={
-                    'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-5 inset-x-2/4 -translate-x-2/4 ' +
+                    'absolute py-1 px-2 block font-normal text-white rounded-lg -bottom-5 inset-x-2/4 -translate-x-2/4 text-[14px] ' +
                     (isHost ? 'bg-red-600 w-[70px]' : 'bg-green-600 w-[80px]')
                   }
                 >
@@ -225,6 +226,14 @@ const LunchDetail = () => {
                         </th>
                         <td>
                           <b>{userInEvent?.length} người</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="font-normal pr-4">
+                          Nhóm
+                        </th>
+                        <td>
+                          <b>{eventInfo?.groupName}</b>
                         </td>
                       </tr>
                     </tbody>
