@@ -24,7 +24,7 @@ import { Container } from '@mui/system'
 import { signOut } from 'firebase/auth'
 import { Formik } from 'formik'
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import * as yup from 'yup'
 
 import { IDropdownMembers } from '../Events/Add'
@@ -279,7 +279,7 @@ const Profile = () => {
                 </Button>
                 <div>
                   {userGroup?.map((group) => (
-                    <div key={group.value} style={{ margin: '10px' }}>
+                    <Link to={`/members?group=${group.value}`} key={group.value} style={{ margin: '10px' }}>
                       <span>{group.label}</span>
                       {group.isCreator ? (
                         <Button
@@ -294,7 +294,7 @@ const Profile = () => {
                       ) : (
                         <></>
                       )}
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
