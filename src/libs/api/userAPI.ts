@@ -1,14 +1,19 @@
 import { auth, storage } from '@app/server/firebase'
-import { User } from '@app/server/firebaseType'
+import { User, UserGroup } from '@app/server/firebaseType'
 // import {User} from 'firebase/auth'
-import { AllowedEmail, UserDetail, usersColection } from '@app/server/useDB'
+import { AllowedEmail, GroupDetail, UserDetail, UserGroupCollection, usersColection } from '@app/server/useDB'
 import { store } from '@app/stores'
 import { clearUser } from '@app/stores/user'
-import { signOut } from 'firebase/auth'
-import { doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { uniqueId } from 'lodash'
 import dayjs from 'dayjs'
+import { getAuth, signOut } from 'firebase/auth'
+import { addDoc, deleteDoc, doc, getDoc, getDocs, query, QuerySnapshot, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+
+export function getCurrentUser() {
+  const auth = getAuth()
+
+  return auth.currentUser
+}
 
 export async function createUser(userInfo: User) {
   try {
@@ -43,7 +48,7 @@ export async function updateUser(uid: string, userInfo: User) {
 }
 
 export async function uploadQRImg(obj: any) {
-  const imgRef = ref(storage, `images/qr/${ dayjs(Date.now()).unix() + obj.name}`)
+  const imgRef = ref(storage, `images/qr/${dayjs(Date.now()).unix() + obj.name}`)
   try {
     await uploadBytes(imgRef, obj)
     return getDownloadURL(imgRef)
@@ -75,4 +80,103 @@ export const hadleLogout = async () => {
 export const getAllowedEmail = async (email: string) => {
   const allowedEmail = await getDoc(AllowedEmail)
   return allowedEmail.data()?.email.includes(email)
+}
+
+function toUserGroupData(snapshot: QuerySnapshot<UserGroup>): UserGroup[] {
+  return snapshot.docs.map((d) => ({
+    ...d.data(),
+    groupId: d.id,
+  }))
+}
+
+/**
+ * Gets all user-group that contains `uid` in `members`
+ * @param uid firebase userId
+ * @returns
+ */
+export async function getUserGroupsByUserId(uid: string) {
+  try {
+    const q = query(UserGroupCollection, where('members', 'array-contains', uid))
+
+    const docs = await getDocs(q)
+
+    return toUserGroupData(docs)
+  } catch (error) {
+    console.log('🚀 ~ file: userAPI.ts:115 ~ getUserGroupByUserId ~ error', error)
+
+    return []
+  }
+}
+
+/**
+ * Gets group by groupID
+ * @param uid firebase userId
+ * @returns
+ */
+export const getGroupById = async (groupId: string): Promise<UserGroup | undefined> => {
+  try {
+    const res = await getDoc(GroupDetail(groupId))
+    return { ...res.data()!, groupId: res.id }
+  } catch (error) {
+    console.log('🚀 ~ file: userAPI.ts:115 ~ getUserGroupByUserId ~ error', error)
+    return undefined
+  }
+}
+
+/**
+ * Get all user-group that contains `user`
+ * @param user User
+ * @returns
+ */
+export async function getUserGroupsByUser(user: User) {
+  if (!user.uid) {
+    return []
+  }
+
+  return getUserGroupsByUserId(user.uid)
+}
+
+export async function createGroup(GroupData: UserGroup) {
+  try {
+    let isSuccess = false
+    if (GroupData.groupId !== '') {
+      await updateDoc(GroupDetail(GroupData.groupId), GroupData).then(() => {
+        isSuccess = true
+      })
+    } else {
+      await addDoc(UserGroupCollection, GroupData).then((docRef) => {
+        isSuccess = true
+        GroupData.groupId = docRef.id
+      })
+    }
+    return { isSuccess, GroupData }
+  } catch (error) {
+    console.log('ERROR SETTING USER INFO IN DB', error)
+  }
+}
+export async function deleteGroup(groupId: string) {
+  console.log('groupId', groupId)
+
+  const res = await deleteDoc(GroupDetail(groupId))
+  return res
+}
+
+export async function getMyUserGroups() {
+  const user = getCurrentUser()
+
+  if (!user) {
+    return []
+  }
+
+  return getUserGroupsByUser(user)
+}
+
+export async function getAllUserGroup() {
+  try {
+    const groupDocs = await getDocs(UserGroupCollection)
+
+    return toUserGroupData(groupDocs)
+  } catch (error) {
+    console.log('ERROR GETTING USER INFO IN DB', error)
+  }
 }
