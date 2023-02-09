@@ -181,14 +181,17 @@ const LunchDetail = () => {
       <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
         <Container>
           <div className="flex justify-between p-3">
-            <button
-              className="h-[36px]"
-              onClick={() => {
-                navigate('/events')
-              }}
-            >
-              <ReplyIcon fontSize={'large'} />
-            </button>
+            <Tooltip title="Back to event list">
+              <button
+                className="h-[36px]"
+                onClick={() => {
+                  navigate('/events')
+                }}
+                aria-label="Back to event list"
+              >
+                <ReplyIcon fontSize={'large'} />
+              </button>
+            </Tooltip>
             <div className="flex flex-col text-center">
               <div className={'mx-auto relative mb-5 rounded-full border-4 p-1 ' + (isHost ? 'border-red-500' : 'border-green-500')}>
                 <img
@@ -243,9 +246,11 @@ const LunchDetail = () => {
             </div>
             <div>
               {isHost || !hostInfo ? (
-                <button className="h-[36px]" onClick={() => navigate(`/events/edit/${params.id}`)}>
-                  <BorderColorIcon fontSize={'large'} />
-                </button>
+                <Tooltip title="Edit event">
+                  <button aria-label="Edit-event" className="h-[36px]" onClick={() => navigate(`/events/edit/${params.id}`)}>
+                    <BorderColorIcon fontSize={'large'} />
+                  </button>
+                </Tooltip>
               ) : (
                 <div className="h-[36px] w-[36px]"></div>
               )}
