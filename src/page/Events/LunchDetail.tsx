@@ -210,7 +210,7 @@ const LunchDetail = () => {
                 </span>
               </div>
               <h2 className="text-2xl text-center mb-2">{eventInfo?.eventName}</h2>
-              <time className="mb-2">{eventInfo?.date}</time>
+              <time className="mb-2">{dayjs(eventInfo?.date).format('DD/MM/YYYY')}</time>
               <div className="my-4 flex-wrap">
                 <div className="relative overflow-x-auto">
                   <table className="w-full text-left">
