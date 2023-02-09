@@ -86,7 +86,6 @@ const List = () => {
     [listEventDetail, userData]
   )
   const listEventUser = useMemo(() => listEvent.filter((event) => eventOfUser.includes(event.id)), [eventOfUser, listEvent])
-  console.log(listEventUser)
 
   const listButton = useMemo(() => {
     return [
@@ -100,15 +99,15 @@ const List = () => {
     setFilterEvents(listEventUser)
   }, [listEventUser])
 
-  const onChangeSearch = (event: any) => {
-    const searchText = event.target.value
-    if (!searchText) {
-      setFilterEvents(listEventUser)
-    }
-    const lowerSearchText = searchText.toLowerCase()
-    const searchResult = listEventUser.filter((item) => item.eventName?.toLowerCase()?.includes(lowerSearchText))
-    setFilterEvents(searchResult)
-  }
+  // const onChangeSearch = (event: any) => {
+  //   const searchText = event.target.value
+  //   if (!searchText) {
+  //     setFilterEvents(listEventUser)
+  //   }
+  //   const lowerSearchText = searchText.toLowerCase()
+  //   const searchResult = listEventUser.filter((item) => item.eventName?.toLowerCase()?.includes(lowerSearchText))
+  //   setFilterEvents(searchResult)
+  // }
 
   const handleSort = useCallback(
     (a: IEvent, b: IEvent): number => {
@@ -207,17 +206,22 @@ const List = () => {
             return (
               <li className="my-4" key={index}>
                 <Link to={item.id!}>
-                  <Box className="bg-white rounded-3xl flex justify-around items-center p-5">
+                  <Box className="bg-white rounded-3xl flex justify-around p-5 gap-2">
                     <div className="relative">
                       <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full" alt="" />
-                      <div className={'font-bold text-white rounded-lg text-center text-[14px] ' + (isHost ? 'text-green-600' : 'text-red-700')}>
+                      <div
+                        className={
+                          'absolute py-1 px-1 block font-normal text-white rounded-lg -bottom-0 inset-x-2/4 -translate-x-2/4 text-[14px] w-[70px] text-center ' +
+                          (isHost ? 'bg-red-600' : 'bg-green-600 ')
+                        }
+                      >
                         {isHost ? TEXT__HOST : TEXT__MEMBER}
                       </div>
                     </div>
                     <Box className="w-full max-w-[70%]">
                       <div className="flex justify-between items-center">
                         <div className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</div>
-                        <div className={'font-bold text-white rounded-xl text-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
+                        <div className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
                           {isHost && isPaid && 'Đã hoàn tất'}
                           {isHost && !isPaid && 'Chưa hoàn tất'}
                           {!isHost && isPaid && 'Đã trả'}

@@ -7,14 +7,37 @@ import SearchIcon from '@mui/icons-material/Search'
 import { Autocomplete, Box, Container, TextField } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 
 const Members = () => {
   const [searchText, setSearchText] = useState<string>('')
   const [users, setUsers] = useState<User[]>([])
   const [userGroups, setUserGroups] = useState<UserGroup[] | undefined>([])
   const [selectedGroup, setSelectedGroup] = useState<{ label: string; value: string } | null>(null)
+
+  const { search } = useLocation()
+  const searchMap = useRef(new URLSearchParams(search))
+  const initialMemberQuery = searchMap.current.get('search')
+  const initialGroupId = searchMap.current.get('group')
+
+  useEffect(() => {
+    if (initialMemberQuery) {
+      setSearchText(initialMemberQuery)
+    }
+  }, [initialMemberQuery])
+
+  useEffect(() => {
+    if (initialGroupId === null || !userGroups || !userGroups.length) {
+      return
+    }
+
+    const matchedGroup = userGroups.find((g) => g.groupId === initialGroupId)
+
+    if (matchedGroup) {
+      setSelectedGroup({ label: matchedGroup.groupName, value: matchedGroup.groupId })
+    }
+  }, [userGroups, initialGroupId])
 
   useEffect(() => {
     getListUser().then((data) => {
@@ -24,6 +47,10 @@ const Members = () => {
 
   useEffect(() => {
     getMyUserGroups().then((data) => {
+      const defaultSelected = { label: data?.[0]?.groupName, value: data?.[0]?.groupId }
+      if (defaultSelected) {
+        setSelectedGroup(defaultSelected)
+      }
       setUserGroups(data)
     })
   }, [])
@@ -73,6 +100,7 @@ const Members = () => {
             </InputAdornment>
           }
           onChange={onChangeSearch}
+          value={searchText}
         />
       </div>
       <Box className="mb-[1.875rem]">
@@ -86,6 +114,7 @@ const Members = () => {
           renderInput={(params) => <TextField {...params} placeholder={'Lọc theo nhóm'} />}
           popupIcon={<ArrowDropDownIcon className="text-green-500 h-auto" fontSize="large" />}
           onChange={(_, item) => setSelectedGroup(item)}
+          isOptionEqualToValue={(v1, v2) => v1.value === v2.value}
         />
       </Box>
       <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">{renderList()}</div>
