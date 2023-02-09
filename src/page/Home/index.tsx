@@ -133,11 +133,11 @@ export default function HomePage() {
         </Grid>
         <Grid className="item box" item sm={3} sx={{ display: { xs: 'none', sm: 'block' }, maxWidth: { sm: '20vw', lg: '14vw' } }}>
           <p className="itemHeader">Cần trả</p>
-          {getTotalUnPaidAmount() != 0 ? <p className="itemDetail">{getTotalUnPaidAmount()}K</p> : <p className="itemDetail">0 (K)</p>}
+          <p className="itemDetail">{getTotalUnPaidAmount()} (K)</p>
         </Grid>
         <Grid className="item box" item sm={3} sx={{ display: { xs: 'none', sm: 'block' }, maxWidth: { sm: '20vw', lg: '14vw' } }}>
           <p className="itemHeader">Cần đòi</p>
-          {getTotalRequirePayment() != 0 ? <p className="itemDetail">{getTotalRequirePayment()}K</p> : <p className="itemDetail">0 (K)</p>}
+          <p className="itemDetail">{getTotalRequirePayment()} (K)</p>
         </Grid>
       </Grid>
       <Grid id="list" container direction="row" justifyContent="center" spacing={3} sx={{ marginLeft: { xs: '-12px', sm: '0' } }}>
