@@ -2,7 +2,7 @@ import { storage } from '@app/server/firebase'
 import { IEvent, IEventDetail, User } from '@app/server/firebaseType'
 import { EventColection, EventDetail, EventDetailColection, EventRef, UserDetail, usersColection } from '@app/server/useDB'
 import dayjs from 'dayjs'
-import { addDoc, deleteDoc, getDocs, updateDoc } from 'firebase/firestore'
+import { addDoc, deleteDoc, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 
 export const getListUser = async () => {
@@ -25,12 +25,12 @@ export const setEvent = async (data: IEvent) => {
 }
 export const setEventDetail = async (data: IEventDetail) => {
   let isSuccess = false
-  let eventId = ''
-  await addDoc(EventDetailColection, data).then((docRef) => {
+  // let eventId = ''
+  await setDoc(doc(EventDetailColection, data?.uid as string), data, { merge: true }).then((docRef) => {
     isSuccess = true
-    eventId = docRef.id
+    console.log(docRef)
   })
-  return { isSuccess, eventId }
+  return { isSuccess }
 }
 
 export const updateEventDetail = async (eventDetailId: string, data: IEventDetail) => {
