@@ -13,7 +13,7 @@ type PropsType = {
   setOpen: any
   handleSelectedMember: any
   selectedListMember: IEventDetail[]
-  selectedGroup: UserGroup
+  selectedGroup?: UserGroup
   useSelectPeopleInGroup?: boolean
 }
 
@@ -63,37 +63,30 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setOpen(false)
   }
 
-  const removeDuplicateMembers = (allMembersInGroup: IEventDetail[]) => {
-    const uniqueListMembers = allMembersInGroup.filter((item, index, list) => index === list.findIndex((member) => member.uid === item.uid))
-    return uniqueListMembers
-  }
-
   useEffect(() => {
     getListUser().then((allMembers) => {
       const allMemberAndOthers = [...allMembers, ...selectingMembers]
-      const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
-      setAllMembers(uniqueListMembers)
+      setAllMembers(allMemberAndOthers)
     })
   }, [])
 
   useEffect(() => {
     if (useSelectPeopleInGroup) {
       const tempMembers: IEventDetail[] = []
-      selectedGroup.members.forEach((uid: string) => {
+      selectedGroup?.members.forEach((uid: string) => {
         const member = allMembers.find((member: IEventDetail) => member.uid === uid)
         if (member) {
           tempMembers.push(member)
         }
       })
-      const allMemberAndOthers = [...tempMembers, ...selectingMembers]
-      const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
-      setAllMembersInGroup(uniqueListMembers)
-      setMembersFilter(uniqueListMembers)
+      const allMemberAndOthers = [...tempMembers]
+      setAllMembersInGroup(allMemberAndOthers)
+      setMembersFilter(allMemberAndOthers)
     } else {
       setAllMembersInGroup(allMembers)
       setMembersFilter(allMembers)
     }
-  }, [allMembers, selectedGroup, selectingMembers, useSelectPeopleInGroup])
+  }, [allMembers, selectedGroup, useSelectPeopleInGroup])
 
   useEffect(() => {
     setSelectingMembers([...selectedListMember])

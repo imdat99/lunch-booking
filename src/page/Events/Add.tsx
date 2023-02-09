@@ -363,6 +363,10 @@ function Add() {
       const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
+      if (eventState.groupId) {
+        const selectedGroup = group?.find((group) => group.groupId === eventState.groupId)
+        setSelectedGroup(selectedGroup)
+      }
     })
   }, [])
 
@@ -442,7 +446,7 @@ function Add() {
                   Thành viên
                 </Typography>
                 <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
-                {selectedGroup && (
+                {eventInfo?.groupId && (
                   <ButtonStyled>
                     <AddIcon
                       color="success"
@@ -724,7 +728,7 @@ function Add() {
             </CardContent>
           </CardStyled>
         </Box>
-        {selectedGroup && (
+        {eventInfo?.groupId && (
           <PeopleModal
             open={open}
             setOpen={setOpen}
