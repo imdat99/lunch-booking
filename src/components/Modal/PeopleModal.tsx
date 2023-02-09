@@ -33,6 +33,7 @@ const style = {
 
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup, useSelectPeopleInGroup = false }: PropsType) {
   const [allMembers, setAllMembers] = useState<IEventDetail[]>([])
+  const [membersFilter, setMembersFilter] = useState<IEventDetail[]>([])
   const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
   const [selectingMembers, setSelectingMembers] = useState<IEventDetail[]>([...selectedListMember])
@@ -87,8 +88,10 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
       const allMemberAndOthers = [...tempMembers, ...selectingMembers]
       const uniqueListMembers = removeDuplicateMembers(allMemberAndOthers)
       setAllMembersInGroup(uniqueListMembers)
+      setMembersFilter(uniqueListMembers)
     } else {
       setAllMembersInGroup(allMembers)
+      setMembersFilter(allMembers)
     }
   }, [allMembers, selectedGroup, selectingMembers, useSelectPeopleInGroup])
 
@@ -125,7 +128,11 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setAllMembers(listMemberAfterDel)
     setSelectingMembers(filterListSelectingMember)
   }
-
+  const handleFilter = (value: string) => {
+    const tempAllMember = _.cloneDeep(allMembersInGroup)
+    const listMemberFilter = value ? tempAllMember.filter((item) => item.name?.toLocaleLowerCase().includes(value.toLowerCase())) : tempAllMember
+    setMembersFilter(listMemberFilter)
+  }
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
@@ -133,7 +140,13 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
           <CloseIcon />
         </button>
         <Typography variant="h5">Chọn người đi ăn</Typography>
-        <NomarlSelectPeople selectingMembers={selectingMembers} handleClickRow={handleClickRow} dellMember={dellMember} allMembers={allMembersInGroup} />
+        <NomarlSelectPeople
+          selectingMembers={selectingMembers}
+          handleClickRow={handleClickRow}
+          dellMember={dellMember}
+          allMembers={membersFilter}
+          handleFilter={handleFilter}
+        />
         <Typography variant="h5" sx={{ marginBottom: '10px' }}>
           Thêm người ngoài
         </Typography>
