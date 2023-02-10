@@ -181,13 +181,13 @@ const LunchDetail = () => {
       <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
         <Container>
           <div className="flex justify-between p-3">
-            <Tooltip title="Back to event list">
+            <Tooltip title="Quay lại trang trước">
               <button
                 className="h-[36px]"
                 onClick={() => {
                   navigate('/events')
                 }}
-                aria-label="Back to event list"
+                aria-label="Quay lại trang trước"
               >
                 <ReplyIcon fontSize={'large'} />
               </button>
@@ -246,8 +246,8 @@ const LunchDetail = () => {
             </div>
             <div>
               {isHost || !hostInfo ? (
-                <Tooltip title="Edit event">
-                  <button aria-label="Edit-event" className="h-[36px]" onClick={() => navigate(`/events/edit/${params.id}`)}>
+                <Tooltip title="Chỉnh sửa bữa ăn">
+                  <button aria-label="Chỉnh sửa bữa ăn" className="h-[36px]" onClick={() => navigate(`/events/edit/${params.id}`)}>
                     <BorderColorIcon fontSize={'large'} />
                   </button>
                 </Tooltip>
