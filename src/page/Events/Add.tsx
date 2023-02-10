@@ -239,7 +239,7 @@ function Add() {
         if (isSuccess) {
           const promises: Promise<any>[] = []
           selectedListMember.map((member) => {
-            const eventDetail = { ...member, eventId }
+            const eventDetail = { ...member, eventId, id: eventId + member.uid }
             promises.push(setEventDetail(eventDetail))
           })
           await Promise.all(promises)
@@ -250,7 +250,7 @@ function Add() {
         if (isSuccess) {
           const promises: Promise<any>[] = []
           selectedListMember.map((member) => {
-            const eventDetail = { ...member, eventId }
+            const eventDetail = { ...member, eventId, id: eventId + member.uid }
             setEventDetail(eventDetail)
           })
           await Promise.all(promises)
@@ -266,6 +266,7 @@ function Add() {
       console.log('ERROR UPDATING BILL: ', e)
     }
   }
+  console.log('selectedListMember', selectedListMember)
 
   const handleShareBill = () => {
     const selectedListMembersWithMoney = _.cloneDeep(selectedListMember)
@@ -483,11 +484,11 @@ function Add() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {selectedListMember.map((member) => {
+                        {selectedListMember.map((member, index) => {
                           const labelId = `checkbox-list-label-${member.uid}`
                           return (
                             <>
-                              <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
+                              <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                                 <TableCell style={{ border: 'none' }}>
                                   <IconButton
                                     aria-label="expand row"

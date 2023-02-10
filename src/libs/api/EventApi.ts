@@ -26,7 +26,7 @@ export const setEvent = async (data: IEvent) => {
 export const setEventDetail = async (data: IEventDetail) => {
   let isSuccess = false
   // let eventId = ''
-  await setDoc(doc(EventDetailColection, data?.uid as string), data, { merge: true }).then((docRef) => {
+  await setDoc(doc(EventDetailColection, data?.id as string), data, { merge: true }).then((docRef) => {
     isSuccess = true
     console.log(docRef)
   })
