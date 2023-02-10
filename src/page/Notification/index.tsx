@@ -1,8 +1,8 @@
-import { updateLastTimeCheckNoti } from '@app/libs/api/noti'
+import { readAllNoti, updateLastTimeCheckNoti } from '@app/libs/api/noti'
 import { getUserByUid } from '@app/libs/api/userAPI'
 import { FORMAT__DATE } from '@app/libs/constant'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
-import { initializeNotiList, isLastPageSelector, listNotiSelector, setUserReadNoti, updateNewNotiCount, updateNoti } from '@app/stores/noti'
+import { isLastPageSelector, listNotiSelector, setUserReadNoti, updateNewNotiCount, updateNoti } from '@app/stores/noti'
 import { userStore } from '@app/stores/user'
 import { Container } from '@mui/material'
 import Typography from '@mui/material/Typography'
@@ -25,8 +25,13 @@ export default function Notification() {
     async function upDateCheckTime() {
       await updateLastTimeCheckNoti(userInfo.uid!)
     }
-  }, [userInfo])
+  }, [dispatch, userInfo])
 
+  useEffect(() => {
+    console.log('userInfouserInfo')
+
+    readAllNoti(userInfo.uid!)
+  }, [])
   useEffect(() => {
     async function createCard() {
       const listUser = await Promise.all(listNoti.map((noti) => getUserByUid(noti.fromUid!)))
@@ -42,10 +47,10 @@ export default function Notification() {
                   Từ <b>{listUser[index]?.name}</b> : {noti.content}
                 </p>
               }
-              isRead={noti.userSeen.includes(userInfo?.uid!)}
-              avatarSrc={listUser[index]?.photoURL!}
+              isRead={noti.userSeen.includes(userInfo?.uid || '')}
+              avatarSrc={listUser[index]?.photoURL || ''}
               onClick={() => {
-                dispatch(setUserReadNoti(userInfo?.uid!, noti))
+                dispatch(setUserReadNoti(userInfo?.uid || '', noti))
               }}
             />
           </div>
@@ -54,10 +59,11 @@ export default function Notification() {
       setListCard(listCard)
     }
     createCard()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listNoti])
 
   function updateNotiList() {
-    dispatch(updateNoti(userInfo?.uid!))
+    dispatch(updateNoti(userInfo.uid!))
   }
 
   return (
