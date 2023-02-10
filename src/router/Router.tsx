@@ -85,11 +85,7 @@ export default createBrowserRouter([
           },
           {
             path: 'add',
-            element: (
-              <Layout>
-                <AppSuspense comp={lazy(() => import('@app/page/Events/Add'))} />
-              </Layout>
-            ),
+            element: <AppSuspense comp={lazy(() => import('@app/page/Events/Add'))} />,
           },
           {
             path: 'edit/:id',

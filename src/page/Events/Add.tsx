@@ -381,391 +381,402 @@ function Add() {
   }
 
   return (
-    <Container>
-      <div>
-        <button className="px-4">
-          <div>
-            <ReplyIcon
-              onClick={() => {
-                history.back()
-              }}
-              fontSize={'large'}
-            />
+    <div className="bg-white">
+      <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
+        <Container>
+          <div className="block p-2">
+            <Tooltip title="Back to event list">
+              <button className="float-left">
+                <div>
+                  <ReplyIcon
+                    onClick={() => {
+                      history.back()
+                    }}
+                    fontSize={'large'}
+                  />
+                </div>
+              </button>
+            </Tooltip>
+            <div className="justify-center text-center font-[Bellota] text-[24px] pb-3">
+              <span>{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</span>
+            </div>
           </div>
-        </button>
-        <div className="text-center font-[Bellota] text-[24px]">{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</div>
-        <Box className="w-full flex justify-center">
-          <CardStyled variant="outlined" className="mx-5 md:px-3 md:max-w-xxl">
-            <CardContent>
-              <Box className="mt-6">
+        </Container>
+      </div>
+      <Container>
+        <div>
+          <Box className="mt-6">
+            <TextFieldStyled
+              fullWidth
+              label="Tên"
+              value={eventState?.eventName}
+              onChange={(e) => handleChangeTextField('eventName', e.target.value)}
+              variant="standard"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              error={!eventState.eventName}
+            />
+          </Box>
+          <Box className="mt-6">
+            <DatePicker
+              className="w-full "
+              label="Thời gian"
+              value={dayjs(eventState.date).format('MM/DD/YYYY')}
+              inputFormat="DD/MM/YYYY"
+              onChange={(newValue) => {
+                handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
+              }}
+              renderInput={(params) => (
                 <TextFieldStyled
-                  fullWidth
-                  label="Tên"
-                  value={eventState?.eventName}
-                  onChange={(e) => handleChangeTextField('eventName', e.target.value)}
                   variant="standard"
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  error={!eventState.eventName}
+                  {...params}
                 />
-              </Box>
-              <Box className="mt-6">
-                <DatePicker
-                  className="w-full "
-                  label="Thời gian"
-                  value={dayjs(eventState.date).format('MM/DD/YYYY')}
-                  inputFormat="DD/MM/YYYY"
-                  onChange={(newValue) => {
-                    handleChangeTextField('date', dayjs(newValue).format('MM/DD/YYYY'))
+              )}
+            />
+          </Box>
+          <Box className="mt-5">
+            <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
+              Group
+            </Typography>
+            <Autocomplete
+              value={{ value: eventState?.groupId, label: eventState.groupName, isCreator: null }}
+              options={userGroupSelectBox || []}
+              onChange={onChangeGroup}
+              renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
+            />
+          </Box>
+          <Box className="flex items-center mt-3">
+            <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
+              Thành viên
+            </Typography>
+            <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
+            {eventInfo?.groupId && (
+              <ButtonStyled>
+                <AddIcon
+                  color="success"
+                  onClick={() => {
+                    setOpen(true)
                   }}
-                  renderInput={(params) => (
-                    <TextFieldStyled
-                      variant="standard"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      {...params}
-                    />
-                  )}
                 />
-              </Box>
-              <Box className="mt-5">
-                <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
-                  Group
-                </Typography>
+              </ButtonStyled>
+            )}
+          </Box>
+
+          {/* Members table */}
+          {!isEmptyMembers && (
+            <>
+              <TableContainer>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow sx={{ border: 'none' }}>
+                      <TableCell style={{ minWidth: '20px' }}></TableCell>
+                      <TableCell style={{ minWidth: '85px' }}>
+                        <Typography variant="subtitle1">Đã trả</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="subtitle1">Tên</Typography>
+                      </TableCell>
+                      <TableCell style={{ minWidth: '130px' }}>
+                        <Typography variant="subtitle1">Bill</Typography>
+                      </TableCell>
+                      <TableCell style={{ minWidth: '130px' }}>
+                        <Typography variant="subtitle1">Thành Tiền</Typography>
+                      </TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedListMember.map((member) => {
+                      const labelId = `checkbox-list-label-${member.uid}`
+                      return (
+                        <>
+                          <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
+                            <TableCell style={{ border: 'none' }}>
+                              <IconButton
+                                aria-label="expand row"
+                                size="small"
+                                onClick={() => {
+                                  handleOpenMemberDetail(member?.uid || '')
+                                }}
+                              >
+                                {openingMemberRows.includes(member?.uid || '') ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                              </IconButton>
+                            </TableCell>
+
+                            <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
+                              <Checkbox
+                                onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
+                                key={forceRerender}
+                                className="w-[20px]"
+                                edge="start"
+                                checked={member.isPaid}
+                                tabIndex={-1}
+                                disableRipple
+                                inputProps={{ 'aria-labelledby': labelId }}
+                              />
+                            </TableCell>
+                            <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                              <Typography noWrap>
+                                <Tooltip title={member.name || member.email}>
+                                  <span> {member.name || member.email} </span>
+                                </Tooltip>
+                              </Typography>
+                            </TableCell>
+                            <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                              <TextNumberInput
+                                thousandSeparator=","
+                                fullWidth
+                                id="filled-required"
+                                variant="standard"
+                                value={member.amount}
+                                onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                                defaultValue={0}
+                              />
+                            </TableCell>
+                            <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                              <TextNumberInput
+                                thousandSeparator=","
+                                fullWidth
+                                id="filled-required"
+                                variant="standard"
+                                value={member.amountToPay}
+                                disabled
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                                defaultValue={0}
+                              />
+                            </TableCell>
+
+                            <TableCell style={{ border: 'none', padding: '5px 16px' }}>
+                              <ButtonStyled onClick={() => handleDelete(member)}>
+                                <DeleteIcon color="error" />
+                              </ButtonStyled>
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow key={`more-infor-${member.uid}`}>
+                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                              <Collapse in={openingMemberRows.includes(member?.uid || '')} timeout="auto" unmountOnExit>
+                                <p className="italic text-[#9c9c9c]">{member.note ? `"${member.note}"` : 'No note'}</p>
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </>
+          )}
+
+          <Typography variant="subtitle2" sx={{ marginTop: '20px' }}>
+            Người trả bill
+          </Typography>
+          <Box sx={{ flexGrow: 1 }} className="mt-2">
+            <Grid container spacing={2}>
+              <Grid item md={4} xs={5} style={{ display: 'flex', alignItems: 'center' }}>
+                <ButtonStyled sx={{ padding: '10px' }} variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
+                  <Typography>Auto Pick</Typography>
+                </ButtonStyled>
+              </Grid>
+              <Grid item md={8} xs={7}>
                 <Autocomplete
-                  value={{ value: eventState?.groupId, label: eventState.groupName, isCreator: null }}
-                  options={userGroupSelectBox || []}
-                  onChange={onChangeGroup}
+                  disabled={!selectedListMember.length}
+                  value={{ value: eventState?.userPayName, label: eventState.userPayName, isCreator: null }}
+                  options={dropdownMembers}
+                  onChange={onChangeBillOwner}
                   renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
                 />
-              </Box>
-              <Box className="flex items-center mt-3">
-                <Typography variant="subtitle2" sx={{ color: isEmptyMembers ? '#E1251B' : '' }}>
-                  Thành viên
-                </Typography>
-                <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
-                {eventInfo?.groupId && (
-                  <ButtonStyled>
-                    <AddIcon
-                      color="success"
-                      onClick={() => {
-                        setOpen(true)
-                      }}
-                    />
-                  </ButtonStyled>
-                )}
-              </Box>
-
-              {/* Members table */}
-              {!isEmptyMembers && (
-                <>
-                  <TableContainer>
-                    <Table stickyHeader>
-                      <TableHead>
-                        <TableRow sx={{ border: 'none' }}>
-                          <TableCell style={{ minWidth: '20px' }}></TableCell>
-                          <TableCell style={{ minWidth: '85px' }}>
-                            <Typography variant="subtitle1">Đã trả</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="subtitle1">Tên</Typography>
-                          </TableCell>
-                          <TableCell style={{ minWidth: '130px' }}>
-                            <Typography variant="subtitle1">Bill</Typography>
-                          </TableCell>
-                          <TableCell style={{ minWidth: '130px' }}>
-                            <Typography variant="subtitle1">Thành Tiền</Typography>
-                          </TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedListMember.map((member) => {
-                          const labelId = `checkbox-list-label-${member.uid}`
-                          return (
-                            <>
-                              <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
-                                <TableCell style={{ border: 'none' }}>
-                                  <IconButton
-                                    aria-label="expand row"
-                                    size="small"
-                                    onClick={() => {
-                                      handleOpenMemberDetail(member?.uid || '')
-                                    }}
-                                  >
-                                    {openingMemberRows.includes(member?.uid || '') ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                                  </IconButton>
-                                </TableCell>
-
-                                <TableCell style={{ border: 'none', padding: '5px 16px', textAlign: 'center' }}>
-                                  <Checkbox
-                                    onClick={() => (member.uid ? handleToggle(member.uid) : undefined)}
-                                    key={forceRerender}
-                                    className="w-[20px]"
-                                    edge="start"
-                                    checked={member.isPaid}
-                                    tabIndex={-1}
-                                    disableRipple
-                                    inputProps={{ 'aria-labelledby': labelId }}
-                                  />
-                                </TableCell>
-                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                  <Typography noWrap>
-                                    <Tooltip title={member.name || member.email}>
-                                      <span> {member.name || member.email} </span>
-                                    </Tooltip>
-                                  </Typography>
-                                </TableCell>
-                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                  <TextNumberInput
-                                    thousandSeparator=","
-                                    fullWidth
-                                    id="filled-required"
-                                    variant="standard"
-                                    value={member.amount}
-                                    onValueChange={(values) => handleChangeAmount(member.uid, round(_.toNumber(values.value), 3))}
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                    defaultValue={0}
-                                  />
-                                </TableCell>
-                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                  <TextNumberInput
-                                    thousandSeparator=","
-                                    fullWidth
-                                    id="filled-required"
-                                    variant="standard"
-                                    value={member.amountToPay}
-                                    disabled
-                                    InputLabelProps={{
-                                      shrink: true,
-                                    }}
-                                    defaultValue={0}
-                                  />
-                                </TableCell>
-
-                                <TableCell style={{ border: 'none', padding: '5px 16px' }}>
-                                  <ButtonStyled onClick={() => handleDelete(member)}>
-                                    <DeleteIcon color="error" />
-                                  </ButtonStyled>
-                                </TableCell>
-                              </TableRow>
-
-                              <TableRow key={`more-infor-${member.uid}`}>
-                                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                                  <Collapse in={openingMemberRows.includes(member?.uid || '')} timeout="auto" unmountOnExit>
-                                    <p className="italic text-[#9c9c9c]">{member.note ? `"${member.note}"` : 'No note'}</p>
-                                  </Collapse>
-                                </TableCell>
-                              </TableRow>
-                            </>
-                          )
-                        })}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </>
-              )}
-
-              <Typography variant="subtitle2" sx={{ marginTop: '20px' }}>
-                Người trả bill
-              </Typography>
-              <Box sx={{ flexGrow: 1 }} className="mt-2">
-                <Grid container spacing={2}>
-                  <Grid item md={4} xs={5} style={{ display: 'flex', alignItems: 'center' }}>
-                    <ButtonStyled sx={{ padding: '10px' }} variant="contained" onClick={handleAutoPickBillOwner} disabled={!selectedListMember.length}>
-                      <Typography>Auto Pick</Typography>
-                    </ButtonStyled>
-                  </Grid>
-                  <Grid item md={8} xs={7}>
-                    <Autocomplete
-                      disabled={!selectedListMember.length}
-                      value={{ value: eventState?.userPayName, label: eventState.userPayName, isCreator: null }}
-                      options={dropdownMembers}
-                      onChange={onChangeBillOwner}
-                      renderInput={(params) => <TextField name="billOwnerValue" {...params} variant="standard" />}
-                    />
-                  </Grid>
-                </Grid>
-              </Box>
-              <Box className="w-full flex mt-3 items-center gap-2">
-                <TextNumberInput
-                  thousandSeparator=","
-                  allowLeadingZeros={false}
-                  fullWidth
-                  variant="standard"
-                  label="Tổng hóa đơn"
-                  placeholder="1K = 1000 VND"
-                  value={eventState?.billAmount}
-                  onValueChange={(values) => {
-                    handleChangeBill(round(_.toNumber(values.value), 3))
-                  }}
-                  InputProps={{
-                    endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
-                    sx: {
-                      '& input': {
-                        textAlign: 'right',
-                      },
-                    },
-                  }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  defaultValue={0}
-                  error={!eventState.billAmount}
-                />
-                <ButtonStyled variant="contained" className="text-[14px] w-[140px]" sx={{ marginTop: '16px' }} onClick={handleShareBill}>
-                  Chia đều
-                </ButtonStyled>
-              </Box>
-              <Typography variant="subtitle2" sx={{ marginTop: '10px' }}>
-                Note
-              </Typography>
-              <TextareaAutosize
-                className="bill-note-textarea"
-                name="billNote"
-                value={eventState.note}
-                style={{ width: '100%', fontFamily: 'Bellota', borderBottom: '1px solid #9c9c9c' }}
-                onChange={(e) =>
-                  setEventState((prev) => {
-                    return { ...prev, note: e.target.value }
-                  })
-                }
-                maxRows={5}
-                minRows={2}
-              />
-
-              <Box className="mt-5 flex items-center justify-between">
-                <FormControl>
-                  <Typography variant="subtitle2">Hoa hồng</Typography>
-                  <RadioGroup
-                    row
-                    aria-labelledby="demo-form-control-label-placement"
-                    name="position"
-                    defaultValue="top"
-                    onChange={(e) => {
-                      handleChangeBonusType(e.target.value as bonusTypeEnum)
-                    }}
-                  >
-                    <FormControlLabel value={bonusTypeEnum.MONEY} checked={bonusType === bonusTypeEnum.MONEY} control={<Radio />} label="Nhập số" />
-                    <FormControlLabel value={bonusTypeEnum.PERCENT} checked={bonusType === bonusTypeEnum.PERCENT} control={<Radio />} label="Phần trăm" />
-                  </RadioGroup>
-                </FormControl>
-                <TextNumberInput
-                  thousandSeparator=","
-                  value={eventState?.tip}
-                  onValueChange={(values) => {
-                    handleChangeTip(_.toNumber(values.value), bonusType)
-                  }}
-                  InputProps={{
-                    endAdornment:
-                      bonusType === bonusTypeEnum.PERCENT ? (
-                        <InputAdornment position="end">%</InputAdornment>
-                      ) : (
-                        <InputAdornment position="end">K VND</InputAdornment>
-                      ),
-                    sx: {
-                      '& input': {
-                        textAlign: 'right',
-                      },
-                    },
-                  }}
-                  variant="standard"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  defaultValue={0}
-                />
-              </Box>
-              <Box className="mt-5">
-                <TextNumberInput
-                  thousandSeparator=","
-                  fullWidth
-                  id="filled-required"
-                  label="Tổng tiền"
-                  value={eventState?.totalAmount}
-                  variant="standard"
-                  disabled
-                  InputProps={{
-                    endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
-                    sx: {
-                      '& input': {
-                        textAlign: 'right',
-                      },
-                    },
-                  }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  defaultValue={0}
-                />
-              </Box>
-              <Box className="flex flex-col mt-[10px]">
-                <span className="text-center">
-                  {imgAvatarPreview ? (
-                    <img alt="bill_image" src={imgAvatarPreview} className="max-w-[60%] max-h-[60%]  m-auto" />
-                  ) : (
-                    <span className="italic">Không có ảnh hoá đơn</span>
-                  )}
-                </span>
-
-                <Tooltip title="Upload ảnh hoá đơn">
-                  <Button onChange={handlePreviewAvatarChange} component="label">
-                    <PhotoCamera fontSize={'large'} />
-                    <input hidden accept="image/*" type="file" />
-                  </Button>
-                </Tooltip>
-              </Box>
-              {/* Submit button */}
-              <Box className="flex justify-center my-7">
-                <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers || !eventState.billAmount}>
-                  <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
-                </ButtonStyled>
-              </Box>
-            </CardContent>
-          </CardStyled>
-        </Box>
-        {eventInfo?.groupId && (
-          <PeopleModal
-            open={open}
-            setOpen={setOpen}
-            handleSelectedMember={handleSelectedMember}
-            selectedListMember={selectedListMember}
-            selectedGroup={selectedGroup}
-            useSelectPeopleInGroup={true}
-          />
-        )}
-        <Modal
-          open={modalConfirmGroupData.isOpen}
-          onClose={handleCancelChangeGroup}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={style}>
-            <button className="absolute top-[10px] right-[10px]" onClick={handleCancelChangeGroup}>
-              <CloseIcon />
-            </button>
-            <Typography variant="h5">Khi chuyển group sẽ xóa thông tin thành viên bạn đã chọn. Bạn đã chắc chưa?</Typography>
-            <Box className="flex mt-5 justify-center">
-              <Button onClick={handleConfirmGroupChange} variant="contained" sx={{ marginRight: '15px' }}>
-                Chắc
-              </Button>
-              <Button onClick={handleCancelChangeGroup} variant="contained">
-                Bỏ đi
-              </Button>
-            </Box>
+              </Grid>
+            </Grid>
           </Box>
-        </Modal>
-        <Snackbar open={!!openModalSuccess} autoHideDuration={1500} onClose={handleCloseModalSuccess} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-          <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
-            <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>
-          </Alert>
-        </Snackbar>
-      </div>
-    </Container>
+          <Box className="w-full flex mt-3 items-center gap-2">
+            <TextNumberInput
+              thousandSeparator=","
+              allowLeadingZeros={false}
+              fullWidth
+              variant="standard"
+              label="Tổng hóa đơn"
+              placeholder="1K = 1000 VND"
+              value={eventState?.billAmount}
+              onValueChange={(values) => {
+                handleChangeBill(round(_.toNumber(values.value), 3))
+              }}
+              InputProps={{
+                endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
+                sx: {
+                  '& input': {
+                    textAlign: 'right',
+                  },
+                },
+              }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              defaultValue={0}
+              error={!eventState.billAmount}
+            />
+            <ButtonStyled variant="contained" className="text-[14px] w-[140px]" sx={{ marginTop: '16px' }} onClick={handleShareBill}>
+              Chia đều
+            </ButtonStyled>
+          </Box>
+          <Typography variant="subtitle2" sx={{ marginTop: '10px' }}>
+            Note
+          </Typography>
+          <TextareaAutosize
+            className="bill-note-textarea"
+            name="billNote"
+            value={eventState.note}
+            style={{ width: '100%', fontFamily: 'Bellota', borderBottom: '1px solid #9c9c9c' }}
+            onChange={(e) =>
+              setEventState((prev) => {
+                return { ...prev, note: e.target.value }
+              })
+            }
+            maxRows={5}
+            minRows={2}
+          />
+
+          <Box className="mt-5 flex items-center justify-between">
+            <FormControl>
+              <Typography variant="subtitle2">Hoa hồng</Typography>
+              <RadioGroup
+                row
+                aria-labelledby="demo-form-control-label-placement"
+                name="position"
+                defaultValue="top"
+                onChange={(e) => {
+                  handleChangeBonusType(e.target.value as bonusTypeEnum)
+                }}
+              >
+                <FormControlLabel value={bonusTypeEnum.MONEY} checked={bonusType === bonusTypeEnum.MONEY} control={<Radio />} label="Nhập số" />
+                <FormControlLabel value={bonusTypeEnum.PERCENT} checked={bonusType === bonusTypeEnum.PERCENT} control={<Radio />} label="Phần trăm" />
+              </RadioGroup>
+            </FormControl>
+            <TextNumberInput
+              thousandSeparator=","
+              value={eventState?.tip}
+              onValueChange={(values) => {
+                handleChangeTip(_.toNumber(values.value), bonusType)
+              }}
+              InputProps={{
+                endAdornment:
+                  bonusType === bonusTypeEnum.PERCENT ? (
+                    <InputAdornment position="end">%</InputAdornment>
+                  ) : (
+                    <InputAdornment position="end">K VND</InputAdornment>
+                  ),
+                sx: {
+                  '& input': {
+                    textAlign: 'right',
+                  },
+                },
+              }}
+              variant="standard"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              defaultValue={0}
+            />
+          </Box>
+          <Box className="mt-5">
+            <TextNumberInput
+              thousandSeparator=","
+              fullWidth
+              id="filled-required"
+              label="Tổng tiền"
+              value={eventState?.totalAmount}
+              variant="standard"
+              disabled
+              InputProps={{
+                endAdornment: bonusType === bonusTypeEnum.PERCENT ? <InputAdornment position="end">K VND</InputAdornment> : null,
+                sx: {
+                  '& input': {
+                    textAlign: 'right',
+                  },
+                },
+              }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              defaultValue={0}
+            />
+          </Box>
+          <Box className="flex flex-col mt-[10px]">
+            <span className="text-center">
+              {imgAvatarPreview ? (
+                <img alt="bill_image" src={imgAvatarPreview} className="max-w-[60%] max-h-[60%]  m-auto" />
+              ) : (
+                <span className="italic">Không có ảnh hoá đơn</span>
+              )}
+            </span>
+
+            <Tooltip title="Upload ảnh hoá đơn">
+              <Button onChange={handlePreviewAvatarChange} component="label">
+                <PhotoCamera fontSize={'large'} />
+                <input hidden accept="image/*" type="file" />
+              </Button>
+            </Tooltip>
+          </Box>
+          {/* Submit button */}
+          <Box className="flex justify-center pb-7">
+            <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers || !eventState.billAmount}>
+              <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
+            </ButtonStyled>
+          </Box>
+          {eventInfo?.groupId && (
+            <PeopleModal
+              open={open}
+              setOpen={setOpen}
+              handleSelectedMember={handleSelectedMember}
+              selectedListMember={selectedListMember}
+              selectedGroup={selectedGroup}
+              useSelectPeopleInGroup={true}
+            />
+          )}
+          <Modal
+            open={modalConfirmGroupData.isOpen}
+            onClose={handleCancelChangeGroup}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              <button className="absolute top-[10px] right-[10px]" onClick={handleCancelChangeGroup}>
+                <CloseIcon />
+              </button>
+              <Typography variant="h5">Khi chuyển group sẽ xóa thông tin thành viên bạn đã chọn. Bạn đã chắc chưa?</Typography>
+              <Box className="flex mt-5 justify-center">
+                <Button onClick={handleConfirmGroupChange} variant="contained" sx={{ marginRight: '15px' }}>
+                  Chắc
+                </Button>
+                <Button onClick={handleCancelChangeGroup} variant="contained">
+                  Bỏ đi
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+          <Snackbar
+            open={!!openModalSuccess}
+            autoHideDuration={1500}
+            onClose={handleCloseModalSuccess}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          >
+            <Alert onClose={handleCloseModalSuccess} severity="success" sx={{ width: '100%', backgroundColor: '#baf7c2' }}>
+              <span className="font-bold"> {isEdit ? 'Cập nhật hoá đơn thành công!' : 'Tạo hoá đơn thành công!'} </span>
+            </Alert>
+          </Snackbar>
+        </div>
+      </Container>
+    </div>
   )
 }
 
