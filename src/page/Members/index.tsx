@@ -50,7 +50,7 @@ const Members = () => {
       const defaultSelected = { label: data?.[0]?.groupName, value: data?.[0]?.groupId }
       if (defaultSelected) {
         setSelectedGroup(defaultSelected)
-      }
+      } else setSelectedGroup(null)
       setUserGroups(data)
     })
   }, [])
@@ -64,16 +64,16 @@ const Members = () => {
   }, [userGroups])
 
   const renderList = React.useCallback(() => {
-    if (!selectedGroup) return <Box className="text-center">Vui lòng chọn nhóm</Box>
+    if (!selectedGroup) return <Box className="text-center text-[13px]">Vui lòng chọn nhóm</Box>
     else {
       const listMember = userGroups?.find((i) => i.groupId === selectedGroup.value)?.members
-      if (!listMember || !listMember?.length) return <div>Nhóm không có ai cả!</div>
+      if (!listMember || !listMember?.length) return <Box className="text-center text-[13px]">Nhóm không có ai cả!</Box>
       const usersData = listMember.map((userId) => users.find((org) => org?.uid?.trim() === userId?.trim()))
       const totalUsers = searchText ? usersData.filter((item) => item?.name?.toLowerCase()?.includes(searchText.toLowerCase())) : usersData
       return totalUsers.length
         ? totalUsers.map((user, index) => (
-            <div className="mb-[0.625rem] rounded-3xl block" key={index}>
-              <Link className="flex bg-white rounded-3xl p-3 max-w-md" to={'/profile/' + user?.uid} key={user?.uid}>
+            <div className="mb-[0.625rem] rounded-md block border-[1px] bg-white drop-shadow-lg" key={index}>
+              <Link className="flex rounded-md p-3 max-w-md" to={'/profile/' + user?.uid} key={user?.uid}>
                 <MemberCard user={user} />
               </Link>
             </div>
@@ -83,41 +83,59 @@ const Members = () => {
   }, [searchText, selectedGroup, userGroups, users])
 
   return (
-    <Container>
-      <div className="mt-[1.875rem] mb-[1.875rem]">
-        <h1 className="font-bellota text-center text-2xl">Thành viên</h1>
-      </div>
-      <div className="text-center mb-[1.875rem]">
-        <OutlinedInput
-          className="max-w-md w-11/12"
-          sx={{ height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
-          id="outlined-adornment-password"
-          type={'text'}
-          placeholder={'Tìm kiếm'}
-          endAdornment={
-            <InputAdornment position="end">
-              <SearchIcon fontSize={'large'} />
-            </InputAdornment>
-          }
-          onChange={onChangeSearch}
-          value={searchText}
-        />
-      </div>
-      <Box className="mb-[1.875rem]">
-        <Autocomplete
-          className="max-w-md w-11/12"
-          disablePortal
-          id="combo-box-demo"
-          options={userGroupsOption || []}
-          sx={{ margin: 'auto', backgroundColor: 'white', '.MuiAutocomplete-endAdornment': { top: 'unset' } }}
-          value={selectedGroup}
-          renderInput={(params) => <TextField {...params} placeholder={'Lọc theo nhóm'} />}
-          popupIcon={<ArrowDropDownIcon className="text-green-500 h-auto" fontSize="large" />}
-          onChange={(_, item) => setSelectedGroup(item)}
-          isOptionEqualToValue={(v1, v2) => v1.value === v2.value}
-        />
+    <Container
+      className="relative"
+      sx={{
+        paddingRight: 0,
+        paddingLeft: 0,
+        margin: 'auto',
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: '375px',
+      }}
+    >
+      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
+        <Box className="py-4">
+          <Box className="font-bellota text-center text-[18px] font-bold">Thành viên</Box>
+        </Box>
+        <Box className="flex gap-2">
+          <OutlinedInput
+            className="max-w-[60%]"
+            sx={{ height: '40px', backgroundColor: 'white' }}
+            id="outlined-adornment-password"
+            type={'text'}
+            placeholder={'Tìm kiếm'}
+            endAdornment={
+              <InputAdornment position="end">
+                <SearchIcon />
+              </InputAdornment>
+            }
+            onChange={onChangeSearch}
+            value={searchText}
+          />
+          <Autocomplete
+            className="max-w-[40%] w-full text-[14px]"
+            disablePortal
+            id="combo-box-demo"
+            options={userGroupsOption || []}
+            sx={{
+              height: '40px',
+              margin: 'auto',
+              backgroundColor: 'white',
+              '.MuiAutocomplete-endAdornment': { top: 'unset' },
+              '.MuiOutlinedInput-root': { padding: 'unset' },
+            }}
+            value={selectedGroup}
+            renderInput={(params) => <TextField {...params} placeholder={'Lọc theo nhóm'} />}
+            popupIcon={<ArrowDropDownIcon className="text-green-500 h-auto" />}
+            onChange={(_, item) => setSelectedGroup(item)}
+            isOptionEqualToValue={(v1, v2) => v1.value === v2.value}
+          />
+        </Box>
       </Box>
-      <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">{renderList()}</div>
+      <Box className="flex flex-col content-center overflow-y-auto mx-auto max-w-md pt-4 px-3 min-w-[375px]">{renderList()}</Box>
     </Container>
   )
 }
