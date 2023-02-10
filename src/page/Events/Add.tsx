@@ -312,20 +312,20 @@ function Add() {
     }
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
-  const onChangeGroup = (_event: any, selectedGroup: any) => {
-    if (!selectedGroup) {
+  const onChangeGroup = (_event: any, selectedGroupOption: any) => {
+    if (!selectedGroupOption) {
       setEventState({ ...eventState, groupId: '', groupName: '' })
       return
     }
-    const tempSelectedGroup = userGroupData?.find((item: UserGroup) => item.groupId === selectedGroup.value)
+    const tempSelectedGroup = userGroupData?.find((item: UserGroup) => item.groupId === selectedGroupOption.value)
     if (tempSelectedGroup) {
       setSelectedGroup(tempSelectedGroup)
     }
-    if (eventState.groupId) {
-      setModalConfirmGroupData({ isOpen: true, groupId: selectedGroup.value, groupName: selectedGroup.label })
+    if (selectedGroup?.members) {
+      setModalConfirmGroupData({ isOpen: true, groupId: selectedGroupOption.value, groupName: selectedGroupOption.label })
       return
     }
-    setEventState({ ...eventState, groupId: selectedGroup.value, groupName: selectedGroup.label })
+    setEventState({ ...eventState, groupId: selectedGroupOption.value, groupName: selectedGroupOption.label })
   }
   const handleConfirmGroupChange = () => {
     setEventState({ ...eventState, groupId: modalConfirmGroupData.groupId, groupName: modalConfirmGroupData.groupName })
@@ -360,6 +360,7 @@ function Add() {
 
   useEffect(() => {
     getUserGroupsByUserId(loginUser?.uid || '').then((group: UserGroup[] | undefined) => {
+      // eslint-disable-next-line max-len
       const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
@@ -446,7 +447,7 @@ function Add() {
                   Thành viên
                 </Typography>
                 <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
-                {eventInfo?.groupId && (
+                {eventState?.groupId && (
                   <ButtonStyled>
                     <AddIcon
                       color="success"
@@ -728,7 +729,7 @@ function Add() {
             </CardContent>
           </CardStyled>
         </Box>
-        {eventInfo?.groupId && (
+        {eventState?.groupId && (
           <PeopleModal
             open={open}
             setOpen={setOpen}
