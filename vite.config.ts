@@ -22,7 +22,7 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'favicon.png',
+            src: '/favicon.png',
             size: '512x512',
             type: 'image/png',
           },
