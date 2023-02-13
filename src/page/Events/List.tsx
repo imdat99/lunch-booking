@@ -162,11 +162,22 @@ const List = () => {
   }
 
   return (
-    <Container>
-      <div className="mx-auto w-11/12 max-w-md">
-        <div className="mt-[1.875rem] mb-[1.875rem]">
-          <h2 className="font-bellota text-center text-2xl">Lịch sử đi ăn</h2>
-        </div>
+    <Container
+      sx={{
+        paddingRight: 0,
+        paddingLeft: 0,
+        margin: 'auto',
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: '375px',
+      }}
+    >
+      <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
+        <Box className="pt-4 pb-3">
+          <Box className="font-bellota text-center text-[18px] font-bold px-3 ">Lịch sử đi ăn</Box>
+        </Box>
         {/* <div className="text-center">
           <OutlinedInput
             sx={{ width: '290px', height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
@@ -180,7 +191,7 @@ const List = () => {
             onChange={onChangeSearch}
           />
         </div> */}
-        <div className="flex w-full rounded-lg bg-white items-center justify-between mt-2" role="group">
+        <div className="flex w-full rounded-lg bg-white items-center justify-between" role="group">
           {listButton.map((item, index) => (
             <React.Fragment key={index}>
               {index !== 0 && <Divider />}
@@ -191,69 +202,69 @@ const List = () => {
             </React.Fragment>
           ))}
         </div>
-        <ul className="mt-10">
-          {data.map((item, index) => {
-            const isHost = userData.uid === item.userPayId
-            const hostInfo = listUser.find((user) => user.uid === item.userPayId)
-            const isPaid = isHost
-              ? item.isAllPaid
-              : listEventDetail.find((eventDetail) => eventDetail?.uid === userData.uid && eventDetail.isPaid && eventDetail.eventId === item.id)
-            const paidMoney = isHost
-              ? listEventDetail
-                  .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
-                  .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
-              : 0
-            return (
-              <li className="my-4" key={index}>
-                <Link to={item.id!}>
-                  <Box className="bg-white rounded-3xl flex justify-around p-5 gap-2">
-                    <div className="relative">
-                      <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full" alt="" />
-                      <div
-                        className={
-                          'absolute py-1 px-1 block font-normal text-white rounded-lg -bottom-0 inset-x-2/4 -translate-x-2/4 text-[14px] w-[70px] text-center ' +
-                          (isHost ? 'bg-red-600' : 'bg-green-600 ')
-                        }
-                      >
-                        {isHost ? TEXT__HOST : TEXT__MEMBER}
+      </Box>
+      <ul className="min-w-[375px]">
+        {data.map((item, index) => {
+          const isHost = userData.uid === item.userPayId
+          const hostInfo = listUser.find((user) => user.uid === item.userPayId)
+          const isPaid = isHost
+            ? item.isAllPaid
+            : listEventDetail.find((eventDetail) => eventDetail?.uid === userData.uid && eventDetail.isPaid && eventDetail.eventId === item.id)
+          const paidMoney = isHost
+            ? listEventDetail
+                .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
+                .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
+            : 0
+          return (
+            <li className="mb-[0.625rem] rounded-md block border-[1px] bg-white drop-shadow-lg" key={index}>
+              <Link to={item.id!}>
+                <Box className="bg-white rounded-3xl flex justify-between p-5 gap-2">
+                  <div className="relative">
+                    <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full" alt="" />
+                    <div
+                      className={
+                        'absolute py-1 px-1 block font-normal text-white rounded-lg -bottom-0 inset-x-2/4 -translate-x-2/4 text-[14px] w-[70px] text-center ' +
+                        (isHost ? 'bg-red-600' : 'bg-green-600 ')
+                      }
+                    >
+                      {isHost ? TEXT__HOST : TEXT__MEMBER}
+                    </div>
+                  </div>
+                  <Box className="w-full max-w-[70%]">
+                    <div className="flex justify-between items-center">
+                      <div className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</div>
+                      <div className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
+                        {isHost && isPaid && 'Đã hoàn tất'}
+                        {isHost && !isPaid && 'Chưa hoàn tất'}
+                        {!isHost && isPaid && 'Đã trả'}
+                        {!isHost && !isPaid && 'Chưa trả'}
+                        {}
                       </div>
                     </div>
-                    <Box className="w-full max-w-[70%]">
-                      <div className="flex justify-between items-center">
-                        <div className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</div>
-                        <div className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
-                          {isHost && isPaid && 'Đã hoàn tất'}
-                          {isHost && !isPaid && 'Chưa hoàn tất'}
-                          {!isHost && isPaid && 'Đã trả'}
-                          {!isHost && !isPaid && 'Chưa trả'}
-                          {}
-                        </div>
-                      </div>
-                      <div className="w-full relative flex flex-col justify-between text-[14px]">
-                        <h3 className="font-medium">{item.eventName}</h3>
-                        <span>
-                          Chủ chi:&nbsp;
-                          <b>{item.userPayName}</b>
-                        </span>
-                        <span>
-                          Số tiền:&nbsp;
-                          <b>
-                            {formatMoney(
-                              isHost
-                                ? Number(item.totalAmount)! - paidMoney
-                                : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
-                            )}
-                          </b>
-                        </span>
-                      </div>
-                    </Box>
+                    <div className="w-full relative flex flex-col justify-between text-[14px]">
+                      <h3 className="font-medium">{item.eventName}</h3>
+                      <span>
+                        Chủ chi:&nbsp;
+                        <b>{item.userPayName}</b>
+                      </span>
+                      <span>
+                        Số tiền:&nbsp;
+                        <b>
+                          {formatMoney(
+                            isHost
+                              ? Number(item.totalAmount)! - paidMoney
+                              : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
+                          )}
+                        </b>
+                      </span>
+                    </div>
                   </Box>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+                </Box>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
     </Container>
   )
 }
