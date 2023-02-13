@@ -101,7 +101,6 @@ const LunchDetail = () => {
   }, [eventInfo])
 
   const handleNoti = useCallback(() => {
-    setDisableNoti(true)
     const toUids = isHost ? userInEvent.filter((user) => !user.isPaid && user.uid !== loginUserUid).map((user) => user.uid!) : [eventInfo?.userPayId || '']
     createNoti({
       date: dayjs(Date.now()).unix(),
@@ -406,7 +405,6 @@ const LunchDetail = () => {
                   <button
                     type="button"
                     onClick={handleNoti}
-                    disabled={disableNoti}
                     className={
                       'focus:outline-none text-white focus:ring-4 font-medium rounded-lg px-5 py-2.5 mx-auto ' +
                       (isHost ? 'bg-green-600 hover:bg-green-700 focus:ring-green-400 ' : 'bg-[#B91D37] ') +
