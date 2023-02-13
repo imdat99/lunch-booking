@@ -1,10 +1,10 @@
-import { readAllNoti, updateLastTimeCheckNoti } from '@app/libs/api/noti'
+import { updateLastTimeCheckNoti } from '@app/libs/api/noti'
 import { getUserByUid } from '@app/libs/api/userAPI'
 import { FORMAT__DATE } from '@app/libs/constant'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
-import { isLastPageSelector, listNotiSelector, setUserReadNoti, updateNewNotiCount, updateNoti } from '@app/stores/noti'
+import { isLastPageSelector, listNotiSelector, setReadAllNoti, setUserReadNoti, updateNewNotiCount, updateNoti } from '@app/stores/noti'
 import { userStore } from '@app/stores/user'
-import { Container } from '@mui/material'
+import { Box, Button, Container } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import dayjs from 'dayjs'
 import { ReactNode, useEffect, useState } from 'react'
@@ -19,6 +19,9 @@ export default function Notification() {
   const dispatch = useAppDispatch()
   const [listCard, setListCard] = useState<ReactNode[]>([])
 
+  const handleReadAllNoti = () => {
+    dispatch(setReadAllNoti(userInfo.uid!))
+  }
   useEffect(() => {
     upDateCheckTime()
     dispatch(updateNewNotiCount(userInfo.uid!))
@@ -27,11 +30,6 @@ export default function Notification() {
     }
   }, [dispatch, userInfo])
 
-  useEffect(() => {
-    console.log('userInfouserInfo')
-
-    readAllNoti(userInfo.uid!)
-  }, [])
   useEffect(() => {
     async function createCard() {
       const listUser = await Promise.all(listNoti.map((noti) => getUserByUid(noti.fromUid!)))
@@ -69,9 +67,14 @@ export default function Notification() {
   return (
     <Container>
       <div className="flex flex-col justify-start">
-        <div className="mt-[1.875rem] mb-[1.875rem]">
+        <div className="mt-[1.875rem] mb-[0.875rem]">
           <Typography sx={{ fontSize: '1.5rem', lineHeight: '1.875rem', textAlign: 'center' }}>Thông báo</Typography>
         </div>
+        <Box className="flex justify-end mb-3 w-11/12">
+          <Button variant="outlined" onClick={handleReadAllNoti}>
+            read all
+          </Button>
+        </Box>
         <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
           <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
             {listCard}

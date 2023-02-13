@@ -76,6 +76,10 @@ export function listenCommingNoti(uid: string, eventHandler: (noti: INoti) => vo
         const newNoti: INoti = { ...change.doc.data(), id: change.doc.id }
         eventHandler(newNoti)
       }
+      // if (change.type === 'modified') {
+      //   const newNoti: INoti = { ...change.doc.data(), id: change.doc.id }
+      //   eventHandler(newNoti)
+      // }
     })
   })
 
@@ -107,9 +111,12 @@ export async function getListNotiByPage(uid: string, afterSnapShot: DocumentSnap
 }
 
 export const readAllNoti = async (uid: string) => {
-  const queryState = query(NotiColection, where('toUids', 'array-contains', uid), where('userSeen', 'not-in', uid))
-  const res = await getDocs(queryState)
-  res.docs.map((doc) => console.log('ressssss', doc))
+  const queryRes = query(NotiColection, where('toUids', 'array-contains', uid))
+  const res = await getDocs(queryRes)
+  const listNoti: INoti[] = res.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+  const listNotiNotRead: INoti[] = listNoti.filter((item) => !item.userSeen.includes(uid))
+  listNotiNotRead.map((item) => setUserSeen(uid, item))
+  // const notifyNotReadYet = allNotify
 }
 
 export const updateLastTimeCheckNoti = async (uid: string) => {

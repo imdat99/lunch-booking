@@ -1,4 +1,4 @@
-import { getCountNewNotice, getListNotiByPage, setUserSeen } from '@app/libs/api/noti'
+import { getCountNewNotice, getListNotiByPage, readAllNoti, setUserSeen } from '@app/libs/api/noti'
 import { INoti } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
@@ -128,6 +128,21 @@ export function setUserReadNoti(uid: string, noti: INoti): ThunkAction<void, Roo
         })
         dispatch(setReadNoti({ listNoti: listNotiTemp }))
       }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+export function setReadAllNoti(uid: string): ThunkAction<void, RootState, unknown, AnyAction> {
+  return async (dispatch, getState) => {
+    try {
+      await readAllNoti(uid)
+      const listNoti = getState().LIST_NOTI.listNoti
+      const listNotiTemp = listNoti.map((currentNoti) => {
+        return { ...currentNoti, userSeen: [...currentNoti.userSeen, uid] }
+      })
+      dispatch(setReadNoti({ listNoti: listNotiTemp }))
     } catch (error) {
       console.log(error)
     }
