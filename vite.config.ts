@@ -12,7 +12,7 @@ export default defineConfig({
     // }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png'],
+      includeAssets: ['icon-512.png'],
       manifest: {
         name: 'Happy Lunch',
         short_name: 'Happy Lunch',
