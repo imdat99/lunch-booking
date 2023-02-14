@@ -239,7 +239,7 @@ function Add() {
         if (isSuccess) {
           const promises: Promise<any>[] = []
           selectedListMember.map((member) => {
-            const eventDetail = { ...member, eventId }
+            const eventDetail = { ...member, eventId, id: eventId + member.uid }
             promises.push(setEventDetail(eventDetail))
           })
           await Promise.all(promises)
@@ -250,7 +250,7 @@ function Add() {
         if (isSuccess) {
           const promises: Promise<any>[] = []
           selectedListMember.map((member) => {
-            const eventDetail = { ...member, eventId }
+            const eventDetail = { ...member, eventId, id: eventId + member.uid }
             setEventDetail(eventDetail)
           })
           await Promise.all(promises)
@@ -266,6 +266,7 @@ function Add() {
       console.log('ERROR UPDATING BILL: ', e)
     }
   }
+  console.log('selectedListMember', selectedListMember)
 
   const handleShareBill = () => {
     const selectedListMembersWithMoney = _.cloneDeep(selectedListMember)
@@ -312,20 +313,20 @@ function Add() {
     }
     setEventState({ ...eventState, userPayId: selectedUser.value, userPayName: selectedUser.label })
   }
-  const onChangeGroup = (_event: any, selectedGroup: any) => {
-    if (!selectedGroup) {
+  const onChangeGroup = (_event: any, selectedGroupOption: any) => {
+    if (!selectedGroupOption) {
       setEventState({ ...eventState, groupId: '', groupName: '' })
       return
     }
-    const tempSelectedGroup = userGroupData?.find((item: UserGroup) => item.groupId === selectedGroup.value)
+    const tempSelectedGroup = userGroupData?.find((item: UserGroup) => item.groupId === selectedGroupOption.value)
     if (tempSelectedGroup) {
       setSelectedGroup(tempSelectedGroup)
     }
-    if (eventState.groupId) {
-      setModalConfirmGroupData({ isOpen: true, groupId: selectedGroup.value, groupName: selectedGroup.label })
+    if (selectedGroup?.members) {
+      setModalConfirmGroupData({ isOpen: true, groupId: selectedGroupOption.value, groupName: selectedGroupOption.label })
       return
     }
-    setEventState({ ...eventState, groupId: selectedGroup.value, groupName: selectedGroup.label })
+    setEventState({ ...eventState, groupId: selectedGroupOption.value, groupName: selectedGroupOption.label })
   }
   const handleConfirmGroupChange = () => {
     setEventState({ ...eventState, groupId: modalConfirmGroupData.groupId, groupName: modalConfirmGroupData.groupName })
@@ -360,6 +361,7 @@ function Add() {
 
   useEffect(() => {
     getUserGroupsByUserId(loginUser?.uid || '').then((group: UserGroup[] | undefined) => {
+      // eslint-disable-next-line max-len
       const groupSelectBox = group?.map((item) => ({ label: item.groupName, value: item.groupId, isCreator: item.createUser == loginUser.uid ? true : false }))
       setUserGroupSelectBox(groupSelectBox)
       setUserGroupData(group)
@@ -454,7 +456,7 @@ function Add() {
               Thành viên
             </Typography>
             <span style={{ color: isEmptyMembers ? '#E1251B' : '' }}> &nbsp; {selectedListMember?.length || 0}</span>
-            {eventInfo?.groupId && (
+            {eventState?.groupId && (
               <ButtonStyled>
                 <AddIcon
                   color="success"
@@ -490,11 +492,11 @@ function Add() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {selectedListMember.map((member) => {
+                    {selectedListMember.map((member, index) => {
                       const labelId = `checkbox-list-label-${member.uid}`
                       return (
                         <>
-                          <TableRow hover role="checkbox" tabIndex={-1} key={member.uid}>
+                          <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                             <TableCell style={{ border: 'none' }}>
                               <IconButton
                                 aria-label="expand row"
@@ -728,12 +730,12 @@ function Add() {
             </Tooltip>
           </Box>
           {/* Submit button */}
-          <Box className="flex justify-center pb-7">
+          <Box className="flex justify-center py-7">
             <ButtonStyled variant="contained" onClick={handleCreateEvent} disabled={!eventState.eventName || isEmptyMembers || !eventState.billAmount}>
               <Typography>{params.id ? 'Cập nhật' : 'Tạo hóa đơn'}</Typography>
             </ButtonStyled>
           </Box>
-          {eventInfo?.groupId && (
+          {eventState?.groupId && (
             <PeopleModal
               open={open}
               setOpen={setOpen}
