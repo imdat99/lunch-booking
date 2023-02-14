@@ -387,12 +387,14 @@ function Add() {
       <div>
         <button className="px-4">
           <div>
-            <ReplyIcon
-              onClick={() => {
-                history.back()
-              }}
-              fontSize={'large'}
-            />
+            <Tooltip title="Back to history">
+              <ReplyIcon
+                onClick={() => {
+                  history.back()
+                }}
+                fontSize={'large'}
+              />
+            </Tooltip>
           </div>
         </button>
         <div className="text-center font-[Bellota] text-[24px]">{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</div>
