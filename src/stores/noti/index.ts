@@ -1,12 +1,12 @@
-import { getCountNewNotice, getListNotiByPage, setUserSeen } from '@app/libs/api/noti'
+import { getCountNewNotice, getListNotiByPage, readAllNoti, setUserSeen } from '@app/libs/api/noti'
 import { INoti } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DocumentSnapshot } from 'firebase/firestore'
 import { AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { updateFailed } from '../user'
 
+import { updateFailed } from '../user'
 
 export const namespace = 'LIST_NOTI'
 
@@ -67,7 +67,7 @@ const slice = createSlice({
     updateNewNotiNumber(state, action: PayloadAction<number>) {
       state.newNotiNumber = action.payload
     },
-    clearNotiList(state) {
+    clearNotiList() {
       return initialState
     },
   },
@@ -102,7 +102,7 @@ export function updateNoti(uid: string): ThunkAction<void, RootState, unknown, A
 }
 
 export function initializeNotiList(uid: string): ThunkAction<void, RootState, unknown, AnyAction> {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     try {
       dispatch(initialize())
       const result = await getListNotiByPage(uid, null)
@@ -134,8 +134,23 @@ export function setUserReadNoti(uid: string, noti: INoti): ThunkAction<void, Roo
   }
 }
 
-export function updateNewNotiCount(uid: string): ThunkAction<void, RootState, unknown, AnyAction> {
+export function setReadAllNoti(uid: string): ThunkAction<void, RootState, unknown, AnyAction> {
   return async (dispatch, getState) => {
+    try {
+      await readAllNoti(uid)
+      const listNoti = getState().LIST_NOTI.listNoti
+      const listNotiTemp = listNoti.map((currentNoti) => {
+        return { ...currentNoti, userSeen: [...currentNoti.userSeen, uid] }
+      })
+      dispatch(setReadNoti({ listNoti: listNotiTemp }))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+export function updateNewNotiCount(uid: string): ThunkAction<void, RootState, unknown, AnyAction> {
+  return async (dispatch) => {
     try {
       const count = await getCountNewNotice(uid)
       dispatch(updateNewNotiNumber(count!))

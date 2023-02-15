@@ -11,7 +11,7 @@
   "background_color": "#ffffff",
   "description": "Booking and Share Lunch Money",
   "dir": "ltr",
-  "display": "standalone",
+  "display": "fullscreen",
   "name": "Happy Lunch",
   "orientation": "any",
   "scope": "/",
@@ -38,9 +38,10 @@
   ],
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/android-chrome-512x512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "maskable any"
     },
     {
       "src": "/favicon.ico",

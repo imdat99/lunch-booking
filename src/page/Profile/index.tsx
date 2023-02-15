@@ -13,6 +13,7 @@ import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import ReplyIcon from '@mui/icons-material/Reply'
+import { Box, Tooltip, Typography } from '@mui/material'
 import Alert from '@mui/material/Alert'
 import Avatar from '@mui/material/Avatar'
 import Badge from '@mui/material/Badge'
@@ -28,7 +29,6 @@ import { Link, useParams } from 'react-router-dom'
 import * as yup from 'yup'
 
 import { IDropdownMembers } from '../Events/Add'
-import { Box, Typography } from '@mui/material'
 type ModalType = {
   isOpen: boolean
   groupId: string
@@ -225,18 +225,22 @@ const Profile = () => {
             <Container>
               <div className="h-72 rounded-b-2xl flex flex-col items-center justify-center">
                 <div className="flex justify-between self-stretch">
-                  <button className="px-4">
-                    <ReplyIcon
-                      onClick={() => {
-                        history.back()
-                      }}
-                      fontSize={'large'}
-                    />
-                  </button>
-                  {isLoginUser && (
-                    <button className="px-4" onClick={logout}>
-                      <LogoutIcon fontSize={'large'} />
+                  <Tooltip title="Quay về trang trước">
+                    <button aria-label="Quay về trang trước" className="px-4">
+                      <ReplyIcon
+                        onClick={() => {
+                          history.back()
+                        }}
+                        fontSize={'large'}
+                      />
                     </button>
+                  </Tooltip>
+                  {isLoginUser && (
+                    <Tooltip title="Đăng xuất">
+                      <button aria-label="Đăng xuất" className="px-4" onClick={logout}>
+                        <LogoutIcon fontSize={'large'} />
+                      </button>
+                    </Tooltip>
                   )}
                 </div>
                 {isLoginUser ? (
