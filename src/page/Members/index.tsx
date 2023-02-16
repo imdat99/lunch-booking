@@ -84,26 +84,28 @@ const Members = () => {
 
   return (
     <Container
+      maxWidth="sm"
       className="relative"
-      sx={{
-        paddingRight: 0,
-        paddingLeft: 0,
-        margin: 'auto',
-        alignItems: 'center',
-        justifyContent: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: '375px',
-      }}
+      // sx={{
+      //   paddingRight: 0,
+      //   paddingLeft: 0,
+      //   margin: 'auto',
+      //   alignItems: 'center',
+      //   justifyContent: 'center',
+      //   display: 'flex',
+      //   flexDirection: 'column',
+      //   minWidth: '375px',
+      // }}
     >
-      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
+      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg">
+        {/* <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]"> */}
         <Box className="py-4">
           <Box className="font-bellota text-center text-[18px] font-bold">Thành viên</Box>
         </Box>
         <Box className="flex gap-2">
           <OutlinedInput
-            className="max-w-[60%]"
-            sx={{ height: '40px', backgroundColor: 'white' }}
+            // className="max-w-[60%]"
+            sx={{ height: '40px', backgroundColor: 'white', width: '50%' }}
             id="outlined-adornment-password"
             type={'text'}
             placeholder={'Tìm kiếm'}
@@ -117,7 +119,7 @@ const Members = () => {
             value={searchText}
           />
           <Autocomplete
-            className="max-w-[40%] w-full text-[14px]"
+            // className="max-w-[40%] w-full text-[14px]"
             disablePortal
             id="combo-box-demo"
             options={userGroupsOption || []}
@@ -127,6 +129,7 @@ const Members = () => {
               backgroundColor: 'white',
               '.MuiAutocomplete-endAdornment': { top: 'unset' },
               '.MuiOutlinedInput-root': { padding: 'unset' },
+              width: '50%',
             }}
             value={selectedGroup}
             renderInput={(params) => <TextField {...params} placeholder={'Lọc theo nhóm'} />}
@@ -136,7 +139,7 @@ const Members = () => {
           />
         </Box>
       </Box>
-      <Box className="flex flex-col content-center overflow-y-auto mx-auto max-w-md pt-4 px-3 min-w-[375px]">{renderList()}</Box>
+      <Box className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 pt-4 px-3 min-w-[375px]">{renderList()}</Box>
     </Container>
   )
 }

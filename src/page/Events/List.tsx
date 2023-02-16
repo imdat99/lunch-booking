@@ -163,16 +163,17 @@ const List = () => {
 
   return (
     <Container
-      sx={{
-        paddingRight: 0,
-        paddingLeft: 0,
-        margin: 'auto',
-        alignItems: 'center',
-        justifyContent: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: '375px',
-      }}
+      maxWidth="sm"
+      // sx={{
+      //   paddingRight: 0,
+      //   paddingLeft: 0,
+      //   margin: 'auto',
+      //   alignItems: 'center',
+      //   justifyContent: 'center',
+      //   display: 'flex',
+      //   flexDirection: 'column',
+      //   minWidth: '375px',
+      // }}
     >
       <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
         <Box className="pt-4 pb-3">
@@ -203,7 +204,7 @@ const List = () => {
           ))}
         </div>
       </Box>
-      <ul className="min-w-[375px]">
+      <ul className="min-w-[375px] w-11/12 m-auto">
         {data.map((item, index) => {
           const isHost = userData.uid === item.userPayId
           const hostInfo = listUser.find((user) => user.uid === item.userPayId)
@@ -230,7 +231,7 @@ const List = () => {
                       {isHost ? TEXT__HOST : TEXT__MEMBER}
                     </div>
                   </div>
-                  <Box className="w-full max-w-[70%]">
+                  <Box className="w-full max-w-[80%]">
                     <div className="flex justify-between items-center">
                       <div className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</div>
                       <div className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>

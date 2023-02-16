@@ -257,7 +257,7 @@ const LunchDetail = () => {
           </div>
         </Container>
       </div>
-      <Container>
+      <Container maxWidth="md">
         <div className="py-3 px-5">
           <div className="flex justify-between">
             <span className="text-gray-400 font-bold block mb-3">Tổng bill</span>
