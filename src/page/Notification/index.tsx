@@ -66,14 +66,16 @@ export default function Notification() {
 
   return (
     <Container>
-      <div className="flex flex-col justify-start">
-        <div className="mt-[1.875rem] mb-[0.875rem]">
-          <Typography sx={{ fontSize: '1.5rem', lineHeight: '1.875rem', textAlign: 'center' }}>Thông báo</Typography>
-        </div>
-        <Box className="flex justify-end mb-3 w-11/12">
-          <Button variant="outlined" onClick={handleReadAllNoti}>
-            read all
-          </Button>
+      <div className="flex flex-col">
+        <Box className="sticky top-0 mb-5 max-w-md mx-auto bg-white w-11/12 rounded-b-lg z-10">
+          <div className="mt-[1.875rem] mb-[0.875rem]">
+            <Typography sx={{ fontSize: '1.5rem', lineHeight: '1.875rem', textAlign: 'center' }}>Thông báo</Typography>
+          </div>
+          <Box className="flex justify-end mb-3 w-11/12">
+            <Button variant="outlined" onClick={handleReadAllNoti}>
+              read all
+            </Button>
+          </Box>
         </Box>
         <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
           <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
