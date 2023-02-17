@@ -405,7 +405,7 @@ function Add() {
           </div>
         </Container>
       </div>
-      <Container>
+      <Container maxWidth="md">
         <div>
           <Box className="mt-6">
             <TextFieldStyled

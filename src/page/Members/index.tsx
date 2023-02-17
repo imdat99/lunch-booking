@@ -114,17 +114,18 @@ const Members = () => {
 
   return (
     <Container
+      maxWidth="sm"
       className="relative"
-      sx={{
-        paddingRight: 0,
-        paddingLeft: 0,
-        margin: 'auto',
-        alignItems: 'center',
-        justifyContent: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: '375px',
-      }}
+      // sx={{
+      //   paddingRight: 0,
+      //   paddingLeft: 0,
+      //   margin: 'auto',
+      //   alignItems: 'center',
+      //   justifyContent: 'center',
+      //   display: 'flex',
+      //   flexDirection: 'column',
+      //   minWidth: '375px',
+      // }}
     >
       <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
         <Box className="py-4">
@@ -133,7 +134,6 @@ const Members = () => {
         <Box className="px-4 pb-4">
           <OutlinedInput
             className="w-full mb-2"
-            sx={{ height: '40px', backgroundColor: 'white' }}
             id="outlined-adornment-password"
             type={'text'}
             placeholder={'Tìm kiếm'}
@@ -157,6 +157,7 @@ const Members = () => {
               backgroundColor: 'white',
               '.MuiAutocomplete-endAdornment': { top: 'unset' },
               '.MuiOutlinedInput-root': { padding: 'unset' },
+              width: '50%',
             }}
             value={selectedGroup}
             renderInput={(params) => <TextField {...params} placeholder={'Lọc theo nhóm'} />}

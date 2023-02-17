@@ -4,7 +4,7 @@ import { FORMAT__DATE } from '@app/libs/constant'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { isLastPageSelector, listNotiSelector, setReadAllNoti, setUserReadNoti, updateNewNotiCount, updateNoti } from '@app/stores/noti'
 import { userStore } from '@app/stores/user'
-import { Box, Button, Container } from '@mui/material'
+import { Box, Button, Container, Grid } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import dayjs from 'dayjs'
 import { ReactNode, useEffect, useState } from 'react'
@@ -65,21 +65,24 @@ export default function Notification() {
   }
 
   return (
-    <Container>
-      <div className="flex flex-col justify-start">
-        <div className="mt-[1.875rem] mb-[0.875rem]">
-          <Typography sx={{ fontSize: '1.5rem', lineHeight: '1.875rem', textAlign: 'center' }}>Thông báo</Typography>
-        </div>
-        <Box className="flex justify-end mb-3 w-11/12">
-          <Button variant="outlined" onClick={handleReadAllNoti}>
-            read all
-          </Button>
-        </Box>
-        <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
-          <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
-            {listCard}
-          </InfinitScroll>
-        </div>
+    <Container maxWidth="sm">
+      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg mb-3">
+        <Grid id="header" className="pt-3" container direction="row" alignItems="center">
+          <Grid item xs={4} md={2}></Grid>
+          <Grid item xs={4} md={8}>
+            <p className="font-bellota text-center text-[18px] font-bold">Thông báo</p>
+          </Grid>
+          <Grid className="flex justify-end mt-10" item xs={4} md={2}>
+            <Button variant="outlined" onClick={handleReadAllNoti}>
+              Read all
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+      <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
+        <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
+          {listCard}
+        </InfinitScroll>
       </div>
     </Container>
   )
