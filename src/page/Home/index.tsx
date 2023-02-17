@@ -111,13 +111,13 @@ export default function HomePage() {
     <Container>
       <style>{css}</style>
       <Grid id="header" container direction="row" alignItems="center">
-        <Grid item xs={3}>
+        <Grid item xs={9}>
           <p id="hello">Xin chào</p>
           <Link to={'/profile/' + user.uid}>
             <p id="username">{user?.name}</p>
           </Link>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={3}>
           <Link to={'/profile/' + user.uid}>
             <img id="userImg" src={user?.photoURL || ''} alt="user_photo" referrerPolicy="no-referrer" />
           </Link>
