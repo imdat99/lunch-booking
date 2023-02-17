@@ -4,10 +4,11 @@ import MemberCard from '@app/page/Members/MemberCard'
 import { User, UserGroup } from '@app/server/firebaseType'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import SearchIcon from '@mui/icons-material/Search'
-import { Autocomplete, Box, Container, TextField } from '@mui/material'
+import { Autocomplete, Box, CircularProgress, Container, TextField } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import InfiniteScroll from 'react-infinite-scroll-component'
 import { Link, useLocation } from 'react-router-dom'
 
 const Members = () => {
@@ -15,6 +16,10 @@ const Members = () => {
   const [users, setUsers] = useState<User[]>([])
   const [userGroups, setUserGroups] = useState<UserGroup[] | undefined>([])
   const [selectedGroup, setSelectedGroup] = useState<{ label: string; value: string } | null>(null)
+  const [listMember, setListMember] = useState<string[]>([])
+  const pageSize = 8
+  const [page, setPage] = useState<number>(1)
+  const [totalPage, setTotalPage] = useState<number>(1)
 
   const { search } = useLocation()
   const searchMap = useRef(new URLSearchParams(search))
@@ -55,6 +60,18 @@ const Members = () => {
     })
   }, [])
 
+  useEffect(() => {
+    if (selectedGroup) {
+      const newList = userGroups?.find((i) => i.groupId === selectedGroup.value)?.members.slice(0, 8)
+      const totalPage = Math.floor((userGroups?.find((i) => i.groupId === selectedGroup.value)?.members?.length || 0) / pageSize) + 1
+      setTotalPage(totalPage)
+      setPage(1)
+      if (newList?.length) {
+        setListMember(newList)
+      } else setListMember([])
+    }
+  }, [selectedGroup, userGroups])
+
   const onChangeSearch = (event: any) => {
     setSearchText(event.target.value)
   }
@@ -63,10 +80,23 @@ const Members = () => {
     return userGroups?.map((item) => ({ label: item.groupName, value: item.groupId }))
   }, [userGroups])
 
+  const handleLoadMore = useCallback(() => {
+    if (page === totalPage) return
+    if (selectedGroup) {
+      const handler = setTimeout(() => {
+        const newList = userGroups?.find((i) => i.groupId === selectedGroup?.value)?.members.slice(0, (page + 1) * pageSize)
+        if (newList?.length && page < totalPage) {
+          setPage((prev) => prev + 1)
+          setListMember(newList)
+        }
+      }, 1500)
+      return () => clearTimeout(handler)
+    }
+  }, [page, selectedGroup, totalPage, userGroups])
+
   const renderList = React.useCallback(() => {
     if (!selectedGroup) return <Box className="text-center text-[13px]">Vui lòng chọn nhóm</Box>
     else {
-      const listMember = userGroups?.find((i) => i.groupId === selectedGroup.value)?.members
       if (!listMember || !listMember?.length) return <Box className="text-center text-[13px]">Nhóm không có ai cả!</Box>
       const usersData = listMember.map((userId) => users.find((org) => org?.uid?.trim() === userId?.trim()))
       const totalUsers = searchText ? usersData.filter((item) => item?.name?.toLowerCase()?.includes(searchText.toLowerCase())) : usersData
@@ -80,7 +110,7 @@ const Members = () => {
           ))
         : null
     }
-  }, [searchText, selectedGroup, userGroups, users])
+  }, [listMember, searchText, selectedGroup, users])
 
   return (
     <Container
@@ -96,13 +126,13 @@ const Members = () => {
         minWidth: '375px',
       }}
     >
-      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
+      <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
         <Box className="py-4">
           <Box className="font-bellota text-center text-[18px] font-bold">Thành viên</Box>
         </Box>
-        <Box className="flex gap-2">
+        <Box className="px-4 pb-4">
           <OutlinedInput
-            className="max-w-[60%]"
+            className="w-full mb-2"
             sx={{ height: '40px', backgroundColor: 'white' }}
             id="outlined-adornment-password"
             type={'text'}
@@ -117,7 +147,7 @@ const Members = () => {
             value={searchText}
           />
           <Autocomplete
-            className="max-w-[40%] w-full text-[14px]"
+            className="w-full text-[14px] mb-2"
             disablePortal
             id="combo-box-demo"
             options={userGroupsOption || []}
@@ -136,7 +166,20 @@ const Members = () => {
           />
         </Box>
       </Box>
-      <Box className="flex flex-col content-center overflow-y-auto mx-auto max-w-md pt-4 px-3 min-w-[375px]">{renderList()}</Box>
+      <Box className="min-w-[375px]">
+        <InfiniteScroll
+          hasMore={page < totalPage}
+          next={handleLoadMore}
+          loader={
+            <Box className="flex items-center justify-center py-5">
+              <CircularProgress />
+            </Box>
+          }
+          dataLength={listMember.length}
+        >
+          {renderList()}
+        </InfiniteScroll>
+      </Box>
     </Container>
   )
 }
