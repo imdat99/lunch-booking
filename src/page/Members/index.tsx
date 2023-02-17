@@ -17,7 +17,7 @@ const Members = () => {
   const [userGroups, setUserGroups] = useState<UserGroup[] | undefined>([])
   const [selectedGroup, setSelectedGroup] = useState<{ label: string; value: string } | null>(null)
   const [listMember, setListMember] = useState<string[]>([])
-  const pageSize = 8
+  const pageSize = 10
   const [page, setPage] = useState<number>(1)
   const [totalPage, setTotalPage] = useState<number>(1)
 
