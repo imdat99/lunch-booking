@@ -1,3 +1,4 @@
+import Wrapper from '@app/components/Wrapper'
 import { getListUser } from '@app/libs/api/EventApi'
 import { getMyUserGroups } from '@app/libs/api/userAPI'
 import MemberCard from '@app/page/Members/MemberCard'
@@ -52,8 +53,11 @@ const Members = () => {
 
   useEffect(() => {
     getMyUserGroups().then((data) => {
-      const defaultSelected = { label: data?.[0]?.groupName, value: data?.[0]?.groupId }
-      if (defaultSelected) {
+      let defaultSelected
+      if (data.length) {
+        defaultSelected = { label: data?.[0]?.groupName, value: data?.[0]?.groupId }
+      }
+      if (defaultSelected && Object.keys(defaultSelected).length) {
         setSelectedGroup(defaultSelected)
       } else setSelectedGroup(null)
       setUserGroups(data)
@@ -113,21 +117,8 @@ const Members = () => {
   }, [listMember, searchText, selectedGroup, users])
 
   return (
-    <Container
-      maxWidth="sm"
-      className="relative"
-      // sx={{
-      //   paddingRight: 0,
-      //   paddingLeft: 0,
-      //   margin: 'auto',
-      //   alignItems: 'center',
-      //   justifyContent: 'center',
-      //   display: 'flex',
-      //   flexDirection: 'column',
-      //   minWidth: '375px',
-      // }}
-    >
-      <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
+    <Wrapper>
+      <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg">
         <Box className="py-4">
           <Box className="font-bellota text-center text-[18px] font-bold">Thành viên</Box>
         </Box>
@@ -167,7 +158,7 @@ const Members = () => {
           />
         </Box>
       </Box>
-      <Box className="min-w-[375px]">
+      <Box>
         <InfiniteScroll
           hasMore={page < totalPage}
           next={handleLoadMore}
@@ -181,7 +172,7 @@ const Members = () => {
           {renderList()}
         </InfiniteScroll>
       </Box>
-    </Container>
+    </Wrapper>
   )
 }
 

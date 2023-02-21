@@ -1,3 +1,4 @@
+import Wrapper from '@app/components/Wrapper'
 import { FORMAT__DATE, TEXT__HOST, TEXT__MEMBER } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { IEvent } from '@app/server/firebaseType'
@@ -8,7 +9,7 @@ import { listUserStore } from '@app/stores/listUser'
 import { userStore } from '@app/stores/user'
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material'
 // import SearchIcon from '@mui/icons-material/Search'
-import { Box, Container } from '@mui/material'
+import { Avatar, Box, Button } from '@mui/material'
 // import InputAdornment from '@mui/material/InputAdornment'
 // import OutlinedInput from '@mui/material/OutlinedInput'
 import dayjs from 'dayjs'
@@ -162,49 +163,24 @@ const List = () => {
   }
 
   return (
-    <Container
-      maxWidth="sm"
-      // sx={{
-      //   paddingRight: 0,
-      //   paddingLeft: 0,
-      //   margin: 'auto',
-      //   alignItems: 'center',
-      //   justifyContent: 'center',
-      //   display: 'flex',
-      //   flexDirection: 'column',
-      //   minWidth: '375px',
-      // }}
-    >
-      <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg max-w-[800px] min-w-[375px]">
+    <Wrapper>
+      <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg">
         <Box className="pt-4 pb-3">
           <Box className="font-bellota text-center text-[18px] font-bold px-3 ">Lịch sử đi ăn</Box>
         </Box>
-        {/* <div className="text-center">
-          <OutlinedInput
-            sx={{ width: '290px', height: '46px', borderRadius: '30px', backgroundColor: 'white' }}
-            id="outlined-adornment-password"
-            type={'text'}
-            endAdornment={
-              <InputAdornment position="end">
-                <SearchIcon fontSize={'large'} />
-              </InputAdornment>
-            }
-            onChange={onChangeSearch}
-          />
-        </div> */}
-        <div className="flex w-full rounded-lg bg-white items-center justify-between" role="group">
+        <Box className="flex w-full rounded-lg bg-white items-center justify-between" role="group">
           {listButton.map((item, index) => (
             <React.Fragment key={index}>
               {index !== 0 && <Divider />}
-              <button type="button" className={buttonClassname(index, listButton.length)} onClick={onChangeSort(item.sortType)}>
+              <Button className={buttonClassname(index, listButton.length)} onClick={onChangeSort(item.sortType)}>
                 {item.title}
                 {renderSortIcon(item.sortType)}
-              </button>
+              </Button>
             </React.Fragment>
           ))}
-        </div>
+        </Box>
       </Box>
-      <ul className="min-w-[375px] w-11/12 m-auto">
+      <Box className="m-auto">
         {data.map((item, index) => {
           const isHost = userData.uid === item.userPayId
           const hostInfo = listUser.find((user) => user.uid === item.userPayId)
@@ -217,38 +193,38 @@ const List = () => {
                 .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
             : 0
           return (
-            <li className="mb-[0.625rem] rounded-md block border-[1px] bg-white drop-shadow-lg" key={index}>
+            <Box className="mb-[0.625rem] rounded-md block border-[1px] bg-white drop-shadow-lg" key={index}>
               <Link to={item.id!}>
-                <Box className="bg-white rounded-3xl flex justify-between p-5 gap-2">
-                  <div className="relative">
-                    <img src={hostInfo?.photoURL || ''} referrerPolicy="no-referrer" className="w-16 h-16 rounded-full" alt="" />
-                    <div
+                <Box className="bg-white rounded-3xl flex p-5 gap-5">
+                  <Box className="relative max-w-fit">
+                    <Avatar src={hostInfo?.photoURL || ''} sx={{ width: 72, height: 72, border: '4px solid #1e8d1d70' }} alt="" />
+                    <Box
                       className={
                         'absolute py-1 px-1 block font-normal text-white rounded-lg -bottom-0 inset-x-2/4 -translate-x-2/4 text-[14px] w-[70px] text-center ' +
                         (isHost ? 'bg-red-600' : 'bg-green-600 ')
                       }
                     >
                       {isHost ? TEXT__HOST : TEXT__MEMBER}
-                    </div>
-                  </div>
-                  <Box className="w-full max-w-[80%]">
-                    <div className="flex justify-between items-center">
-                      <div className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</div>
-                      <div className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
+                    </Box>
+                  </Box>
+                  <Box className="w-full">
+                    <Box className="flex justify-between items-center">
+                      <Box className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</Box>
+                      <Box className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
                         {isHost && isPaid && 'Đã hoàn tất'}
                         {isHost && !isPaid && 'Chưa hoàn tất'}
                         {!isHost && isPaid && 'Đã trả'}
                         {!isHost && !isPaid && 'Chưa trả'}
                         {}
-                      </div>
-                    </div>
-                    <div className="w-full relative flex flex-col justify-between text-[14px]">
+                      </Box>
+                    </Box>
+                    <Box className="w-full relative flex flex-col justify-between text-[14px]">
                       <h3 className="font-medium">{item.eventName}</h3>
-                      <span>
+                      <Box component={'span'}>
                         Chủ chi:&nbsp;
                         <b>{item.userPayName}</b>
-                      </span>
-                      <span>
+                      </Box>
+                      <Box component={'span'}>
                         Số tiền:&nbsp;
                         <b>
                           {formatMoney(
@@ -257,16 +233,16 @@ const List = () => {
                               : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
                           )}
                         </b>
-                      </span>
-                    </div>
+                      </Box>
+                    </Box>
                   </Box>
                 </Box>
               </Link>
-            </li>
+            </Box>
           )
         })}
-      </ul>
-    </Container>
+      </Box>
+    </Wrapper>
   )
 }
 
