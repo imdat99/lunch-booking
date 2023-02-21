@@ -13,8 +13,6 @@ import {
   orderBy,
   Query,
   query,
-  QueryConstraint,
-  QueryFieldFilterConstraint,
   setDoc,
   startAfter,
   updateDoc,

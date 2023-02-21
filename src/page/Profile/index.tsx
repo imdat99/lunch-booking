@@ -269,7 +269,7 @@ const Profile = () => {
               </div>
             </Container>
           </div>
-          <Container>
+          <Container maxWidth="md">
             <div className="px-6 py-4">
               <div className="mb-3" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.42)' }}>
                 <Box className="flex items-center">

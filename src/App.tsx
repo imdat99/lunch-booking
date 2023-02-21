@@ -12,6 +12,7 @@ import { listenCommingNoti } from './libs/api/noti'
 import Router from './router/Router'
 import { auth } from './server/firebase'
 import { useAppDispatch } from './stores/hook'
+import { initializeEventList } from './stores/listEvent'
 import { setListUser } from './stores/listUser'
 import { addNewNotiCome, initializeNotiList, updateNewNotiCount } from './stores/noti'
 import { initializeUser } from './stores/user'
@@ -41,6 +42,7 @@ function App() {
       const { uid } = loggedInUser
       dispatch(initializeUser(loggedInUser))
       dispatch(initializeNotiList(uid))
+      dispatch(initializeEventList())
       const _unscribe = listenCommingNoti(uid, (noti) => {
         dispatch(addNewNotiCome(noti))
         dispatch(updateNewNotiCount(uid))

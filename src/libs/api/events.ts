@@ -1,7 +1,7 @@
 import { IEvent } from '@app/server/firebaseType'
-import { EventDetail, EventDetailColection, UserDetail, usersColection } from '@app/server/useDB'
+import { EventColection, EventDetail, EventDetailColection, UserDetail, usersColection } from '@app/server/useDB'
 import { store } from '@app/stores'
-import { getDoc, getDocs, limit, query, QueryDocumentSnapshot, startAt, where } from 'firebase/firestore'
+import { DocumentSnapshot, getDoc, getDocs, limit, orderBy, Query, query, QueryDocumentSnapshot, startAfter, startAt, where } from 'firebase/firestore'
 
 export async function getListEventByUser(pageSize: number, pageIndex?: QueryDocumentSnapshot<IEvent>) {
   const queryCondition = pageIndex ? [startAt(pageIndex), limit(pageSize)] : [limit(pageSize)]

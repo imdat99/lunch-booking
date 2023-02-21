@@ -1,6 +1,6 @@
 import { IEventDetail } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { AnyAction, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
 export const namespace = 'LIST_EVENT_DETAIL'
 const initialState: IEventDetail[] = []
 
