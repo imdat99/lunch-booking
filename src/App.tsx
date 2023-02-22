@@ -42,12 +42,12 @@ function App() {
       const { uid } = loggedInUser
       dispatch(initializeUser(loggedInUser))
       dispatch(initializeNotiList(uid))
-      dispatch(initializeEventList())
       const _unscribe = listenCommingNoti(uid, (noti) => {
         dispatch(addNewNotiCome(noti))
         dispatch(updateNewNotiCount(uid))
       })
-      getListEventDetail()
+      getListEventDetail(uid)
+      dispatch(initializeEventList(uid))
     }
   }, [dispatch, loggedInUser])
 

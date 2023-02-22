@@ -384,26 +384,28 @@ function Add() {
 
   return (
     <div className="bg-white">
-      <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
-        <Container>
-          <div className="block p-2">
-            <Tooltip title="Back to event list">
-              <button className="float-left">
-                <div>
-                  <ReplyIcon
-                    onClick={() => {
-                      history.back()
-                    }}
-                    fontSize={'large'}
-                  />
-                </div>
-              </button>
-            </Tooltip>
-            <div className="justify-center text-center font-[Bellota] text-[24px] pb-3">
-              <span>{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</span>
+      <div className=" sticky top-0 z-10 bg-white">
+        <div className="bg-gradient-to-t from-green-300 to-light-color rounded-b-3xl">
+          <Container>
+            <div className="block p-2">
+              <Tooltip title="Back to event list">
+                <button className="float-left">
+                  <div>
+                    <ReplyIcon
+                      onClick={() => {
+                        history.back()
+                      }}
+                      fontSize={'large'}
+                    />
+                  </div>
+                </button>
+              </Tooltip>
+              <div className="justify-center text-center font-[Bellota] text-[24px] pb-3">
+                <span>{isEdit ? 'Sửa hoá đơn' : 'Tạo mới hoá đơn'}</span>
+              </div>
             </div>
-          </div>
-        </Container>
+          </Container>
+        </div>
       </div>
       <Container maxWidth="md">
         <div>

@@ -279,16 +279,19 @@ const LunchDetail = () => {
           </div>
           <div className="border-y-[1px] border-gray-400">
             <div className="relative overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left sm:table-fixed">
                 <thead>
                   <tr className="text-gray-400 font-bold">
-                    <th scope="col" className="py-3">
+                    <th scope="col" className="py-3 w-1/2">
                       Thành viên
                     </th>
-                    <th scope="col" className="py-3 pl-5 text-right">
+                    <th scope="col" className="py-3 hidden sm:block w-1/6">
+                      trễ
+                    </th>
+                    <th scope="col" className="py-3 pl-5 text-right w-1/6">
                       Bill
                     </th>
-                    <th scope="col" className="py-3 pl-10 text-right">
+                    <th scope="col" className="py-3 pl-10 text-right w-1/6">
                       Pay
                     </th>
                   </tr>
@@ -309,7 +312,7 @@ const LunchDetail = () => {
                             <span className="ml-3">{user.name || user.email}</span>
                           </label>
                         </td>
-
+                        <td className="hidden sm:block">{!user.isPaid && `${dayjs().diff(eventInfo?.date, 'day')} ngày`}</td>
                         <td className="text-right">{formatMoney(user.amount, false)} K</td>
                         <td className="text-right">{formatMoney(user.amountToPay, false)} K</td>
                       </tr>

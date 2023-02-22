@@ -78,6 +78,7 @@ const List = () => {
   }
 
   const listEventDetail = useAppSelector(listEventDetailStore)
+
   const eventOfUser = useMemo(
     () =>
       listEventDetail
@@ -149,11 +150,11 @@ const List = () => {
     [orderBy, sort, userData?.uid]
   )
 
-  const data = useMemo(() => {
-    const cloneFilterEvents = _.cloneDeep(filterEvents)
-    const totalData = sort ? cloneFilterEvents.sort((a, b) => handleSort(a, b)) : filterEvents
-    return totalData
-  }, [filterEvents, handleSort, sort])
+  // const data = useMemo(() => {
+  //   const cloneFilterEvents = _.cloneDeep(filterEvents)
+  //   const totalData = sort ? cloneFilterEvents.sort((a, b) => handleSort(a, b)) : filterEvents
+  //   return totalData
+  // }, [filterEvents, handleSort, sort])
 
   const renderSortIcon = (sortType: SortType) => {
     if (!sort) return null
@@ -161,6 +162,9 @@ const List = () => {
       if (sort === Order.ASC) return <ArrowDropDown />
       return <ArrowDropUp />
     }
+  }
+  function updateEventListDispatch() {
+    dispatch(updateEventList(userData.uid!))
   }
   return (
     <Container
@@ -205,9 +209,9 @@ const List = () => {
           ))}
         </div>
       </Box>
-      <InfinitScroll hasMore={!isLastPage} next={() => dispatch(updateEventList())} loader={<p>Loading...</p>} dataLength={data.length}>
+      <InfinitScroll hasMore={!isLastPage} next={updateEventListDispatch} loader={<p>Loading...</p>} dataLength={listEvent.length}>
         <ul className="min-w-[375px] w-11/12 m-auto">
-          {data.map((item, index) => {
+          {listEvent.map((item, index) => {
             const isHost = userData.uid === item.userPayId
             const hostInfo = listUser.find((user) => user.uid === item.userPayId)
             const isPaid = isHost
