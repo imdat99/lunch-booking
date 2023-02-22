@@ -28,6 +28,7 @@ const style = {
   boxShadow: 24,
   p: 4,
   overflowY: 'scroll',
+  height: '100%',
   maxHeight: '100vh',
 }
 
