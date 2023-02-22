@@ -1,11 +1,11 @@
+import Wrapper from '@app/components/Wrapper'
 import { updateLastTimeCheckNoti } from '@app/libs/api/noti'
 import { getUserByUid } from '@app/libs/api/userAPI'
 import { FORMAT__DATE } from '@app/libs/constant'
 import { useAppDispatch, useAppSelector } from '@app/stores/hook'
 import { isLastPageSelector, listNotiSelector, setReadAllNoti, setUserReadNoti, updateNewNotiCount, updateNoti } from '@app/stores/noti'
 import { userStore } from '@app/stores/user'
-import { Box, Button, Container, Grid } from '@mui/material'
-import Typography from '@mui/material/Typography'
+import { Box, Button, Grid } from '@mui/material'
 import dayjs from 'dayjs'
 import { ReactNode, useEffect, useState } from 'react'
 import InfinitScroll from 'react-infinite-scroll-component'
@@ -65,8 +65,8 @@ export default function Notification() {
   }
 
   return (
-    <Container maxWidth="sm">
-      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-b-xl drop-shadow-lg mb-3">
+    <Wrapper>
+      <Box className="sticky top-0 z-10 pb-4 bg-white border-b-[1px] px-3 rounded-md drop-shadow-lg mb-3">
         <Grid id="header" className="pt-3" container direction="row" alignItems="center">
           <Grid item xs={4} md={2}></Grid>
           <Grid item xs={4} md={8}>
@@ -79,11 +79,11 @@ export default function Notification() {
           </Grid>
         </Grid>
       </Box>
-      <div className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
+      <Box className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
         <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
           {listCard}
         </InfinitScroll>
-      </div>
-    </Container>
+      </Box>
+    </Wrapper>
   )
 }
