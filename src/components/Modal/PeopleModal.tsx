@@ -26,10 +26,10 @@ const style = {
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
-  p: 4,
   overflowY: 'scroll',
   height: '100%',
   maxHeight: '100vh',
+  p: '0 2rem',
 }
 
 function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, selectedGroup, useSelectPeopleInGroup = false }: PropsType) {
@@ -38,6 +38,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
   const [allMembersInGroup, setAllMembersInGroup] = useState<IEventDetail[]>([])
   const [newMemberName, setNewMemberName] = useState<string>()
   const [selectingMembers, setSelectingMembers] = useState<IEventDetail[]>([...selectedListMember])
+  const [filterText, setFilterText] = useState<string>('')
 
   const handleClickRow = (user: IEventDetail) => {
     const tempMembers = [...selectingMembers]
@@ -63,7 +64,18 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     handleSelectedMember(formatSelectingMembers)
     setOpen(false)
   }
-
+  const initialMemberInGroup = () => {
+    const tempMembers: IEventDetail[] = []
+    selectedGroup?.members.forEach((uid: string) => {
+      const member = allMembers.find((member: IEventDetail) => member.uid === uid)
+      if (member) {
+        tempMembers.push(member)
+      }
+    })
+    const allMemberAndOthers = [...tempMembers]
+    setAllMembersInGroup(allMemberAndOthers)
+    setMembersFilter(allMemberAndOthers)
+  }
   useEffect(() => {
     getListUser().then((allMembers) => {
       const allMemberAndOthers = [...allMembers, ...selectingMembers]
@@ -73,16 +85,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
 
   useEffect(() => {
     if (useSelectPeopleInGroup) {
-      const tempMembers: IEventDetail[] = []
-      selectedGroup?.members.forEach((uid: string) => {
-        const member = allMembers.find((member: IEventDetail) => member.uid === uid)
-        if (member) {
-          tempMembers.push(member)
-        }
-      })
-      const allMemberAndOthers = [...tempMembers]
-      setAllMembersInGroup(allMemberAndOthers)
-      setMembersFilter(allMemberAndOthers)
+      initialMemberInGroup()
     } else {
       setAllMembersInGroup(allMembers)
       setMembersFilter(allMembers)
@@ -91,6 +94,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
 
   useEffect(() => {
     setSelectingMembers([...selectedListMember])
+    initialMemberInGroup()
     setNewMemberName('')
   }, [open])
 
@@ -127,20 +131,27 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     const listMemberFilter = value ? tempAllMember.filter((item) => item.name?.toLocaleLowerCase().includes(value.toLowerCase())) : tempAllMember
     setMembersFilter(listMemberFilter)
   }
+  const handleSearch = (value: string) => {
+    handleFilter(value)
+    setFilterText(value)
+  }
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
-        <button className="absolute top-[10px] right-[10px]" onClick={handleOnClose}>
-          <CloseIcon />
-        </button>
-        <Typography variant="h5">Chọn người đi ăn</Typography>
-        <NomarlSelectPeople
-          selectingMembers={selectingMembers}
-          handleClickRow={handleClickRow}
-          dellMember={dellMember}
-          allMembers={membersFilter}
-          handleFilter={handleFilter}
-        />
+        <Box className="sticky top-0 bg-white z-10 pt-5 pb-1">
+          <button className="absolute top-[10px] right-[10px]" onClick={handleOnClose}>
+            <CloseIcon />
+          </button>
+          <Typography variant="h5">Chọn người đi ăn</Typography>
+          <Typography variant="subtitle1">Tìm kiếm</Typography>
+          <Box className="flex justify-between mb-5">
+            <TextField value={filterText} onChange={(e) => handleSearch(e.target.value)} />
+            <Button variant="contained" onClick={() => handleSearch('')}>
+              Clear
+            </Button>
+          </Box>
+        </Box>
+        <NomarlSelectPeople selectingMembers={selectingMembers} handleClickRow={handleClickRow} dellMember={dellMember} allMembers={membersFilter} />
         <Typography variant="h5" sx={{ marginBottom: '10px' }}>
           Thêm người ngoài
         </Typography>

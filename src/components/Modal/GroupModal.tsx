@@ -38,6 +38,7 @@ function GroupModal({ open, setOpen, handleSelectedMember, groupId, handleDelete
   const [membersFilter, setMembersFilter] = useState<User[]>([])
   const [groupInfo, setGroupInfo] = useState<UserGroup>({ members: [], createUser: loginUser.uid || '', groupName: '', groupId: '' })
   const [selectingMembers, setSelectingMembers] = useState<User[]>([])
+  const [filterText, setFilterText] = useState<string>('')
   const handleClickRow = (user: User) => {
     const tempMembers = [...selectingMembers]
     const index = tempMembers.findIndex((u) => u.uid === user.uid)
@@ -102,6 +103,10 @@ function GroupModal({ open, setOpen, handleSelectedMember, groupId, handleDelete
     const listMemberFilter = value ? tempAllMember.filter((item) => item.name?.toLocaleLowerCase().includes(value.toLowerCase())) : tempAllMember
     setMembersFilter(listMemberFilter)
   }
+  const handleSearch = (value: string) => {
+    handleFilter(value)
+    setFilterText(value)
+  }
   return (
     <Modal open={open} onClose={handleOnClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
@@ -121,13 +126,14 @@ function GroupModal({ open, setOpen, handleSelectedMember, groupId, handleDelete
             {selectingMembers.length}
           </Typography>
         </Box>
-        <NomarlSelectPeople
-          selectingMembers={selectingMembers}
-          handleClickRow={handleClickRow}
-          dellMember={dellMember}
-          allMembers={membersFilter}
-          handleFilter={handleFilter}
-        />
+        <Typography variant="subtitle1">Tìm kiếm</Typography>
+        <Box className="flex justify-between mb-5">
+          <TextField value={filterText} onChange={(e) => handleSearch(e.target.value)} />
+          <Button variant="contained" onClick={() => handleSearch('')}>
+            Clear
+          </Button>
+        </Box>
+        <NomarlSelectPeople selectingMembers={selectingMembers} handleClickRow={handleClickRow} dellMember={dellMember} allMembers={membersFilter} />
         <Box className="flex justify-center">
           <Button onClick={handleAdd} variant="contained" sx={{ margin: '20px 15px 0px 0px' }}>
             OK
