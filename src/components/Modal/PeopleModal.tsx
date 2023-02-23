@@ -96,6 +96,7 @@ function PeopleModal({ open, setOpen, handleSelectedMember, selectedListMember, 
     setSelectingMembers([...selectedListMember])
     initialMemberInGroup()
     setNewMemberName('')
+    setFilterText('')
   }, [open])
 
   const handleOnClose = () => {

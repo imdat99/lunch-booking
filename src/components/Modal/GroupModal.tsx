@@ -85,7 +85,9 @@ function GroupModal({ open, setOpen, handleSelectedMember, groupId, handleDelete
   useEffect(() => {
     setSelectingMembers([loginUser])
     setGroupInfo({ members: [], createUser: loginUser.uid || '', groupName: '', groupId: '' })
-  }, [loginUser, loginUser.uid, open])
+    setFilterText('')
+    setMembersFilter(allMembers)
+  }, [allMembers, loginUser, loginUser.uid, open])
 
   const handleOnClose = () => {
     setOpen({ isOpen: false, groupId: '' })
