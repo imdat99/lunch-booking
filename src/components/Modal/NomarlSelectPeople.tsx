@@ -1,30 +1,16 @@
 import { IEventDetail } from '@app/server/firebaseType'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import { Box, Button, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Box, Button, Typography } from '@mui/material'
 
 type PropsType = {
   selectingMembers: IEventDetail[]
   handleClickRow: (user: IEventDetail) => void
   dellMember: (uid: string) => void
   allMembers: IEventDetail[]
-  handleFilter: any
 }
-function NomarlSelectPeople({ selectingMembers, handleClickRow, dellMember, allMembers, handleFilter }: PropsType) {
-  const [filterText, setFilterText] = useState<string>('')
-  const handleSearch = (value: string) => {
-    handleFilter(value)
-    setFilterText(value)
-  }
+function NomarlSelectPeople({ selectingMembers, handleClickRow, dellMember, allMembers }: PropsType) {
   return (
     <>
-      <Typography variant="subtitle1">Tìm kiếm</Typography>
-      <Box className="flex justify-between mb-5">
-        <TextField value={filterText} onChange={(e) => handleSearch(e.target.value)} />
-        <Button variant="contained" onClick={() => handleSearch('')}>
-          Clear
-        </Button>
-      </Box>
       {allMembers?.map((item: IEventDetail) => (
         <Box className="flex w-full" key={item.uid}>
           <Box
