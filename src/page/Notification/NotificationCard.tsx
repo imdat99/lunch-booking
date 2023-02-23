@@ -18,11 +18,11 @@ export default function NotificationCard(props: NotificationCardProps) {
         sx={{
           margin: 'auto',
           height: '5.87rem',
-          borderRadius: '0.938rem',
+          borderRadius: '0.375rem',
           width: '100%',
           padding: '0.93rem',
           paddingBottom: '0.688rem',
-          backgroundColor: props.isRead ? '#9C9C9C' : '#FFFFFF',
+          backgroundColor: props.isRead ? '#ccc' : '#FFFFFF',
           // boxShadow:"0 0.25rem rgba(0, 0, 0, 0.3)"
         }}
       >
