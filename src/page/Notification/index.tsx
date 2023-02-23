@@ -79,7 +79,7 @@ export default function Notification() {
           </Grid>
         </Grid>
       </Box>
-      <Box className="flex flex-col content-center overflow-y-auto mx-auto w-11/12 max-w-md">
+      <Box className="mb-[0.625rem] rounded-md block drop-shadow-lg">
         <InfinitScroll hasMore={!isLastPage} next={updateNotiList} loader={<p>Loading...</p>} dataLength={listCard.length}>
           {listCard}
         </InfinitScroll>
