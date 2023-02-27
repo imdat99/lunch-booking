@@ -17,13 +17,18 @@ import _ from 'lodash'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import React from 'react'
 import { Link } from 'react-router-dom'
-
+import { VariableSizeList } from 'react-window'
+import { CSSProperties } from 'react'
 enum SortType {
   TIME = 'time',
   MEMBERS = 'members',
   PAY = 'pay',
 }
-
+type CardProps = {
+  index: number
+  style: CSSProperties
+  data: IEvent[]
+}
 enum Order {
   ASC = 'asc',
   DESC = 'desc',
@@ -161,7 +166,71 @@ const List = () => {
       return <ArrowDropUp />
     }
   }
-
+  const Card = ({ index, style, data }: CardProps) => {
+    const cardData = data[index]
+    const isHost = userData.uid === cardData.userPayId
+    const hostInfo = listUser.find((user) => user.uid === cardData.userPayId)
+    const isPaid = isHost
+      ? cardData.isAllPaid
+      : listEventDetail.find((eventDetail) => eventDetail?.uid === userData.uid && eventDetail.isPaid && eventDetail.eventId === cardData.id)
+    const paidMoney = isHost
+      ? listEventDetail
+          .filter((eventDetail) => eventDetail.eventId === cardData.id && eventDetail.isPaid)
+          .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
+      : 0
+    return (
+      <Box
+        className="rounded-md block border-[1px] bg-white drop-shadow-lg"
+        key={index}
+        style={{ ...style, top: `${parseFloat(style?.top as string) + 5 * index}px` }}
+      >
+        <Link to={cardData.id!}>
+          <Box className="bg-white rounded-3xl flex p-5 gap-5">
+            <Box className="relative max-w-fit">
+              <Avatar src={hostInfo?.photoURL || ''} sx={{ width: 72, height: 72, border: '4px solid #1e8d1d70' }} alt="" />
+              <Box
+                className={
+                  'absolute py-1 px-1 block font-normal text-white rounded-lg -bottom-0 inset-x-2/4 -translate-x-2/4 text-[14px] w-[70px] text-center ' +
+                  (isHost ? 'bg-red-600' : 'bg-green-600 ')
+                }
+              >
+                {isHost ? TEXT__HOST : TEXT__MEMBER}
+              </Box>
+            </Box>
+            <Box className="w-full">
+              <Box className="flex justify-between items-center">
+                <Box className="text-[14px]">{dayjs(cardData.date, FORMAT__DATE).format('DD/MM/YYYY')}</Box>
+                <Box className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
+                  {isHost && isPaid && 'Đã hoàn tất'}
+                  {isHost && !isPaid && 'Chưa hoàn tất'}
+                  {!isHost && isPaid && 'Đã trả'}
+                  {!isHost && !isPaid && 'Chưa trả'}
+                  {}
+                </Box>
+              </Box>
+              <Box className="w-full relative flex flex-col justify-between text-[14px]">
+                <h3 className="font-medium">{cardData.eventName}</h3>
+                <Box component={'span'}>
+                  Chủ chi:&nbsp;
+                  <b>{cardData.userPayName}</b>
+                </Box>
+                <Box component={'span'}>
+                  Số tiền:&nbsp;
+                  <b>
+                    {formatMoney(
+                      isHost
+                        ? Number(cardData.totalAmount)! - paidMoney
+                        : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === cardData.id)?.amountToPay
+                    )}
+                  </b>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Link>
+      </Box>
+    )
+  }
   return (
     <Wrapper>
       <Box className="sticky top-0 mb-3 z-10 bg-white border-b-[1px] rounded-b-xl drop-shadow-lg">
@@ -180,68 +249,9 @@ const List = () => {
           ))}
         </Box>
       </Box>
-      <Box className="m-auto">
-        {data.map((item, index) => {
-          const isHost = userData.uid === item.userPayId
-          const hostInfo = listUser.find((user) => user.uid === item.userPayId)
-          const isPaid = isHost
-            ? item.isAllPaid
-            : listEventDetail.find((eventDetail) => eventDetail?.uid === userData.uid && eventDetail.isPaid && eventDetail.eventId === item.id)
-          const paidMoney = isHost
-            ? listEventDetail
-                .filter((eventDetail) => eventDetail.eventId === item.id && eventDetail.isPaid)
-                .reduce((sum, eventDetail) => sum + Number(eventDetail.amountToPay!), 0)
-            : 0
-          return (
-            <Box className="mb-[0.625rem] rounded-md block border-[1px] bg-white drop-shadow-lg" key={index}>
-              <Link to={item.id!}>
-                <Box className="bg-white rounded-3xl flex p-5 gap-5">
-                  <Box className="relative max-w-fit">
-                    <Avatar src={hostInfo?.photoURL || ''} sx={{ width: 72, height: 72, border: '4px solid #1e8d1d70' }} alt="" />
-                    <Box
-                      className={
-                        'absolute py-1 px-1 block font-normal text-white rounded-lg -bottom-0 inset-x-2/4 -translate-x-2/4 text-[14px] w-[70px] text-center ' +
-                        (isHost ? 'bg-red-600' : 'bg-green-600 ')
-                      }
-                    >
-                      {isHost ? TEXT__HOST : TEXT__MEMBER}
-                    </Box>
-                  </Box>
-                  <Box className="w-full">
-                    <Box className="flex justify-between items-center">
-                      <Box className="text-[14px]">{dayjs(item.date, FORMAT__DATE).format('DD/MM/YYYY')}</Box>
-                      <Box className={'font-bold text-white rounded-xl top-0 right-0 text-[14px] ' + (isPaid ? 'text-green-600' : 'text-red-700')}>
-                        {isHost && isPaid && 'Đã hoàn tất'}
-                        {isHost && !isPaid && 'Chưa hoàn tất'}
-                        {!isHost && isPaid && 'Đã trả'}
-                        {!isHost && !isPaid && 'Chưa trả'}
-                        {}
-                      </Box>
-                    </Box>
-                    <Box className="w-full relative flex flex-col justify-between text-[14px]">
-                      <h3 className="font-medium">{item.eventName}</h3>
-                      <Box component={'span'}>
-                        Chủ chi:&nbsp;
-                        <b>{item.userPayName}</b>
-                      </Box>
-                      <Box component={'span'}>
-                        Số tiền:&nbsp;
-                        <b>
-                          {formatMoney(
-                            isHost
-                              ? Number(item.totalAmount)! - paidMoney
-                              : listEventDetail?.find((member) => member.uid === userData.uid && member.eventId === item.id)?.amountToPay
-                          )}
-                        </b>
-                      </Box>
-                    </Box>
-                  </Box>
-                </Box>
-              </Link>
-            </Box>
-          )
-        })}
-      </Box>
+      <VariableSizeList className="List" height={(screen.height * 2) / 3} itemCount={data.length} itemSize={() => 150} width={'100%'} itemData={data}>
+        {Card}
+      </VariableSizeList>
     </Wrapper>
   )
 }
