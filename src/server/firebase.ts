@@ -1,7 +1,9 @@
 import { getApp, getApps, initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { initializeFirestore } from 'firebase/firestore'
+import { getMessaging, getToken, onMessage } from 'firebase/messaging'
 import { getStorage } from 'firebase/storage'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 const {
   VITE_APP_apiKey: apiKey,
@@ -11,9 +13,10 @@ const {
   VITE_APP_messagingSenderId: messagingSenderId,
   VITE_APP_appId: appId,
   VITE_APP_measurementId: measurementId,
+  VITE_APP_vapiKey: vapiKey,
 } = import.meta.env
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey,
   authDomain,
   projectId,
@@ -31,6 +34,18 @@ const db = initializeFirestore(app, {
 const auth = getAuth(app)
 const googleAuthProvider = new GoogleAuthProvider()
 const storage = getStorage(app)
+const messaging = getMessaging(app)
+function requestPermission() {
+  console.log('Requesting permission...')
+  Notification.requestPermission().then((permission) => {
+    if (permission === 'granted') {
+      console.log('Notification permission granted.')
+    } else {
+      console.log('Notification permission is not granted.')
+    }
+  })
+}
+requestPermission()
 
 // connectAuthEmulator(auth, "http://localhost:9099");
 // if(window.location.hostname === 'localhost'){
@@ -38,4 +53,4 @@ const storage = getStorage(app)
 //   connectStorageEmulator(storage,'localhost',9199)
 // }
 
-export { auth, db, googleAuthProvider, storage }
+export { auth, db, googleAuthProvider, messaging, storage }

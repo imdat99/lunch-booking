@@ -1,7 +1,7 @@
 import { LoadingScreen } from '@app/components/Suspense'
 import { deleteEvent } from '@app/libs/api/event'
 import { updateEventDetail } from '@app/libs/api/EventApi'
-import { createNoti, IsDemandPaymentNoticed, IsPaymentNoticed } from '@app/libs/api/noti'
+import { createNoti, IsDemandPaymentNoticed, IsPaymentNoticed, sendPushNoti } from '@app/libs/api/noti'
 import { TEXT__HOST, TEXT__MEMBER, TEXT__PAYMENT_PAID, TEXT__PAYMENT_PAID_MSG, TEXT__PAYMENT_REMIND, TEXT__PAYMENT_REMIND_MSG } from '@app/libs/constant'
 import { formatMoney } from '@app/libs/functions'
 import { auth } from '@app/server/firebase'
@@ -50,7 +50,6 @@ const LunchDetail = () => {
   // calc - memo
   const userInEvent = useMemo(() => listEventDetail.filter((event) => event.eventId === params.id), [listEventDetail, params])
   const eventInfo = useMemo(() => listEvent.find((item) => item.id === params.id), [listEvent, params.id])
-  console.log('user', loggedInUser?.uid)
 
   // state
   const [loggedUserNote, setLoggedUserNote] = useState(userInEvent.find((item) => item.uid === (loggedInUser?.uid || ''))?.note || '')
@@ -101,7 +100,19 @@ const LunchDetail = () => {
   }, [eventInfo])
 
   const handleNoti = useCallback(() => {
-    const toUids = isHost ? userInEvent.filter((user) => !user.isPaid && user.uid !== loginUserUid).map((user) => user.uid!) : [eventInfo?.userPayId || '']
+    const allUnPaidUsers = userInEvent.filter((user) => !user.isPaid && user.uid !== loginUserUid)
+    const toUids = isHost ? allUnPaidUsers.map((user) => user.uid!) : [eventInfo?.userPayId || '']
+    listUser
+      .filter((user) => toUids.includes(user?.uid || ''))
+      .map((member) => {
+        if (member.receiveToken) {
+          sendPushNoti(member.receiveToken, {
+            title: isHost ? 'DemandPayment' : 'PaymentNotice',
+            body: isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG,
+            icon: '/itwonders-web-logo.png',
+          })
+        }
+      })
     createNoti({
       date: dayjs(Date.now()).unix(),
       content: isHost ? TEXT__PAYMENT_REMIND_MSG : TEXT__PAYMENT_PAID_MSG,
@@ -147,7 +158,6 @@ const LunchDetail = () => {
   const handleCloseAlert = () => {
     setAlertMessage('')
   }
-  console.log(eventInfo)
   return loading ? (
     <LoadingScreen />
   ) : (

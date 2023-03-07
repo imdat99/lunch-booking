@@ -17,6 +17,7 @@ export type User = {
   photoURL?: string | null
   qrCodeURL?: string
   groups?: string[]
+  receiveToken?: string
 }
 export type UserGroup = {
   groupName: string
