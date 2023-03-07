@@ -180,3 +180,7 @@ export async function getAllUserGroup() {
     console.log('ERROR GETTING USER INFO IN DB', error)
   }
 }
+
+export async function setUserField(uid: string, field: string, value: any) {
+  await setDoc(UserDetail(uid), { [field]: value }, { merge: true })
+}

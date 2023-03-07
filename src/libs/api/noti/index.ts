@@ -21,6 +21,8 @@ import {
   where,
 } from 'firebase/firestore'
 
+import httpClient from '../httpClient'
+
 export const createNoti = async (data: Partial<INoti>) => {
   let isSuccess = false
   let notiId = ''
@@ -152,4 +154,21 @@ export async function getCountNewNotice(uid: string) {
   } catch (error) {
     console.log('ERROR GET LAST TIME CHECK NOTI IN DB', error)
   }
+}
+
+export function sendPushNoti(toDeviceToken: string, msgBody: any) {
+  httpClient.post(
+    'https://fcm.googleapis.com/fcm/send',
+    {
+      notification: msgBody,
+      to: toDeviceToken,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          'key=AAAAHKakbv4:APA91bFjOlcDu--AENU-qcdgSeM3kwpZGbPS3YfT612GUpGKwu3-jhDE0bmqi_UqnVhPove6z0U60rfNUFzMzsuAbzeKZykqf9CYS-dj4gRmMNc7SaabqkeSXcF8BgDgAmQigL1DR3B5',
+      },
+    }
+  )
 }
