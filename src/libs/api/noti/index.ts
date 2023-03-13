@@ -162,7 +162,9 @@ export async function getCountNewNotice(uid: string) {
     const queryCountNotiHaveRead = await getCountFromServer(query(NotiColection, where('userSeen', 'array-contains', uid)))
     const resCount = await getCountFromServer(queryState)
 
-    return resCount.data().count - queryCountNotiHaveRead.data()?.count
+    const countNewNoti = resCount.data().count - queryCountNotiHaveRead.data()?.count > 0 ? resCount.data().count - queryCountNotiHaveRead.data()?.count : 0
+
+    return countNewNoti
   } catch (error) {
     console.log('ERROR GET LAST TIME CHECK NOTI IN DB', error)
   }
