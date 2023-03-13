@@ -3,7 +3,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import HomeIcon from '@mui/icons-material/Home'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import NotificationsIcon from '@mui/icons-material/Notifications'
-import Badge from '@mui/material/Badge';
+import Badge from '@mui/material/Badge'
 import PeopleIcon from '@mui/icons-material/People'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -11,7 +11,7 @@ import { useAppSelector } from '@app/stores/hook'
 import { newNotiNumberSelector } from '@app/stores/noti'
 
 const Footer = () => {
-  const newNotiCount =  useAppSelector(newNotiNumberSelector)
+  const newNotiCount = useAppSelector(newNotiNumberSelector)
   const navigateTo = useNavigate()
   const location = useLocation()
 
