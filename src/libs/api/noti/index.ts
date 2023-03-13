@@ -19,6 +19,7 @@ import {
   startAfter,
   updateDoc,
   where,
+  deleteDoc,
 } from 'firebase/firestore'
 
 import httpClient from '../httpClient'
@@ -36,6 +37,14 @@ export const createNoti = async (data: Partial<INoti>) => {
 export async function setUserSeen(uid: string, noti: INoti) {
   try {
     await updateDoc(NotiDetail(noti.id!), { userSeen: [...noti.userSeen, uid] })
+  } catch (error) {
+    console.log('ERROR SETTING USER SEEN NOTIFICATIONS IN DB', error)
+  }
+}
+
+export async function deleteDocNotiByUId(noti: INoti) {
+  try {
+    await updateDoc(NotiDetail(noti.id!), { ...noti })
   } catch (error) {
     console.log('ERROR SETTING USER SEEN NOTIFICATIONS IN DB', error)
   }
@@ -90,7 +99,7 @@ export function listenCommingNoti(uid: string, eventHandler: (noti: INoti) => vo
 
 const itemPerPage = 10
 
-export async function getListNotiByPage(uid: string, afterSnapShot: DocumentSnapshot<INoti> | null) {
+export async function getListNotiByPage(uid: string, afterSnapShot?: DocumentSnapshot<INoti> | null) {
   try {
     let queryState: Query<INoti>
     if (afterSnapShot)
@@ -148,9 +157,12 @@ async function getLastTimeCheckNoti(uid: string) {
 export async function getCountNewNotice(uid: string) {
   try {
     const lastTimeCheck = await getLastTimeCheckNoti(uid)
-    const queryState = query(NotiColection, where('toUids', 'array-contains', uid), where('date', '>', lastTimeCheck))
+    // const queryState = query(NotiColection, where('toUids', 'array-contains', uid), where('date', '>', lastTimeCheck))
+    const queryState = query(NotiColection, where('toUids', 'array-contains', uid))
+    const queryCountNotiHaveRead = await getCountFromServer(query(NotiColection, where('userSeen', 'array-contains', uid)))
     const resCount = await getCountFromServer(queryState)
-    return resCount.data().count
+
+    return resCount.data().count - queryCountNotiHaveRead.data()?.count
   } catch (error) {
     console.log('ERROR GET LAST TIME CHECK NOTI IN DB', error)
   }

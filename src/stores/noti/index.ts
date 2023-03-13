@@ -1,4 +1,4 @@
-import { getCountNewNotice, getListNotiByPage, readAllNoti, setUserSeen } from '@app/libs/api/noti'
+import { deleteDocNotiByUId, getCountNewNotice, getListNotiByPage, readAllNoti, setUserSeen } from '@app/libs/api/noti'
 import { INoti } from '@app/server/firebaseType'
 import { RootState } from '@app/stores'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
@@ -70,6 +70,9 @@ const slice = createSlice({
     clearNotiList() {
       return initialState
     },
+    setListNoti(state, action: PayloadAction<Pick<NotiState, 'listNoti'>>) {
+      state.listNoti = action.payload.listNoti
+    },
   },
 })
 
@@ -85,6 +88,7 @@ export const {
   addNewNotiCome,
   updateNewNotiNumber,
   clearNotiList,
+  setListNoti,
 } = slice.actions
 
 //Thunk
@@ -154,6 +158,22 @@ export function updateNewNotiCount(uid: string): ThunkAction<void, RootState, un
     try {
       const count = await getCountNewNotice(uid)
       dispatch(updateNewNotiNumber(count!))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+export function removeNotiUser(uid: string, noti: INoti): ThunkAction<void, RootState, unknown, AnyAction> {
+  return async (dispatch, getState) => {
+    try {
+      const newNoti = { ...noti, toUids: noti.toUids.filter((e) => e !== uid) }
+      await deleteDocNotiByUId({ ...newNoti })
+
+      // reload page
+      const listNoti = getState().LIST_NOTI.listNoti
+      const listNotiTemp = listNoti.filter((e) => e.id !== noti.id)
+      dispatch(setListNoti({ listNoti: listNotiTemp }))
     } catch (error) {
       console.log(error)
     }
