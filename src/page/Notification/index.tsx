@@ -60,7 +60,7 @@ export default function Notification() {
         return (
           <div className="mb-[0.625rem] rounded-3xl block" key={noti.id}>
             <NotificationCard
-              link={`/events/${noti.eventId}`}
+              link={`/events/${noti.eventId}?history=noti`}
               content={
                 <p className="text-black text-[0.875rem] leading-[1.125rem]">
                   Từ <b>{listUser[index]?.name}</b> : {noti.content}
