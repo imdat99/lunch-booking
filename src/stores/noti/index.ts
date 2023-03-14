@@ -130,7 +130,13 @@ export function setUserReadNoti(uid: string, noti: INoti): ThunkAction<void, Roo
           }
           return { ...currentNoti }
         })
+
+        // update store list noti read
         dispatch(setReadNoti({ listNoti: listNotiTemp }))
+
+        // update store conut new noti
+        const newNotiNumber = getState().LIST_NOTI.newNotiNumber
+        dispatch(updateNewNotiNumber(newNotiNumber ? newNotiNumber - 1 : 0))
       }
     } catch (error) {
       console.log(error)
@@ -173,7 +179,13 @@ export function removeNotiUser(uid: string, noti: INoti): ThunkAction<void, Root
       // reload page
       const listNoti = getState().LIST_NOTI.listNoti
       const listNotiTemp = listNoti.filter((e) => e.id !== noti.id)
+
+      // update store list noti
       dispatch(setListNoti({ listNoti: listNotiTemp }))
+
+      // update store conut new noti
+      const newNotiNumber = getState().LIST_NOTI.newNotiNumber
+      dispatch(updateNewNotiNumber(newNotiNumber ? newNotiNumber - 1 : 0))
     } catch (error) {
       console.log(error)
     }
