@@ -57,7 +57,6 @@ export default function NotificationCard(props: NotificationCardProps) {
             padding: '0.93rem',
             paddingBottom: '0.688rem',
             backgroundColor: props.isRead ? '#ccc' : '#FFFFFF',
-            // boxShadow:"0 0.25rem rgba(0, 0, 0, 0.3)"
           }}
           onClick={props.onClick}
         >
