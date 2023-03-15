@@ -173,7 +173,7 @@ export function updateNewNotiCount(uid: string): ThunkAction<void, RootState, un
 export function removeNotiUser(uid: string, noti: INoti): ThunkAction<void, RootState, unknown, AnyAction> {
   return async (dispatch, getState) => {
     try {
-      const newNoti = { ...noti, toUids: noti.toUids.filter((e) => e !== uid) }
+      const newNoti = { ...noti, toUids: noti.toUids.filter((e) => e !== uid), userSeen: noti.userSeen.filter((e) => e !== uid) }
       await deleteDocNotiByUId({ ...newNoti })
 
       // reload page

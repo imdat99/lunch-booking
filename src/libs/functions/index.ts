@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { FORMAT__DATE } from '../constant'
+const FORMAT_DATE = 'DD/MM/YYYY'
 
 export const formatMoney = (v?: string | number, isShowUnit = true) => {
   const replaceStr = String(v || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')
@@ -16,7 +16,7 @@ export const formatDate = (date: dayjs.ConfigType, formatDate?: string) => {
   }
 
   if (typeof date === 'number') {
-    return dayjs(date * 1000).format(formatDate ?? FORMAT__DATE)
+    return dayjs(date * 1000).format(formatDate ?? FORMAT_DATE)
   }
-  return dayjs(date).format(formatDate ?? FORMAT__DATE)
+  return dayjs(date).format(formatDate ?? FORMAT_DATE)
 }
