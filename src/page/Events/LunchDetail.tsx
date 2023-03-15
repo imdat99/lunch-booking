@@ -158,6 +158,16 @@ const LunchDetail = () => {
   const handleCloseAlert = () => {
     setAlertMessage('')
   }
+
+  const checkNotiEvents = () => {
+    const params = new URLSearchParams(location?.search)
+    if (params.get('history') === 'noti') {
+      navigate('/notifications')
+      return
+    }
+    navigate('/events')
+  }
+
   return loading ? (
     <LoadingScreen />
   ) : (
@@ -191,13 +201,7 @@ const LunchDetail = () => {
         <Container>
           <div className="flex justify-between p-3">
             <Tooltip title="Quay lại trang trước">
-              <button
-                className="h-[36px]"
-                onClick={() => {
-                  navigate('/events')
-                }}
-                aria-label="Quay lại trang trước"
-              >
+              <button className="h-[36px]" onClick={checkNotiEvents} aria-label="Quay lại trang trước">
                 <ReplyIcon fontSize={'large'} />
               </button>
             </Tooltip>
